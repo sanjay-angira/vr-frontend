@@ -6,7 +6,7 @@ export default function AdminForgotPasswordPage() {
   return (
     <AdminAuthCard
       title="Forgot password?"
-      subtitle="We'll send reset instructions to your admin email"
+      subtitle="We'll send a 6-digit OTP to your admin email"
     >
       <Suspense fallback={<p className="text-sm text-slate-500">Loading...</p>}>
         <AdminForgotPasswordForm />

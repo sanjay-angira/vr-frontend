@@ -6,6 +6,18 @@ import { FormEvent, useState } from "react";
 import { Button } from "@/components/common/Button";
 import { ErrorMessage } from "@/components/common/ErrorMessage";
 import { Input } from "@/components/common/Input";
+import { API_ENDPOINTS, postData } from "@/services/api";
+import type { ApiErrorResponse } from "@/services/api/errors";
+
+function getErrorMessage(error: unknown, fallback: string) {
+  if (error && typeof error === "object" && "message" in error) {
+    return String((error as ApiErrorResponse).message || fallback);
+  }
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return fallback;
+}
 
 export function AdminResetPasswordForm() {
   const searchParams = useSearchParams();
@@ -39,11 +51,30 @@ export function AdminResetPasswordForm() {
     setIsLoading(true);
 
     try {
-      // TODO: integrate with adminAuth.service
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      const response = await postData(
+        API_ENDPOINTS.AUTH.RESET_PASSWORD,
+        {
+          token,
+          password,
+          confirmPassword,
+        },
+        { auth: false }
+      );
+
+      if (
+        response &&
+        typeof response === "object" &&
+        "success" in response &&
+        response.success === false
+      ) {
+        throw new Error(
+          String((response as ApiErrorResponse).message ?? "Unable to reset password.")
+        );
+      }
+
       setIsSubmitted(true);
-    } catch {
-      setError("Unable to reset password. The link may have expired.");
+    } catch (resetError) {
+      setError(getErrorMessage(resetError, "Unable to reset password. The link may have expired."));
     } finally {
       setIsLoading(false);
     }
@@ -113,6 +144,7 @@ export function AdminResetPasswordForm() {
         placeholder="At least 8 characters"
         value={password}
         onChange={(event) => setPassword(event.target.value)}
+        showPasswordToggle
         required
       />
 
@@ -124,6 +156,7 @@ export function AdminResetPasswordForm() {
         placeholder="Re-enter your password"
         value={confirmPassword}
         onChange={(event) => setConfirmPassword(event.target.value)}
+        showPasswordToggle
         required
       />
 
