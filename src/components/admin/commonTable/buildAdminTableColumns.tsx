@@ -284,6 +284,12 @@ function renderAdminCell(
       return <Badge variant="green">{String(row.roleName ?? value ?? "NA")}</Badge>;
     case "roleId":
       return <span>{String(row.roleId ?? value ?? "NA")}</span>;
+    case "name": {
+      const firstName = String(row.firstName ?? "").trim();
+      const lastName = String(row.lastName ?? "").trim();
+      const fullName = `${firstName} ${lastName}`.trim();
+      return <DefaultCell value={fullName || value} />;
+    }
     case "rating":
       return <RatingStars value={value} />;
     case "date":
@@ -294,7 +300,6 @@ function renderAdminCell(
       return <ImageCell value={value} />;
     case "color":
       return <ColorCell value={value} />;
-    case "name":
     case "email":
     case "phoneNumber":
     case "text":

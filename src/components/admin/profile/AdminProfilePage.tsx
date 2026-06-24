@@ -4,6 +4,8 @@ import { FormEvent, useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/common/Button";
 import { ErrorMessage } from "@/components/common/ErrorMessage";
 import { Input } from "@/components/common/Input";
+import { ImageUploadField } from "@/components/admin/forms/shared/ImageUploadField";
+import { UPLOAD_PATHS } from "@/components/admin/forms/shared/uploadPaths";
 import {
   STORAGE_KEYS,
   getData,
@@ -173,6 +175,67 @@ export function AdminProfilePage() {
     loadProfile();
   }, [loadProfile]);
 
+  async function saveProfile(
+    overrides?: Partial<ProfileFormState>,
+    successMessage = "Profile updated successfully."
+  ) {
+    if (!admin?.id) return;
+
+    const nextProfile = {
+      firstName: (overrides?.firstName ?? profileForm.firstName).trim(),
+      lastName: (overrides?.lastName ?? profileForm.lastName).trim(),
+      email: (overrides?.email ?? profileForm.email).trim(),
+      phoneNumber: (overrides?.phoneNumber ?? profileForm.phoneNumber).trim(),
+      profileImage: (overrides?.profileImage ?? profileForm.profileImage).trim(),
+    };
+
+    const response = await putData(API_ENDPOINTS.USERS.UPDATE(admin.id), nextProfile);
+    const updatedUser =
+      (response as { data?: ProfileUser }).data ?? (response as ProfileUser);
+
+    setProfile(updatedUser);
+    setProfileForm(mapUserToForm(updatedUser));
+
+    const fullName = `${updatedUser.firstName ?? ""} ${updatedUser.lastName ?? ""}`.trim();
+    dispatch(
+      updateAdmin({
+        name: fullName || admin.name,
+        email: updatedUser.email ?? admin.email,
+        avatar: updatedUser.profileImage ?? undefined,
+        role: getRoleName(updatedUser),
+      })
+    );
+
+    setJson(STORAGE_KEYS.adminUser, updatedUser);
+    setProfileSuccess(successMessage);
+  }
+
+  async function handleProfileImageChange(url: string) {
+    const previousImage = profileForm.profileImage;
+    setProfileForm((current) => ({
+      ...current,
+      profileImage: url,
+    }));
+
+    if (url !== "" || !previousImage) return;
+
+    setProfileError("");
+    setProfileSuccess("");
+    setIsSavingProfile(true);
+
+    try {
+      await saveProfile({ profileImage: "" }, "Profile photo removed.");
+    } catch {
+      setProfileForm((current) => ({
+        ...current,
+        profileImage: previousImage,
+      }));
+      setProfileError("Failed to remove profile photo. Please try again.");
+    } finally {
+      setIsSavingProfile(false);
+    }
+  }
+
   async function handleProfileSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!admin?.id) return;
@@ -182,30 +245,7 @@ export function AdminProfilePage() {
     setIsSavingProfile(true);
 
     try {
-      const response = await putData(API_ENDPOINTS.USERS.UPDATE(admin.id), {
-        firstName: profileForm.firstName.trim(),
-        lastName: profileForm.lastName.trim(),
-        email: profileForm.email.trim(),
-        phoneNumber: profileForm.phoneNumber.trim(),
-        profileImage: profileForm.profileImage.trim(),
-      });
-      const updatedUser =
-        (response as { data?: ProfileUser }).data ?? (response as ProfileUser);
-      setProfile(updatedUser);
-      setProfileForm(mapUserToForm(updatedUser));
-
-      const fullName = `${updatedUser.firstName ?? ""} ${updatedUser.lastName ?? ""}`.trim();
-      dispatch(
-        updateAdmin({
-          name: fullName || admin.name,
-          email: updatedUser.email ?? admin.email,
-          avatar: updatedUser.profileImage ?? undefined,
-          role: getRoleName(updatedUser),
-        })
-      );
-
-      setJson(STORAGE_KEYS.adminUser, updatedUser);
-      setProfileSuccess("Profile updated successfully.");
+      await saveProfile();
     } catch (error) {
       throw error;
     } finally {
@@ -270,32 +310,10 @@ export function AdminProfilePage() {
   return (
     <div className="space-y-6">
       <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
-        <div className="relative bg-gradient-to-r from-admin-sidebar via-admin-primary to-blue-400 px-6 pb-20 pt-8">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:pl-32">
-            <div className="min-w-0">
-              <h2 className="text-2xl font-semibold text-white">{displayName}</h2>
-              <p className="mt-1 truncate text-sm text-blue-100">
-                {profileForm.email || admin.email}
-              </p>
-            </div>
+        <div className="relative px-6 pb-6">
+          <div className="-mx-6 h-28 bg-gradient-to-r from-admin-sidebar via-admin-primary to-blue-400" />
 
-            <div className="flex flex-wrap gap-2">
-              <span className="inline-flex items-center rounded-full bg-white/20 px-3 py-1 text-xs font-medium uppercase tracking-wide text-white">
-                {roleName}
-              </span>
-              <span
-                className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
-                  profile?.isActive === false
-                    ? "bg-red-500/30 text-red-50"
-                    : "bg-green-500/30 text-green-50"
-                }`}
-              >
-                {profile?.isActive === false ? "Inactive" : "Active"}
-              </span>
-            </div>
-          </div>
-
-          <div className="absolute bottom-0 left-6 flex h-24 w-24 -translate-y-1/2 items-center justify-center overflow-hidden rounded-2xl border-4 border-white bg-admin-primary text-2xl font-semibold text-white shadow-md">
+          <div className="absolute left-6 top-28 flex h-24 w-24 -translate-y-1/2 items-center justify-center overflow-hidden rounded-2xl border-4 border-white bg-admin-primary text-2xl font-semibold text-white shadow-md">
             {avatarUrl ? (
               <img
                 src={avatarUrl}
@@ -306,10 +324,35 @@ export function AdminProfilePage() {
               getInitials(profileForm.firstName, profileForm.lastName)
             )}
           </div>
-        </div>
 
-        <div className="px-6 pb-6 pt-14">
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="absolute right-6 left-34 top-26 -translate-y-full">
+            <h2 className="truncate text-2xl font-semibold leading-tight text-white">
+              {displayName}
+            </h2>
+          </div>
+
+          <div className="absolute inset-x-6 top-28 flex flex-col gap-2 pt-1 pl-28 sm:flex-row sm:items-center sm:justify-between">
+            <p className="min-w-0 truncate text-sm text-zinc-500">
+              {profileForm.email || admin.email}
+            </p>
+
+            <div className="flex shrink-0 flex-wrap gap-2">
+              <span className="inline-flex items-center rounded-full bg-admin-muted px-3 py-1 text-xs font-medium uppercase tracking-wide text-blue-800">
+                {roleName}
+              </span>
+              <span
+                className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
+                  profile?.isActive === false
+                    ? "bg-red-50 text-red-700"
+                    : "bg-green-50 text-green-700"
+                }`}
+              >
+                {profile?.isActive === false ? "Inactive" : "Active"}
+              </span>
+            </div>
+          </div>
+
+          <div className="mt-[3.5rem] grid gap-4 border-t border-zinc-100 pt-6 sm:grid-cols-3">
             <div>
               <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
                 User ID
@@ -429,18 +472,12 @@ export function AdminProfilePage() {
                 placeholder="9876543210"
               />
 
-              <Input
-                label="Profile image URL"
-                type="url"
+              <ImageUploadField
+                label="Profile photo"
                 value={profileForm.profileImage}
-                onChange={(event) =>
-                  setProfileForm((current) => ({
-                    ...current,
-                    profileImage: event.target.value,
-                  }))
-                }
-                placeholder="https://example.com/avatar.jpg"
-                hint="Paste an image URL for your profile photo."
+                onChange={handleProfileImageChange}
+                uploadPath={UPLOAD_PATHS.users}
+                hint="Upload a profile photo or replace the current image. Removing the photo updates your profile immediately."
               />
 
               <div className="flex justify-end pt-2">

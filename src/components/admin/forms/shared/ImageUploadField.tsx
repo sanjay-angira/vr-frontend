@@ -1,6 +1,6 @@
 "use client";
 
-import { CloudUpload, Loader2, X } from "lucide-react";
+import { CloudUpload, ImagePlus, Loader2, X } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
 import { Button } from "@/components/common/Button";
 import {
@@ -258,45 +258,61 @@ export function ImageUploadField({
       <FormLabel label={label} required={required} htmlFor={inputId} />
 
       {value ? (
-        <div className="space-y-3">
-          <div className="relative inline-block">
-            <div className="overflow-hidden rounded-lg border border-zinc-200 shadow-sm">
-              {mediaType === "video" ? (
-                <video
-                  src={resolveImageUrl(value)}
-                  controls
-                  className="h-32 w-auto max-w-full bg-black"
-                />
-              ) : (
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img
-                  src={resolveImageUrl(value)}
-                  alt={label}
-                  className="h-32 w-32 object-cover"
-                />
-              )}
+        <div className="rounded-xl border border-zinc-200 bg-zinc-50/50 p-4">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+            <div className="relative shrink-0 self-start">
+              <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
+                {mediaType === "video" ? (
+                  <video
+                    src={resolveImageUrl(value)}
+                    controls
+                    className="h-32 w-auto max-w-full bg-black"
+                  />
+                ) : (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img
+                    src={resolveImageUrl(value)}
+                    alt={label}
+                    className="h-32 w-32 object-cover"
+                  />
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={handleDelete}
+                disabled={deleting}
+                className="absolute -right-2 -top-2 flex h-7 w-7 items-center justify-center rounded-full bg-red-500 text-white shadow-md transition-transform hover:scale-105 disabled:opacity-60"
+                aria-label={`Remove ${label}`}
+              >
+                {deleting ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <X className="h-3.5 w-3.5" />
+                )}
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={handleDelete}
-              disabled={deleting}
-              className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white shadow disabled:opacity-60"
-              aria-label={`Remove ${label}`}
-            >
-              {deleting ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              ) : (
-                <X className="h-3.5 w-3.5" />
-              )}
-            </button>
+
+            <div className="flex min-w-0 flex-1 flex-col gap-3">
+              <div>
+                <p className="text-sm font-medium text-zinc-800">
+                  {mediaType === "video" ? "Current video" : "Current photo"}
+                </p>
+                <p className="mt-0.5 text-xs text-zinc-500">
+                  Upload a new file to replace the current{" "}
+                  {mediaType === "video" ? "video" : "image"}.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setModalOpen(true)}
+                className={`${UPLOAD_TRIGGER_CLASS} sm:w-auto sm:min-w-[11rem]`}
+              >
+                <ImagePlus className="h-4 w-4" />
+                Replace {mediaType === "video" ? "video" : "image"}
+              </button>
+            </div>
           </div>
-          <button
-            type="button"
-            onClick={() => setModalOpen(true)}
-            className="text-sm font-medium text-admin-primary hover:underline"
-          >
-            Replace {mediaType === "video" ? "video" : "image"}
-          </button>
         </div>
       ) : (
         <button
