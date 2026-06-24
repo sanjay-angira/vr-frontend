@@ -19,7 +19,6 @@ export default async function AdminModuleViewPage({
   if (!config || !hasAdminView(module)) {
     notFound();
   }
-
   return (
     <AdminModuleView module={module as AdminModuleKey} recordId={id} />
   );

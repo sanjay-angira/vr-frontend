@@ -16,4 +16,5 @@ export const UPLOAD_PATHS = {
   footer: {
     icons: "/footer/icons",
   },
+  
 } as const;

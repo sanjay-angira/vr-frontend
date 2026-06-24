@@ -19,6 +19,5 @@ export default async function AdminModuleAddPage({
   if (!config || !hasAdminForm(module)) {
     notFound();
   }
-
   return <AdminModuleForm module={module as AdminModuleKey} />;
 }

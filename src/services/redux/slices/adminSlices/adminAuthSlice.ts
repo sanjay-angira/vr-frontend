@@ -17,6 +17,7 @@ const initialState: AdminAuthState = {
   error: null,
 };
 
+
 const adminAuthSlice = createSlice({
   name: "adminAuth",
   initialState,

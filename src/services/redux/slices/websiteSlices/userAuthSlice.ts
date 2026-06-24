@@ -14,6 +14,7 @@ export interface UserData {
   profileImage: string | null;
 }
 
+
 export interface UserAuthState {
   user: User | null;
   accessToken: string | null;

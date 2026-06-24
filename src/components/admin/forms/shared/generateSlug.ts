@@ -1,6 +1,5 @@
 export function generateSlug(text: string): string {
   if (!text) return "";
-
   return text
     .toString()
     .toLowerCase()

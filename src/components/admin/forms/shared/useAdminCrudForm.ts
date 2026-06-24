@@ -20,6 +20,7 @@ type UseAdminCrudFormOptions<T extends Record<string, unknown>> = {
   redirectPath?: string;
 };
 
+
 function getErrorMessage(error: unknown): string {
   if (error && typeof error === "object" && "message" in error) {
     return String((error as { message: string }).message);

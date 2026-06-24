@@ -27,6 +27,7 @@ const IMAGE_TYPES = [
   "image/heif",
 ];
 
+
 type ImageUploadModalProps = {
   uploadPath: string;
   accept: string;

@@ -12,6 +12,7 @@ const initialState: ModalState = {
   cartDrawerOpen: false,
 };
 
+
 const modalSlice = createSlice({
   name: 'modal',
   initialState,

@@ -23,6 +23,7 @@ export const optionalUrl = Yup.string()
 
 export const activeField = Yup.boolean().default(true);
 
+
 export const htmlMinLength = (label: string, min: number) =>
   Yup.string()
     .required(`${label} is required`)

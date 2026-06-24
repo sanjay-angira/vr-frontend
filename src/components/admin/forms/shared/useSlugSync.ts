@@ -26,6 +26,7 @@ export function useSlugSync<T extends Record<string, unknown>>(
     }
   }, [enabled, formik.values[nameField]]);
 
+  
   useEffect(() => {
     if (!enabled) return;
 

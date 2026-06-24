@@ -18,7 +18,6 @@ const initialState: CartState = {
   error: null,
 };
 
-// Async thunks for API calls
 
 export const fetchCart = createAsyncThunk(
   'cart/fetchCart',

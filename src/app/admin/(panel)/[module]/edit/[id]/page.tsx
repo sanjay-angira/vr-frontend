@@ -19,7 +19,6 @@ export default async function AdminModuleEditPage({
   if (!config || !hasAdminForm(module)) {
     notFound();
   }
-
   return (
     <AdminModuleForm module={module as AdminModuleKey} recordId={id} />
   );
