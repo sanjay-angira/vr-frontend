@@ -11,9 +11,9 @@ import {
   putData,
   API_ENDPOINTS,
 } from "@/services/api";
-import { setJson, tokenStorage } from "@/services/api/storage";
-import { useAppDispatch, useAppSelector } from "@/services/redux/hooks";
-import { selectAdminAuth } from "@/services/redux/selectors";
+import { setJson } from "@/services/api/storage";
+import { useAdminAuth } from "@/services/admin/useAdminAuth";
+import { useAppDispatch } from "@/services/redux/hooks";
 import { updateAdmin } from "@/services/redux/slices/adminSlices/adminAuthSlice";
 
 type ProfileUser = {
@@ -125,7 +125,7 @@ function ProfileSectionCard({
 
 export function AdminProfilePage() {
   const dispatch = useAppDispatch();
-  const { admin } = useAppSelector(selectAdminAuth);
+  const { admin, isHydrated } = useAdminAuth();
   const [profile, setProfile] = useState<ProfileUser | null>(null);
   const [profileForm, setProfileForm] = useState<ProfileFormState>(emptyProfileForm);
   const [passwordForm, setPasswordForm] = useState<PasswordFormState>(emptyPasswordForm);
@@ -137,11 +137,6 @@ export function AdminProfilePage() {
   const [profileSuccess, setProfileSuccess] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [passwordSuccess, setPasswordSuccess] = useState("");
-  const [hasMounted, setHasMounted] = useState(false);
-
-  useEffect(() => {
-    setHasMounted(true);
-  }, []);
 
   const loadProfile = useCallback(async () => {
     if (!admin?.id) {
@@ -153,9 +148,10 @@ export function AdminProfilePage() {
     setLoadError("");
 
     try {
-      const user = await getData(API_ENDPOINTS.AUTH.GET_USER(admin.id));
-      setProfile(user);
-      setProfileForm(mapUserToForm(user));
+      const response = await getData(API_ENDPOINTS.AUTH.GET_USER(admin.id));
+      const user = (response as { data?: ProfileUser }).data ?? response;
+      setProfile(user as ProfileUser);
+      setProfileForm(mapUserToForm(user as ProfileUser));
     } catch {
       setLoadError("Failed to load profile. Please try again.");
       if (admin) {
@@ -186,13 +182,15 @@ export function AdminProfilePage() {
     setIsSavingProfile(true);
 
     try {
-      const updatedUser = await putData(API_ENDPOINTS.USERS.UPDATE(admin.id), {
+      const response = await putData(API_ENDPOINTS.USERS.UPDATE(admin.id), {
         firstName: profileForm.firstName.trim(),
         lastName: profileForm.lastName.trim(),
         email: profileForm.email.trim(),
         phoneNumber: profileForm.phoneNumber.trim(),
         profileImage: profileForm.profileImage.trim(),
       });
+      const updatedUser =
+        (response as { data?: ProfileUser }).data ?? (response as ProfileUser);
       setProfile(updatedUser);
       setProfileForm(mapUserToForm(updatedUser));
 
@@ -253,15 +251,15 @@ export function AdminProfilePage() {
   const roleName = getRoleName(profile);
   const avatarUrl = profileForm.profileImage.trim() || admin?.avatar;
 
-  if (!admin) {
-    if (!hasMounted || tokenStorage.getAdminAccessToken()) {
-      return (
-        <div className="rounded-xl border border-zinc-200 bg-white p-8 text-center shadow-sm">
-          <p className="text-sm text-zinc-500">Loading profile...</p>
-        </div>
-      );
-    }
+  if (!isHydrated) {
+    return (
+      <div className="rounded-xl border border-zinc-200 bg-white p-8 text-center shadow-sm">
+        <p className="text-sm text-zinc-500">Loading profile...</p>
+      </div>
+    );
+  }
 
+  if (!admin) {
     return (
       <div className="rounded-xl border border-zinc-200 bg-white p-8 text-center shadow-sm">
         <p className="text-sm text-zinc-500">Sign in to view your profile.</p>
@@ -272,37 +270,24 @@ export function AdminProfilePage() {
   return (
     <div className="space-y-6">
       <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
-        <div className="h-28 bg-gradient-to-r from-admin-sidebar via-admin-primary to-blue-400" />
-          <div className="px-6 pb-6">
-            <div className="-mt-12 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-              <div className="flex items-end gap-4">
-                <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-2xl border-4 border-white bg-admin-primary text-2xl font-semibold text-white shadow-md">
-                {avatarUrl ? (
-                  <img
-                    src={avatarUrl}
-                    alt={displayName}
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  getInitials(profileForm.firstName, profileForm.lastName)
-                )}
-              </div>
-
-              <div className="pb-1">
-                <h2 className="text-2xl font-semibold text-zinc-900">{displayName}</h2>
-                <p className="mt-1 text-sm text-zinc-500">{profileForm.email || admin.email}</p>
-              </div>
+        <div className="relative bg-gradient-to-r from-admin-sidebar via-admin-primary to-blue-400 px-6 pb-20 pt-8">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:pl-32">
+            <div className="min-w-0">
+              <h2 className="text-2xl font-semibold text-white">{displayName}</h2>
+              <p className="mt-1 truncate text-sm text-blue-100">
+                {profileForm.email || admin.email}
+              </p>
             </div>
 
-            <div className="flex flex-wrap gap-2 pb-1">
-              <span className="inline-flex items-center rounded-full bg-admin-muted px-3 py-1 text-xs font-medium uppercase tracking-wide text-blue-800">
+            <div className="flex flex-wrap gap-2">
+              <span className="inline-flex items-center rounded-full bg-white/20 px-3 py-1 text-xs font-medium uppercase tracking-wide text-white">
                 {roleName}
               </span>
               <span
                 className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
                   profile?.isActive === false
-                    ? "bg-red-50 text-red-700"
-                    : "bg-green-50 text-green-700"
+                    ? "bg-red-500/30 text-red-50"
+                    : "bg-green-500/30 text-green-50"
                 }`}
               >
                 {profile?.isActive === false ? "Inactive" : "Active"}
@@ -310,7 +295,21 @@ export function AdminProfilePage() {
             </div>
           </div>
 
-          <div className="mt-6 grid gap-4 border-t border-zinc-100 pt-6 sm:grid-cols-3">
+          <div className="absolute bottom-0 left-6 flex h-24 w-24 -translate-y-1/2 items-center justify-center overflow-hidden rounded-2xl border-4 border-white bg-admin-primary text-2xl font-semibold text-white shadow-md">
+            {avatarUrl ? (
+              <img
+                src={avatarUrl}
+                alt={displayName}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              getInitials(profileForm.firstName, profileForm.lastName)
+            )}
+          </div>
+        </div>
+
+        <div className="px-6 pb-6 pt-14">
+          <div className="grid gap-4 sm:grid-cols-3">
             <div>
               <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
                 User ID

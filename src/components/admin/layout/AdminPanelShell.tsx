@@ -1,15 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { AdminHeader } from "@/components/admin/layout/AdminHeader";
 import { AdminMobileSidebar } from "@/components/admin/layout/AdminMobileSidebar";
 import { AdminSidebar } from "@/components/admin/layout/AdminSidebar";
+import { useAdminAuth } from "@/services/admin/useAdminAuth";
 
 type AdminPanelShellProps = {
   children: React.ReactNode;
 };
 
 export function AdminPanelShell({ children }: AdminPanelShellProps) {
+  useAdminAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
 
