@@ -1,0 +1,12 @@
+.website-layout {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+  background: var(--cream-background, #fef9e5);
+}
+
+.auth-page-shell {
+  display: flex;
+  justify-content: center;
+  padding: 2rem 1rem 3rem;
+}
