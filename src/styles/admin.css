@@ -3,3 +3,31 @@
 .admin-auth-layout {
   min-height: 100vh;
 }
+
+/* Fallback for native color inputs in admin (matches common Input height) */
+.admin-panel input[type="color"] {
+  appearance: none;
+  height: 42px;
+  padding: 4px;
+  cursor: pointer;
+}
+
+.admin-panel input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+  height: 100%;
+  width: 100%;
+}
+
+.admin-panel input[type="color"]::-webkit-color-swatch {
+  border: none;
+  border-radius: 0.375rem;
+  height: 100%;
+  width: 100%;
+}
+
+.admin-panel input[type="color"]::-moz-color-swatch {
+  border: none;
+  border-radius: 0.375rem;
+  height: 100%;
+  width: 100%;
+}

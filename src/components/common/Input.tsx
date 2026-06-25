@@ -11,6 +11,12 @@ type InputProps = InputHTMLAttributes<HTMLInputElement> & {
   showPasswordToggle?: boolean;
 };
 
+const COLOR_INPUT_CLASS =
+  "h-[42px] cursor-pointer appearance-none p-1 bg-white " +
+  "[&::-webkit-color-swatch-wrapper]:h-full [&::-webkit-color-swatch-wrapper]:w-full [&::-webkit-color-swatch-wrapper]:p-0 " +
+  "[&::-webkit-color-swatch]:h-full [&::-webkit-color-swatch]:w-full [&::-webkit-color-swatch]:rounded-md [&::-webkit-color-swatch]:border-0 " +
+  "[&::-moz-color-swatch]:h-full [&::-moz-color-swatch]:w-full [&::-moz-color-swatch]:rounded-md [&::-moz-color-swatch]:border-0";
+
 export const Input = forwardRef<HTMLInputElement, InputProps>(
   (
     {
@@ -30,8 +36,25 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     const inputId = id ?? generatedId;
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
     const isPasswordField = type === "password";
+    const isColorField = type === "color";
     const canTogglePassword = isPasswordField && showPasswordToggle;
     const inputType = canTogglePassword && isPasswordVisible ? "text" : type;
+
+    const borderClass = error
+      ? "border-red-500 focus:border-red-500 focus:ring-red-500/10"
+      : "border-zinc-300";
+
+    const inputClassName = [
+      "w-full rounded-lg border text-sm transition-colors focus:border-admin-primary focus:outline-none focus:ring-2 focus:ring-admin-primary/15",
+      borderClass,
+      isColorField
+        ? COLOR_INPUT_CLASS
+        : "bg-white px-3.5 py-2.5 text-zinc-900 placeholder:text-zinc-400",
+      canTogglePassword ? "pr-11" : "",
+      className,
+    ]
+      .filter(Boolean)
+      .join(" ");
 
     return (
       <div className="w-full">
@@ -50,11 +73,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             ref={ref}
             id={inputId}
             type={inputType}
-            className={`w-full rounded-lg border bg-white px-3.5 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 transition-colors focus:border-admin-primary focus:outline-none focus:ring-2 focus:ring-admin-primary/15 ${
-              error
-                ? "border-red-500 focus:border-red-500 focus:ring-red-500/10"
-                : "border-zinc-300"
-            } ${canTogglePassword ? "pr-11" : ""} ${className}`}
+            className={inputClassName}
             {...props}
           />
 

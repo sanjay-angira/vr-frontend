@@ -16,7 +16,7 @@ export function AdminPanelShell({ children }: AdminPanelShellProps) {
   const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
+    <div className="admin-panel flex min-h-screen bg-slate-50">
       <div className="hidden lg:block">
         <AdminSidebar
           collapsed={collapsed}
