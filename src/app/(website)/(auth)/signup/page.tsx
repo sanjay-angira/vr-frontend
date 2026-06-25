@@ -1,8 +1,5 @@
-import SignUp from "@/components/website/auth/SignUpForm";
+import SignUp from "@/components/website/auth/signUp";
+
 export default function SignUpPage() {
-    return (
-        <SignUp />
-    );
+  return <SignUp />;
 }
-
-

@@ -5,8 +5,9 @@ import { useRef, useState } from "react";
 import { User } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAppDispatch } from "@/services/redux/hooks";
-import { toggleModal } from "@/services/redux/slices/websiteSlices/modalSlice";
+import { setAuthModalOpen } from "@/services/redux/slices/websiteSlices/modalSlice";
 import { useUserAuth } from "@/services/website/useUserAuth";
+import { isAuthPagePath } from "@/utils/authRoutes";
 
 export function HeaderUser() {
   const [showDropdown, setShowDropdown] = useState(false);
@@ -23,8 +24,10 @@ export function HeaderUser() {
   };
 
   const handleLoginClick = () => {
-    if (pathname === "/login" || pathname === "/register") return;
-    dispatch(toggleModal());
+    if (isAuthPagePath(pathname)) {
+      return;
+    }
+    dispatch(setAuthModalOpen(true));
   };
 
   if (isAuthenticated && user) {

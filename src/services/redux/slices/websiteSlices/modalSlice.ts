@@ -23,6 +23,9 @@ const modalSlice = createSlice({
     toggleModal(state) {
       state.toggleModal = !state.toggleModal;
     },
+    setAuthModalOpen(state, action: PayloadAction<boolean>) {
+      state.toggleModal = action.payload;
+    },
     toggleCartDrawer(state) {
       state.cartDrawerOpen = !state.cartDrawerOpen;
     },
@@ -35,6 +38,7 @@ const modalSlice = createSlice({
 export const {
   toggleForm,
   toggleModal,
+  setAuthModalOpen,
   toggleCartDrawer,
   setCartDrawerOpen,
 } = modalSlice.actions;

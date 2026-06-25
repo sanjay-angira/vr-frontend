@@ -23,7 +23,7 @@ const SignUp = () => {
                 <h2 style={{ fontSize: '28px', fontWeight: 'bold', color: 'var(--brown)', marginBottom: '16px', lineHeight: '1.2' }}>Looks like you're new here!</h2>
                 <p style={{ fontSize: '16px', color: '#666', lineHeight: '1.5', fontWeight: '500' }}>Sign up with your mobile number to get started.</p>
             </div>
-            <div className="formBx">
+            <div className="formBx flex items-center flex-col justify-between">
                 <SignUpForm />
                 <SecondryButton
                     onClick={routeToHomePage}

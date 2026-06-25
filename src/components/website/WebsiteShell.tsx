@@ -1,5 +1,3 @@
-"use client";
-
 import { WebsiteFooter } from "@/components/website/layout/WebsiteFooter";
 import { WebsiteProgressBar } from "@/components/website/shared/WebsiteProgressBar";
 import AuthModals from "@/components/website/auth/AuthModals";
@@ -12,8 +10,8 @@ type WebsiteShellProps = {
 export function WebsiteShell({ children }: WebsiteShellProps) {
   return (
     <div className="website-layout">
-      <AuthModals />
       <WebsiteProgressBar />
+      <AuthModals />
       <WebsiteHeader/>
       <main className="flex-1">{children}</main>
       <WebsiteFooter />

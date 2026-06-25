@@ -2,10 +2,11 @@
 import LogInForm from "@/components/website/auth/LogInForm"
 import { useDispatch } from "react-redux"
 import { useSelector } from "react-redux"
-import { toggleModal } from "@/services/redux/slices/websiteSlices/modalSlice";
+import { setAuthModalOpen } from "@/services/redux/slices/websiteSlices/modalSlice";
 import { RootState } from "@/services/redux/index";
 import { useRouter, usePathname } from "next/navigation";
 import { ButtonLink } from "@/components/website/auth/buttons";
+import { isAuthPagePath } from "@/utils/authRoutes";
 
 const LogIn = () => {
 
@@ -13,21 +14,17 @@ const LogIn = () => {
     const router = useRouter();
     const pathName = usePathname()
     const toggleModalState = useSelector((state: RootState) => state.modal.toggleModal);
+    const onAuthPage = isAuthPagePath(pathName);
 
-    if (!toggleModalState) {
-        if (pathName !== "/login") {
-            return null;
-        }
+    if (!toggleModalState && pathName !== "/login") {
+        return null;
     }
 
     const handleSignUpClick = () => {
-        if (pathName !== "/login") {
-            router.push('/signup')
-            dispatch(toggleModal())
+        if (!onAuthPage) {
+            dispatch(setAuthModalOpen(false));
         }
-        if (pathName === "/login") {
-            router.push('/signup')
-        }
+        router.push("/signup");
     }
 
     return (

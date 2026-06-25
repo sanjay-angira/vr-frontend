@@ -7,8 +7,9 @@ import ProductImageGallery from "@/components/website/product/ProductImageGaller
 import { fetchWebsiteCart } from "@/services/redux/slices/websiteSlices/cartSlice";
 import { addOrUpdateCartItem } from "@/services/website/cartService";
 import type { RootState } from "@/services/redux";
-import { toggleModal } from "@/services/redux/slices/websiteSlices/modalSlice";
+import { setAuthModalOpen } from "@/services/redux/slices/websiteSlices/modalSlice";
 import { usePathname, useRouter } from "next/navigation";
+import { isAuthPagePath } from "@/utils/authRoutes";
 
 export type ProductAttributeView = {
   id: number;
@@ -409,7 +410,10 @@ export default function ProductDetail({ product, fallbackImages = [] }: Props) {
 
   const handleWishlist = () => {
     if (!isAuthenticated) {
-      dispatch(toggleModal());
+      if (isAuthPagePath(pathname)) {
+        return;
+      }
+      dispatch(setAuthModalOpen(true));
       return;
     }
     // TODO: implement add to wishlist when API is ready

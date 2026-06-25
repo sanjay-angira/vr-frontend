@@ -99,7 +99,7 @@ export default function SignUpForm() {
                         dispatch(setUserCredentials({ user: mappedUser, accessToken }));
                     }
 
-                    toast.success('Login successful!');
+                    toast.success('Sign up successful!');
                     router.push('/');
                 } else {
                     toast.error(response.message || 'Invalid OTP');
@@ -147,7 +147,7 @@ export default function SignUpForm() {
 
                     <Button
                         type="submit"
-                        text="Verify & Login"
+                        text="Verify & Sign up"
                         loading={loading}
                         disabled={loading}
                         loadingText="Verifying..."
