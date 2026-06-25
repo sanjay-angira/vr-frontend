@@ -9,7 +9,7 @@ import { API_ENDPOINTS } from '@/services/api/API_ENDPOINT';
 import { setJson, STORAGE_KEYS, tokenStorage } from '@/services/api/storage';
 import { useDispatch } from 'react-redux';
 import { setUserCredentials } from '@/services/redux/slices/websiteSlices/userAuthSlice';
-import type { User } from '@/utils/types/user';
+import type { User } from '../../../types/user';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/website/authComponents/buttons';
 import { PhoneInput, OTPInput } from '@/components/website/authComponents/inputes';

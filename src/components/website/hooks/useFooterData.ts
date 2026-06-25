@@ -5,7 +5,7 @@ import {
   fetchFooterData,
   getFallbackFooterData,
 } from "@/services/website/footerService";
-import type { FooterData } from "@/utils/types/footer";
+import type { FooterData } from "../../../types/footer";
 
 export function useFooterData() {
   const [footerData, setFooterData] = useState<FooterData>(getFallbackFooterData());

@@ -12,7 +12,7 @@ import {
 } from "@/services/redux/slices/websiteSlices/userAuthSlice";
 import { useAppDispatch, useAppSelector } from "@/services/redux/hooks";
 import { selectUserAuth } from "@/services/redux/selectors";
-import type { User } from "@/utils/types/user";
+import type { User } from "../../types/user";
 
 export function useUserAuth() {
   const dispatch = useAppDispatch();

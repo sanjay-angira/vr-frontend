@@ -12,12 +12,13 @@ import {
   postData,
   STORAGE_KEYS,
 } from "@/services/api";
+import type { ApiErrorResponse } from "@/services/api/errors";
 import { useAppDispatch } from "@/services/redux/hooks";
 import {
   setAdminAuthLoading,
   setAdminCredentials,
 } from "@/services/redux/slices/adminSlices/adminAuthSlice";
-import { Admin } from "@/utils/types/user";
+import { Admin } from "../../../types/user";
 
 export interface BackendAdminUser {
   id: number;
@@ -43,12 +44,25 @@ export function mapBackendAdminUser(user: BackendAdminUser): Admin {
 }
 
 type AdminLoginResponse = {
-  data: {
+  success: boolean;
+  message?: string;
+  data?: {
     user: BackendAdminUser;
     accessToken: string;
     refreshToken: string;
   };
 };
+
+function getLoginErrorMessage(error: unknown): string {
+  if (error && typeof error === "object" && "message" in error) {
+    const message = (error as ApiErrorResponse).message;
+    if (message) return message;
+  }
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+  return "Login failed. Please check your credentials.";
+}
 
 export function AdminLoginForm() {
   const searchParams = useSearchParams();
@@ -65,10 +79,17 @@ export function AdminLoginForm() {
     dispatch(setAdminAuthLoading(true));
 
     try {
-      const response = (await postData(API_ENDPOINTS.AUTH.LOGIN, {
-        email,
-        password,
-      })) as AdminLoginResponse;
+      const response = (await postData(
+        API_ENDPOINTS.AUTH.LOGIN,
+        { email, password },
+        { auth: false }
+      )) as AdminLoginResponse;
+
+      if (!response?.success || !response.data) {
+        setError(response?.message ?? "Invalid email or password");
+        return;
+      }
+
       const { user, accessToken, refreshToken } = response.data;
 
       if (!accessToken || !refreshToken) {
@@ -91,7 +112,7 @@ export function AdminLoginForm() {
 
       window.location.href = searchParams.get("returnUrl") || "/admin/dashboard";
     } catch (err) {
-      throw err;
+      setError(getLoginErrorMessage(err));
     } finally {
       setIsLoading(false);
       dispatch(setAdminAuthLoading(false));

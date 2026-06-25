@@ -182,16 +182,6 @@ export const API_ENDPOINTS = {
     BY_SLUG: (slug: string) => `cms-pages/slug/${slug}`,
   },
 
-  POLICIES: {
-    ABOUT_US: "policies/about-us",
-    REFUND_POLICY: "policies/refund-policy",
-    REPLACE_POLICY: "policies/replace-policy",
-    PRIVACY_POLICY: "policies/privacy-policy",
-    TERMS_OF_USE: "policies/term-of-use",
-    DELIVERY_SHIPPING: "policies/delivery-and-shipping",
-    CANCELLATION_RETURN: "policies/cancellation-and-return",
-  },
-
   FOOTER: {
     PUBLIC: "footer/public",
     SETTINGS: "admin/footer-settings",
@@ -248,6 +238,18 @@ export const API_ENDPOINTS = {
 
   SETTINGS: {
     LIST: "settings",
+  },
+
+  HEADER: {
+    WEBSITE_HEADER: "website/header",
+    ADMIN_HEADER: "admin/header",
+    ANNOUNCEMENT_BARS: "admin/announcement-bars",
+    ANNOUNCEMENT_BAR_BY_ID: (id: number | string) =>
+      `admin/announcement-bars/${id}`,
+    MENUS: "admin/menus",
+    MENU_BY_ID: (id: number | string) => `admin/menus/${id}`,
+    MENU_ITEMS: "admin/menu-items",
+    MENU_ITEM_BY_ID: (id: number | string) => `admin/menu-items/${id}`,
   },
 } as const;
 

@@ -6,7 +6,7 @@ import { useFooterData } from "@/components/website/hooks/useFooterData";
 import type {
   FooterLinkItem,
   FooterSection,
-} from "@/utils/types/footer";
+} from "../../../types/footer";
 
 function FooterLink({ item }: { item: FooterLinkItem }) {
   const href = item.url?.trim() || "#";

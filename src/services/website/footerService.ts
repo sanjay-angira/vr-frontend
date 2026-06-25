@@ -1,6 +1,6 @@
 import { getData } from "@/services/api/apiService";
 import { API_ENDPOINTS } from "@/services/api/API_ENDPOINT";
-import type { FooterApiResponse, FooterData } from "@/utils/types/footer";
+import type { FooterApiResponse, FooterData } from "../../types/footer";
 
 const FALLBACK_FOOTER: FooterData = {
   settings: {

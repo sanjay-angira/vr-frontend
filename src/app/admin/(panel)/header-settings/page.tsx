@@ -1,8 +1,10 @@
+import { Suspense } from "react";
+import { HeaderSettingsPage } from "@/components/admin/header-settings/HeaderSettingsPage";
+
 export default function Page() {
-    return (
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Header Settings</h1>
-      </div>
-    );
-  }
-  
+  return (
+    <Suspense fallback={<p className="text-sm text-slate-500">Loading...</p>}>
+      <HeaderSettingsPage />
+    </Suspense>
+  );
+}

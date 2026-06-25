@@ -1,7 +1,7 @@
 import { postData } from "@/services/api/apiService";
 import { API_ENDPOINTS } from "@/services/api/API_ENDPOINT";
 import { tokenStorage } from "@/services/api/storage";
-import type { User } from "@/utils/types/user";
+import type { User } from "../../types/user";
 import type { ApiErrorResponse } from "@/services/api/errors";
 import { ApiError } from "@/services/api/errors";
 
