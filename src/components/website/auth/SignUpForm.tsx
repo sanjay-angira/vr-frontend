@@ -11,8 +11,8 @@ import { useDispatch } from 'react-redux';
 import { setUserCredentials } from '@/services/redux/slices/websiteSlices/userAuthSlice';
 import type { User } from '../../../types/user';
 import { useRouter } from 'next/navigation';
-import { Button } from '@/components/website/authComponents/buttons';
-import { PhoneInput, OTPInput } from '@/components/website/authComponents/inputes';
+import { Button } from '@/components/website/auth/buttons';
+import { PhoneInput, OTPInput } from '@/components/website/auth/inputes';
 import { toast } from 'react-toastify';
 
 export default function SignUpForm() {

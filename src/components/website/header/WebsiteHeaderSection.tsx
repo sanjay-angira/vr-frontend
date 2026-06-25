@@ -1,12 +1,10 @@
-import type { WebsiteHeaderData } from "@/types/header";
+
 import { AnnouncementBar } from "./AnnouncementBar";
 import { Header } from "./Header";
+import { fetchWebsiteHeader } from "@/services/website/headerService";
 
-type WebsiteHeaderSectionProps = {
-  data: WebsiteHeaderData;
-};
-
-export function WebsiteHeaderSection({ data }: WebsiteHeaderSectionProps) {
+export async function WebsiteHeader() {
+  const data = await fetchWebsiteHeader();
   return (
     <>
       <AnnouncementBar data={data.announcementBar} />

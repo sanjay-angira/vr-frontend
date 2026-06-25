@@ -1,11 +1,11 @@
 "use client";
-import LogInForm from "@/components/website/authComponents/LogInForm"
+import LogInForm from "@/components/website/auth/LogInForm"
 import { useDispatch } from "react-redux"
 import { useSelector } from "react-redux"
 import { toggleModal } from "@/services/redux/slices/websiteSlices/modalSlice";
 import { RootState } from "@/services/redux/index";
 import { useRouter, usePathname } from "next/navigation";
-import { ButtonLink } from "@/components/website/authComponents/buttons";
+import { ButtonLink } from "@/components/website/auth/buttons";
 
 const LogIn = () => {
 

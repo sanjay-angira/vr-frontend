@@ -1,6 +1,6 @@
 'use client'
 import SignUpForm from "./SignUpForm"
-import { SecondryButton } from "@/components/website/authComponents/buttons"
+import { SecondryButton } from "@/components/website/auth/buttons"
 import { useRouter } from "next/navigation"
 
 
