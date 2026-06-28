@@ -33,7 +33,7 @@ export function MobileNavigation({
   };
 
   return (
-    <div className="mobile-nav-panel lg:hidden">
+    <div className="mobile-nav-panel">
       <nav className="flex flex-col gap-2">
         {items.map((item) => {
           const hasChildren = item.children.length > 0;

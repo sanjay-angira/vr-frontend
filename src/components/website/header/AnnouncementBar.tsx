@@ -25,7 +25,10 @@ export function AnnouncementBar({ data }: AnnouncementBarProps) {
           className="announcement-bar-content"
           style={{ justifyContent: "center", height: "40px" }}
         >
-          <p className="m-0 text-center text-sm font-medium" style={{ color: data.textColor }}>
+          <p
+            className="m-0 text-center text-sm font-medium"
+            style={{ color: data.textColor }}
+          >
             {data.message}
             {data.linkText && data.linkUrl ? (
               <>

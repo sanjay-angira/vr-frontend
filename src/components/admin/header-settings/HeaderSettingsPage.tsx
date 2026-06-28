@@ -17,6 +17,9 @@ import {
   patchData,
   postData,
 } from "@/services/api/apiService";
+import { buildHeaderPreviewData } from "@/utils/headerHelpers";
+import { HeaderPreviewContent } from "@/components/website/header/HeaderPreviewContent";
+import "@/styles/website/header-preview.css";
 import type {
   AdminAnnouncementBar,
   AdminHeaderSettings,
@@ -250,6 +253,11 @@ export function HeaderSettingsPage() {
       .filter((item) => !item.parentId)
       .sort((a, b) => a.sortOrder - b.sortOrder || a.id - b.id);
   }, [selectedMenu]);
+
+  const headerPreviewData = useMemo(
+    () => buildHeaderPreviewData(headerSettings, bars, menus),
+    [headerSettings, bars, menus]
+  );
 
   const getChildren = (parentId: number) =>
     (selectedMenu?.items ?? [])
@@ -821,6 +829,18 @@ export function HeaderSettingsPage() {
           </div>
         </div>
       ) : null}
+
+      <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
+        <div className="border-b border-zinc-100 p-5">
+          <h2 className="text-lg font-semibold text-zinc-900">Header Preview</h2>
+          <p className="mt-1 text-sm text-zinc-500">
+            Live preview matching the website header layout.
+          </p>
+        </div>
+        <div className="p-5">
+          <HeaderPreviewContent data={headerPreviewData} />
+        </div>
+      </div>
 
       {announcementModalOpen ? (
         <AdminModal

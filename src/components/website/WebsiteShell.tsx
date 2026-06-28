@@ -1,6 +1,6 @@
 import { WebsiteProgressBar } from "@/components/website/shared/WebsiteProgressBar";
 import AuthModals from "@/components/website/auth/AuthModals";
-import { WebsiteFooter } from "@/components/website/layout/WebsiteFooter";
+import { WebsiteFooter } from "@/components/website/footer/WebsiteFooter";
 import { WebsiteHeader } from "@/components/website/header/WebsiteHeader";
 
 type WebsiteShellProps = {

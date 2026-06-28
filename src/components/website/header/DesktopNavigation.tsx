@@ -1,6 +1,5 @@
-"use client";
-
 import Link from "next/link";
+import type { CSSProperties, ReactNode } from "react";
 import { ChevronDown } from "lucide-react";
 import type { MenuItemNode } from "@/types/header";
 
@@ -9,45 +8,63 @@ type DesktopNavigationProps = {
   textColor: string;
 };
 
+function NavLink({
+  href,
+  className,
+  style,
+  children,
+}: {
+  href: string;
+  className: string;
+  style?: CSSProperties;
+  children: ReactNode;
+}) {
+  return (
+    <Link href={href} className={className} style={style}>
+      {children}
+    </Link>
+  );
+}
+
 export function DesktopNavigation({ items, textColor }: DesktopNavigationProps) {
   if (!items.length) {
     return null;
   }
 
   return (
-    <nav className="nav hidden lg:flex">
+    <nav className="nav">
       {items.map((item) => (
         <div key={item.id} className="nav-item">
           {item.children.length > 0 ? (
             <>
-              <Link
+              <NavLink
                 href={item.url}
                 className="nav-button"
                 style={{ color: textColor }}
               >
                 {item.label}
                 <ChevronDown size={16} />
-              </Link>
+              </NavLink>
               <div className="dropdown">
                 {item.children.map((child) => (
-                  <Link
+                  <NavLink
                     key={child.id}
                     href={child.url}
                     className="dropdown-item"
                   >
                     {child.label}
-                  </Link>
+                  </NavLink>
                 ))}
               </div>
             </>
           ) : (
-            <Link
+            <NavLink
               href={item.url}
               className="nav-button"
               style={{ color: textColor }}
             >
               {item.label}
-            </Link>
+            </NavLink>
           )}
         </div>
       ))}
