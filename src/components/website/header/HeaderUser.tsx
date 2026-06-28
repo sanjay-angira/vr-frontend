@@ -23,6 +23,7 @@ export function HeaderUser() {
     router.push("/");
   };
 
+  
   const handleLoginClick = () => {
     if (isAuthPagePath(pathname)) {
       return;
