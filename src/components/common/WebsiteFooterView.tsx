@@ -2,10 +2,22 @@ import Link from "next/link";
 import { Mail, MapPin, Phone } from "lucide-react";
 import { resolveImageUrl } from "@/components/admin/forms/shared/resolveImageUrl";
 import type { FooterData, FooterLinkItem, FooterSection } from "@/types/footer";
+import {
+  buildDisplaySections,
+  buildFooterGridSections,
+  collectSocialLinks,
+  getSectionLinks,
+} from "@/utils/footerHelpers";
 
 type WebsiteFooterViewProps = {
   data: FooterData;
   isPreview?: boolean;
+};
+
+type SectionProps = {
+  section: FooterSection;
+  isPreview?: boolean;
+  settings?: FooterData["settings"];
 };
 
 function FooterLink({
@@ -42,20 +54,58 @@ function FooterLink({
   );
 }
 
-function MenuSection({
-  section,
-  isPreview = false,
+function IconTile({
+  label,
+  iconUrl,
+  isPreview,
+  href,
+  className,
+  imageClassName,
 }: {
-  section: FooterSection;
-  isPreview?: boolean;
+  label: string;
+  iconUrl: string;
+  isPreview: boolean;
+  href?: string;
+  className: string;
+  imageClassName: string;
 }) {
-  if (!section.items?.length) return null;
+  const content = iconUrl ? (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={iconUrl} alt={label} className={imageClassName} />
+  ) : (
+    <span className="footer-payment-label">{label}</span>
+  );
+
+  if (isPreview || !href) {
+    return (
+      <span className={className} title={label}>
+        {content}
+      </span>
+    );
+  }
+
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={className}
+      title={label}
+    >
+      {content}
+    </a>
+  );
+}
+
+function MenuSection({ section, isPreview = false }: SectionProps) {
+  const items = getSectionLinks(section);
+  if (!items.length) return null;
 
   return (
     <div className="footer-section">
       <h3 className="footer-section-title">{section.title}</h3>
       <ul className="footer-link-list">
-        {section.items.map((item) => (
+        {items.map((item) => (
           <li key={item.id}>
             <FooterLink item={item} isPreview={isPreview} />
           </li>
@@ -65,184 +115,154 @@ function MenuSection({
   );
 }
 
-function SocialSection({
-  section,
+function SocialIconGrid({
+  links,
   isPreview = false,
 }: {
-  section: FooterSection;
+  links: FooterLinkItem[];
   isPreview?: boolean;
 }) {
-  const links =
-    section.socialLinks?.length > 0 ? section.socialLinks : section.items ?? [];
-
-  if (!links.length) return null;
-
   return (
-    <div className="footer-section">
-      <h3 className="footer-section-title">{section.title}</h3>
-      <div className="footer-social-grid">
-        {links.map((link) => {
-          const iconUrl = link.icon ? resolveImageUrl(link.icon) : "";
-
-          if (isPreview) {
-            return (
-              <span key={link.id} className="footer-social-link" title={link.label}>
-                {iconUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={iconUrl} alt={link.label} className="footer-social-icon" />
-                ) : (
-                  <span className="footer-payment-label">{link.label}</span>
-                )}
-              </span>
-            );
-          }
-
-          return (
-            <a
-              key={link.id}
-              href={link.url || "#"}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="footer-social-link"
-              title={link.label}
-            >
-              {iconUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={iconUrl} alt={link.label} className="footer-social-icon" />
-              ) : (
-                <span className="footer-payment-label">{link.label}</span>
-              )}
-            </a>
-          );
-        })}
-      </div>
+    <div className="footer-social-grid">
+      {links.map((link) => (
+        <IconTile
+          key={link.id}
+          label={link.label}
+          iconUrl={link.icon ? resolveImageUrl(link.icon) : ""}
+          href={link.url}
+          isPreview={isPreview}
+          className="footer-social-link"
+          imageClassName="footer-social-icon"
+        />
+      ))}
     </div>
   );
 }
 
 function ContactSection({
   section,
-  email,
-  phone,
-  address,
+  settings,
   isPreview = false,
-}: {
-  section: FooterSection;
-  email?: string;
-  phone?: string;
-  address?: string;
-  isPreview?: boolean;
+  socialLinks = [],
+  socialTitle = "Follow Us",
+}: SectionProps & {
+  socialLinks?: FooterLinkItem[];
+  socialTitle?: string;
 }) {
+  const email = settings?.email;
+  const phone = settings?.phone;
+  const address = settings?.address;
   const hasSettings = Boolean(email || phone || address);
   const hasItems = (section.items ?? []).length > 0;
+  const hasSocial = socialLinks.length > 0;
 
-  if (!hasSettings && !hasItems) return null;
+  const hasContactContent = hasSettings || hasItems;
+
+  if (!hasContactContent && !hasSocial) return null;
 
   return (
     <div className="footer-section">
-      <h3 className="footer-section-title">{section.title}</h3>
-      <ul className="footer-contact-list">
-        {phone && (
-          <li>
-            <Phone size={16} />
-            {isPreview ? (
-              <span className="footer-link">{phone}</span>
-            ) : (
-              <a href={`tel:${phone.replace(/\s/g, "")}`} className="footer-link">
-                {phone}
-              </a>
-            )}
-          </li>
-        )}
-        {email && (
-          <li>
-            <Mail size={16} />
-            {isPreview ? (
-              <span className="footer-link">{email}</span>
-            ) : (
-              <a href={`mailto:${email}`} className="footer-link">
-                {email}
-              </a>
-            )}
-          </li>
-        )}
-        {address && (
-          <li>
-            <MapPin size={16} />
-            <span>{address}</span>
-          </li>
-        )}
-        {(section.items ?? []).map((item) => (
-          <li key={item.id}>
-            <FooterLink item={item} isPreview={isPreview} />
-          </li>
-        ))}
-      </ul>
+      {hasContactContent && (
+        <>
+          <h3 className="footer-section-title">{section.title}</h3>
+          <ul className="footer-contact-list">
+          {phone && (
+            <li>
+              <Phone size={16} />
+              {isPreview ? (
+                <span className="footer-link">{phone}</span>
+              ) : (
+                <a href={`tel:${phone.replace(/\s/g, "")}`} className="footer-link">
+                  {phone}
+                </a>
+              )}
+            </li>
+          )}
+          {email && (
+            <li>
+              <Mail size={16} />
+              {isPreview ? (
+                <span className="footer-link">{email}</span>
+              ) : (
+                <a href={`mailto:${email}`} className="footer-link">
+                  {email}
+                </a>
+              )}
+            </li>
+          )}
+          {address && (
+            <li>
+              <MapPin size={16} />
+              <span>{address}</span>
+            </li>
+          )}
+          {(section.items ?? []).map((item) => (
+            <li key={item.id}>
+              <FooterLink item={item} isPreview={isPreview} />
+            </li>
+          ))}
+        </ul>
+        </>
+      )}
+      {hasSocial && (
+        <div className={hasContactContent ? "footer-social-block" : undefined}>
+          <h3 className="footer-section-title">{socialTitle}</h3>
+          <SocialIconGrid links={socialLinks} isPreview={isPreview} />
+        </div>
+      )}
     </div>
   );
 }
 
-function PaymentSection({
-  section,
-  isPreview = false,
-}: {
-  section: FooterSection;
-  isPreview?: boolean;
-}) {
-  const methods =
-    section.paymentMethods?.length > 0
-      ? section.paymentMethods
-      : section.items ?? [];
-
+function PaymentSection({ section, isPreview = false }: SectionProps) {
+  const methods = getSectionLinks(section);
   if (!methods.length) return null;
 
   return (
     <div className="footer-section">
       <h3 className="footer-section-title">{section.title}</h3>
       <div className="footer-payment-grid">
-        {methods.map((method) => {
-          const iconUrl = method.icon ? resolveImageUrl(method.icon) : "";
-
-          return (
-            <div key={method.id} className="footer-payment-item" title={method.label}>
-              {iconUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={iconUrl} alt={method.label} className="footer-payment-icon" width={150} height={100} />
-              ) : (
-                <span className="footer-payment-label">{method.label}</span>
-              )}
-            </div>
-          );
-        })}
+        {methods.map((method) => (
+          <div key={method.id} className="footer-payment-item" title={method.label}>
+            <IconTile
+              label={method.label}
+              iconUrl={method.icon ? resolveImageUrl(method.icon) : ""}
+              isPreview={isPreview}
+              className="footer-payment-icon-wrap"
+              imageClassName="footer-payment-icon"
+            />
+          </div>
+        ))}
       </div>
     </div>
   );
 }
 
-function renderSection(
+function renderFooterSection(
   section: FooterSection,
   settings: FooterData["settings"],
-  isPreview: boolean
+  isPreview: boolean,
+  socialBlock?: { links: FooterLinkItem[]; title: string }
 ) {
   switch (section.type) {
     case "menu":
       return (
         <MenuSection key={section.id} section={section} isPreview={isPreview} />
       );
-    case "social":
-      return (
-        <SocialSection key={section.id} section={section} isPreview={isPreview} />
-      );
     case "contact":
       return (
         <ContactSection
           key={section.id}
           section={section}
-          email={settings?.email}
-          phone={settings?.phone}
-          address={settings?.address}
+          settings={settings}
           isPreview={isPreview}
+          socialLinks={socialBlock?.links}
+          socialTitle={socialBlock?.title}
         />
+      );
+    case "payment":
+      return (
+        <PaymentSection key={section.id} section={section} isPreview={isPreview} />
       );
     default:
       return null;
@@ -251,15 +271,10 @@ function renderSection(
 
 export function WebsiteFooterView({ data, isPreview = false }: WebsiteFooterViewProps) {
   const { settings, sections = [] } = data;
-
-  const sortedSections = [...sections].sort((a, b) => a.position - b.position);
-  const gridSections = sortedSections.filter((section) => section.type !== "payment" && section.type !== "social");
-
-  const socialSections = sortedSections.filter((section) => section.type === "social");
-  const paymentSections = sortedSections.filter((section) => section.type === "payment");
-
-  const hasContactSection = gridSections.some((section) => section.type === "contact");
-  const hasSettingsContact = Boolean(settings?.email || settings?.phone || settings?.address);
+  const displaySections = buildDisplaySections(sections, settings);
+  const gridSections = buildFooterGridSections(sections, settings);
+  const { links: socialLinks, title: socialTitle } = collectSocialLinks(displaySections);
+  let socialAttached = false;
 
   const copyright =
     settings?.copyrightText ||
@@ -269,34 +284,19 @@ export function WebsiteFooterView({ data, isPreview = false }: WebsiteFooterView
     <footer className="footer">
       <div className="container">
         <div className="footer-grid">
-          <div className="footer-lead-column">
-            {!hasContactSection && hasSettingsContact && (
-              <ContactSection
-                section={{
-                  id: 0,
-                  title: "Contact Us",
-                  type: "contact",
-                  position: 999,
-                  items: [],
-                  socialLinks: [],
-                  paymentMethods: [],
-                }}
-                email={settings?.email}
-                phone={settings?.phone}
-                address={settings?.address}
-                isPreview={isPreview}
-              />
-            )}
-            {socialSections.map((section) => renderSection(section, settings, isPreview))}
-          </div>
+          {gridSections.map((section) => {
+            const attachSocial =
+              section.type === "contact" && !socialAttached && socialLinks.length > 0;
+            if (attachSocial) socialAttached = true;
 
-
-          {gridSections.map((section) => renderSection(section, settings, isPreview))}
-          {paymentSections.map((section) => (
-            <PaymentSection key={section.id} section={section} isPreview={isPreview} />
-          ))}
+            return renderFooterSection(
+              section,
+              settings,
+              isPreview,
+              attachSocial ? { links: socialLinks, title: socialTitle } : undefined
+            );
+          })}
         </div>
-
 
         <div className="footer-bottom">
           <p>{copyright}</p>

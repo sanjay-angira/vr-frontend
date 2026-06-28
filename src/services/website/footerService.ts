@@ -1,6 +1,7 @@
 import { getData } from "@/services/api/apiService";
 import { API_ENDPOINTS } from "@/services/api/API_ENDPOINT";
 import type { FooterApiResponse, FooterData } from "@/types/footer";
+import { normalizeFooterData } from "@/utils/footerHelpers";
 
 const FALLBACK_FOOTER: FooterData = {
   settings: {
@@ -9,20 +10,17 @@ const FALLBACK_FOOTER: FooterData = {
     address: "Mathura, India",
     copyrightText: `© ${new Date().getFullYear()} Vrindavan Rasa. All rights reserved.`,
   },
-  sections: [], 
+  sections: [],
 };
-
-export function getFallbackFooterData(): FooterData {
-  return FALLBACK_FOOTER;
-}
 
 export async function fetchFooterData(): Promise<FooterData> {
   try {
     const response = (await getData(API_ENDPOINTS.FOOTER.PUBLIC, undefined, {
       auth: false,
     })) as FooterApiResponse;
+
     if (response?.success && response?.data) {
-      return response.data;
+      return normalizeFooterData(response.data);
     }
   } catch {
     return FALLBACK_FOOTER;

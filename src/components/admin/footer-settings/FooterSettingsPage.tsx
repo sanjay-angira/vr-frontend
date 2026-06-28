@@ -18,9 +18,14 @@ import { UPLOAD_PATHS } from "@/components/admin/forms/shared/uploadPaths";
 import { resolveImageUrl } from "@/components/admin/forms/shared/resolveImageUrl";
 import { API_ENDPOINTS } from "@/services/api/API_ENDPOINT";
 import { deleteData, getData, postData, putData } from "@/services/api/apiService";
-import { buildFooterPreviewData } from "@/components/admin/footer-settings/buildFooterPreviewData";
+import { buildFooterPreviewData } from "@/utils/footerHelpers";
 import { WebsiteFooterView } from "@/components/common/WebsiteFooterView";
 import "@/styles/website/footer-preview.css";
+import type {
+  AdminFooterLinkRow,
+  AdminFooterSection,
+  AdminFooterSettings,
+} from "@/types/footer";
 
 function unwrap<T>(response: { data?: T } | T): T {
   if (response && typeof response === "object" && "data" in response) {
@@ -29,33 +34,9 @@ function unwrap<T>(response: { data?: T } | T): T {
   return response as T;
 }
 
-type FooterSettings = {
-  id?: number;
-  email?: string;
-  phone?: string;
-  address?: string;
-  copyrightText?: string;
-  status?: boolean;
-};
-
-type FooterSection = {
-  id: number;
-  title: string;
-  type: string;
-  position: number;
-  status?: boolean;
-};
-
-type FooterLinkRow = {
-  id: number;
-  label: string;
-  url?: string;
-  icon?: string;
-  position?: number;
-  status?: boolean;
-  sectionId?: number;
-  section?: FooterSection;
-};
+type FooterSettings = AdminFooterSettings;
+type FooterSection = AdminFooterSection;
+type FooterLinkRow = AdminFooterLinkRow;
 
 const SECTION_TYPES = [
   { value: "menu", label: "Menu" },

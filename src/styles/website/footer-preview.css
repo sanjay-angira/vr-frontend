@@ -26,42 +26,8 @@
   margin-bottom: 2rem;
 }
 
-.footer-lead-column {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-}
-
 .footer-section {
   min-width: 0;
-}
-
-.footer-brand {
-  max-width: 320px;
-}
-
-.footer-logo {
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
-  margin-bottom: 1rem;
-}
-
-.footer-logo-icon {
-  font-size: 1.6rem;
-  color: var(--header-accent);
-}
-
-.footer-logo-text {
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: var(--footer-heading);
-}
-
-.footer-brand-text {
-  color: var(--footer-text);
-  line-height: 1.7;
-  font-size: 0.95rem;
 }
 
 .footer-section-title {
@@ -101,6 +67,10 @@
   color: var(--footer-text);
 }
 
+.footer-social-block {
+  margin-top: 1.25rem;
+}
+
 .footer-social-grid {
   display: flex;
   flex-wrap: wrap;
@@ -130,17 +100,10 @@
   object-fit: contain;
 }
 
-.footer-payments-row {
-  border-top: 1px solid var(--footer-border);
-  padding-top: 1.5rem;
-  margin-bottom: 1.5rem;
-}
-
 .footer-payment-grid {
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem;
-  margin-top: 0.75rem;
 }
 
 .footer-payment-item {
@@ -151,6 +114,12 @@
   border-radius: 0.5rem;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--footer-border);
+}
+
+.footer-payment-icon-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .footer-payment-icon {
@@ -164,39 +133,12 @@
   color: var(--footer-text);
 }
 
-.footer-loading .footer-skeleton-line {
-  height: 12px;
-  border-radius: 8px;
-  margin-bottom: 10px;
-  background: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0.06) 25%,
-    rgba(255, 255, 255, 0.12) 50%,
-    rgba(255, 255, 255, 0.06) 75%
-  );
-  background-size: 200% 100%;
-  animation: footer-skeleton-loading 1.2s infinite ease-in-out;
-}
-
-.footer-loading .footer-skeleton-line.short {
-  width: 55%;
-}
-
 .footer-bottom {
   border-top: 1px solid var(--footer-border);
   padding-top: 1.5rem;
   text-align: center;
   color: rgba(216, 205, 184, 0.85);
   font-size: 0.9rem;
-}
-
-@keyframes footer-skeleton-loading {
-  0% {
-    background-position: 200% 0;
-  }
-  100% {
-    background-position: -200% 0;
-  }
 }
 
 @media (max-width: 768px) {
@@ -208,13 +150,8 @@
     grid-template-columns: 1fr;
     gap: 1.5rem;
   }
-
-  .footer-lead-column {
-    gap: 1.5rem;
-  }
 }
 
-/* Admin panel preview wrapper */
 .website-footer-preview {
   overflow: hidden;
   border-radius: 0.5rem;
