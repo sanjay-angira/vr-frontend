@@ -5,7 +5,7 @@ import { fetchWebsiteHeader } from "@/services/website/headerService";
 
 export async function WebsiteHeader() {
   const data = await fetchWebsiteHeader();
-  console.log(data);
+  // console.log(data);
   return (
     <>
       <AnnouncementBar data={data.announcementBar} />

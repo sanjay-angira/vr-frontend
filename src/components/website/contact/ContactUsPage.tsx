@@ -10,7 +10,9 @@ import {
   Send,
   ShieldCheck,
 } from "lucide-react";
-import { API_BASE_URL } from "@/services/api/config";
+import { API_ENDPOINTS } from "@/services/api/API_ENDPOINT";
+import { postData } from "@/services/api/apiService";
+import type { ApiErrorResponse } from "@/services/api/errors";
 
 type ContactFormState = {
   firstName: string;
@@ -87,22 +89,18 @@ export function ContactUsPage() {
 
     try {
       setIsSendingOtp(true);
-      const response = await fetch(
-        `${API_BASE_URL}/customer/contact-us/send-otp`,
+      const result = await postData(
+        API_ENDPOINTS.CONTACT_LEADS.SEND_OTP,
         {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            firstName: form.firstName.trim(),
-            lastName: form.lastName.trim(),
-            email: form.email.trim(),
-            phoneNumber: form.phoneNumber.trim(),
-            message: form.message.trim(),
-          }),
-        }
+          firstName: form.firstName.trim(),
+          lastName: form.lastName.trim(),
+          email: form.email.trim(),
+          phoneNumber: form.phoneNumber.trim(),
+          message: form.message.trim(),
+        },
+        { auth: false }
       );
-      const result = await response.json();
-      if (!response.ok || !result?.success) {
+      if (!result?.success) {
         setStatusType("error");
         setStatusMessage(result?.message || "Failed to send OTP");
         return;
@@ -111,9 +109,10 @@ export function ContactUsPage() {
       setVerified(false);
       setStatusType("success");
       setStatusMessage(result?.message || "OTP sent successfully");
-    } catch {
+    } catch (error) {
+      const apiError = error as ApiErrorResponse;
       setStatusType("error");
-      setStatusMessage("Unable to send OTP right now");
+      setStatusMessage(apiError?.message || "Unable to send OTP right now");
     } finally {
       setIsSendingOtp(false);
     }
@@ -128,19 +127,15 @@ export function ContactUsPage() {
 
     try {
       setIsVerifyingOtp(true);
-      const response = await fetch(
-        `${API_BASE_URL}/customer/contact-us/verify-otp`,
+      const result = await postData(
+        API_ENDPOINTS.CONTACT_LEADS.VERIFY_OTP,
         {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: form.email.trim(),
-            otp: form.otp.trim(),
-          }),
-        }
+          email: form.email.trim(),
+          otp: form.otp.trim(),
+        },
+        { auth: false }
       );
-      const result = await response.json();
-      if (!response.ok || !result?.success) {
+      if (!result?.success) {
         setStatusType("error");
         setStatusMessage(result?.message || "OTP verification failed");
         return;
@@ -148,9 +143,10 @@ export function ContactUsPage() {
       setVerified(true);
       setStatusType("success");
       setStatusMessage(result?.message || "Email verified successfully");
-    } catch {
+    } catch (error) {
+      const apiError = error as ApiErrorResponse;
       setStatusType("error");
-      setStatusMessage("Unable to verify OTP right now");
+      setStatusMessage(apiError?.message || "Unable to verify OTP right now");
     } finally {
       setIsVerifyingOtp(false);
     }

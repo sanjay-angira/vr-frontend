@@ -1,4 +1,5 @@
-import { API_BASE_URL } from "@/services/api/config";
+import { getData } from "@/services/api/apiService";
+import { API_ENDPOINTS } from "@/services/api/API_ENDPOINT";
 
 export type ProductPageData = {
   id: number;
@@ -47,21 +48,23 @@ export async function fetchProductBySlug(
   slug: string
 ): Promise<ProductPageData | null> {
   const safeSlug = encodeURIComponent(slug);
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15000);
 
   try {
-    const res = await fetch(`${API_BASE_URL}/customer/products/${safeSlug}`, {
-      cache: "no-store",
-      signal: AbortSignal.timeout(15000),
-    });
+    const json = await getData(
+      API_ENDPOINTS.CUSTOMER.PRODUCT_DETAILS(safeSlug),
+      undefined,
+      { auth: false, signal: controller.signal }
+    );
 
-    if (!res.ok) return null;
-
-    const json = await res.json();
-    if (json.success && json.data) {
+    if (json?.success && json?.data) {
       return json.data as ProductPageData;
     }
   } catch {
     return null;
+  } finally {
+    clearTimeout(timeout);
   }
 
   return null;

@@ -18,6 +18,9 @@ import { UPLOAD_PATHS } from "@/components/admin/forms/shared/uploadPaths";
 import { resolveImageUrl } from "@/components/admin/forms/shared/resolveImageUrl";
 import { API_ENDPOINTS } from "@/services/api/API_ENDPOINT";
 import { deleteData, getData, postData, putData } from "@/services/api/apiService";
+import { buildFooterPreviewData } from "@/components/admin/footer-settings/buildFooterPreviewData";
+import { WebsiteFooterView } from "@/components/common/WebsiteFooterView";
+import "@/styles/website/footer-preview.css";
 
 function unwrap<T>(response: { data?: T } | T): T {
   if (response && typeof response === "object" && "data" in response) {
@@ -280,6 +283,18 @@ export function FooterSettingsPage() {
   const footerItems = useMemo(
     () => items.filter((item) => item.section?.type === "menu"),
     [items]
+  );
+
+  const footerPreviewData = useMemo(
+    () =>
+      buildFooterPreviewData(
+        settings,
+        sections,
+        items,
+        socialLinks,
+        paymentMethods
+      ),
+    [settings, sections, items, socialLinks, paymentMethods]
   );
 
   const loadAll = useCallback(async () => {
@@ -744,59 +759,10 @@ export function FooterSettingsPage() {
         />
       </AdminCard>
 
-      <AdminCard title="Footer Preview" description="Live preview of footer content.">
-        <div className="grid gap-6 rounded-lg bg-zinc-900 p-6 text-zinc-100 md:grid-cols-3">
-          <div>
-            <h3 className="mb-2 font-semibold">Contact</h3>
-            <p className="text-sm text-zinc-300">{settings.email || "—"}</p>
-            <p className="text-sm text-zinc-300">{settings.phone || "—"}</p>
-            <p className="mt-2 text-sm text-zinc-400">{settings.address || "—"}</p>
-          </div>
-          {sections
-            .filter((s) => s.type === "menu" && s.status)
-            .map((section) => (
-              <div key={section.id}>
-                <h3 className="mb-2 font-semibold">{section.title}</h3>
-                <ul className="space-y-1 text-sm text-zinc-300">
-                  {items
-                    .filter((item) => item.sectionId === section.id && item.status)
-                    .map((item) => (
-                      <li key={item.id}>{item.label}</li>
-                    ))}
-                </ul>
-              </div>
-            ))}
-          <div>
-            <h3 className="mb-2 font-semibold">Social & Payment</h3>
-            <div className="flex flex-wrap gap-2">
-              {socialLinks
-                .filter((link) => link.status && link.icon)
-                .map((link) => (
-                  /* eslint-disable-next-line @next/next/no-img-element */
-                  <img
-                    key={link.id}
-                    src={resolveImageUrl(link.icon!)}
-                    alt={link.label}
-                    className="h-8 w-8 rounded bg-white/10 object-contain p-1"
-                  />
-                ))}
-              {paymentMethods
-                .filter((method) => method.status && method.icon)
-                .map((method) => (
-                  /* eslint-disable-next-line @next/next/no-img-element */
-                  <img
-                    key={method.id}
-                    src={resolveImageUrl(method.icon!)}
-                    alt={method.label}
-                    className="h-8 w-8 rounded bg-white/10 object-contain p-1"
-                  />
-                ))}
-            </div>
-          </div>
+      <AdminCard title="Footer Preview" description="Live preview matching the website footer layout.">
+        <div className="website-footer-preview border border-zinc-200">
+          <WebsiteFooterView data={footerPreviewData} isPreview />
         </div>
-        <p className="mt-4 text-center text-sm text-zinc-500">
-          {settings.copyrightText || "© Vrindavan Rasa"}
-        </p>
       </AdminCard>
 
       {sectionModal && (

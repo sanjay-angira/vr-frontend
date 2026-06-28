@@ -1,7 +1,7 @@
-import { WebsiteFooter } from "@/components/website/layout/WebsiteFooter";
 import { WebsiteProgressBar } from "@/components/website/shared/WebsiteProgressBar";
 import AuthModals from "@/components/website/auth/AuthModals";
-import { WebsiteHeader } from "@/components/website/header/WebsiteHeaderSection";
+import { WebsiteFooter } from "@/components/website/layout/WebsiteFooter";
+import { WebsiteHeader } from "@/components/website/header/WebsiteHeader";
 
 type WebsiteShellProps = {
   children: React.ReactNode;

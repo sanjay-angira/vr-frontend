@@ -1,13 +1,13 @@
 import { getData } from "@/services/api/apiService";
 import { API_ENDPOINTS } from "@/services/api/API_ENDPOINT";
-import type { FooterApiResponse, FooterData } from "../../types/footer";
+import type { FooterApiResponse, FooterData } from "@/types/footer";
 
 const FALLBACK_FOOTER: FooterData = {
   settings: {
-    email: "info@sacredstore.com",
-    phone: "+91 9876543210",
-    address: "Delhi, India",
-    copyrightText: `© ${new Date().getFullYear()} Sacred Store. All rights reserved.`,
+    email: "vrindavanrasa@gmail.com",
+    phone: "+91 9043534534",
+    address: "Mathura, India",
+    copyrightText: `© ${new Date().getFullYear()} Vrindavan Rasa. All rights reserved.`,
   },
   sections: [
     {
@@ -39,32 +39,33 @@ const FALLBACK_FOOTER: FooterData = {
   ],
 };
 
-let cachedFooter: FooterData | null = null;
-let footerRequest: Promise<FooterData> | null = null;
-
-export async function fetchFooterData(): Promise<FooterData> {
-  if (cachedFooter) {
-    return cachedFooter;
-  }
-
-  if (!footerRequest) {
-    footerRequest = getData(API_ENDPOINTS.FOOTER.PUBLIC, undefined, { auth: false })
-      .then((response: FooterApiResponse) => {
-        if (response?.success && response?.data) {
-          cachedFooter = response.data;
-          return response.data;
-        }
-        return FALLBACK_FOOTER;
-      })
-      .catch(() => FALLBACK_FOOTER)
-      .finally(() => {
-        footerRequest = null;
-      });
-  }
-
-  return footerRequest;
+export function getFallbackFooterData(): FooterData {
+  return FALLBACK_FOOTER;
 }
 
-export function getFallbackFooterData(): FooterData {
+function normalizeFooterData(data: FooterData): FooterData {
+  return {
+    settings: data.settings ?? null,
+    sections: (data.sections ?? []).map((section) => ({
+      ...section,
+      items: section.items ?? [],
+      socialLinks: section.socialLinks ?? [],
+      paymentMethods: section.paymentMethods ?? [],
+    })),
+  };
+}
+
+export async function fetchFooterData(): Promise<FooterData> {
+  try {
+    const response = (await getData(API_ENDPOINTS.FOOTER.PUBLIC, undefined, {
+      auth: false,
+    })) as FooterApiResponse;
+    if (response?.success && response?.data) {
+      return normalizeFooterData(response.data);
+    }
+  } catch {
+    return FALLBACK_FOOTER;
+  }
+
   return FALLBACK_FOOTER;
 }

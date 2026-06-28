@@ -1,3 +1,4 @@
+import axios from "axios";
 import Cookies from "js-cookie";
 import { STORAGE_KEYS } from "./storage";
 import { API_BASE_URL } from "./config";
@@ -18,15 +19,14 @@ export function destroyTokens() {
 
 export async function getNewAccessToken(refreshToken: string) {
   try {
-    const response = await fetch(`${API_BASE_URL}/${API_ENDPOINTS.AUTH.REFRESH_TOKEN}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ refreshToken }),
-    });
-    const parsedResponse = await response.json();
+    const response = await axios.post(
+      `${API_BASE_URL}/${API_ENDPOINTS.AUTH.REFRESH_TOKEN}`,
+      { refreshToken },
+      { headers: { "Content-Type": "application/json" } }
+    );
+    const parsedResponse = response.data;
 
     if (
-      response.ok &&
       parsedResponse?.data?.token &&
       parsedResponse?.data?.refreshToken
     ) {
