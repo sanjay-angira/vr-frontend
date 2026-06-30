@@ -1,3 +1,5 @@
+import { fetchHomepageSections } from "@/services/website/homepageService";
+import { CmsHomeSections } from "@/components/website/home/CmsHomeSections";
 import { HeroSection } from "@/components/website/home/HeroSection";
 import { CategorySection } from "@/components/website/sections/CategorySection";
 import { ProductSection } from "@/components/website/sections/ProductSection";
@@ -14,9 +16,9 @@ import {
   rudrakshaProducts,
 } from "@/components/website/data/homeData";
 
-export function HomePage() {
+function StaticHomeFallback() {
   return (
-    <div style={{ minHeight: "100vh" }}>
+    <>
       <HeroSection />
       <CategorySection
         title="Browse by Category"
@@ -27,7 +29,7 @@ export function HomePage() {
         title="Popular Products"
         subtitle="Customer Favorites"
         products={rudrakshaProducts}
-        viewAllLink="/rudraksha"
+        viewAllLink="/products"
       />
       <WhyChooseSection />
       <ProductComboSection
@@ -47,6 +49,20 @@ export function HomePage() {
         title="Our Blog"
         subtitle="From The Kitchen"
       />
+    </>
+  );
+}
+
+export async function HomePage() {
+  const sections = await fetchHomepageSections();
+
+  return (
+    <div style={{ minHeight: "100vh" }}>
+      {sections.length > 0 ? (
+        <CmsHomeSections sections={sections} />
+      ) : (
+        <StaticHomeFallback />
+      )}
     </div>
   );
 }

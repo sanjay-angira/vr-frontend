@@ -26,6 +26,7 @@ export interface WebsiteProductCardData {
   inStock: boolean;
   isNew?: boolean;
   isFeatured?: boolean;
+  slug?: string;
 }
 
 export interface ProductCardProps {

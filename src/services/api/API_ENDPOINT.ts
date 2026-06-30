@@ -213,14 +213,15 @@ export const API_ENDPOINTS = {
   },
 
   CUSTOMER: {
+    HOMEPAGE: "customer/homepage",
     STORE_PRODUCTS: "customer/store-products",
-    PRODUCT_DETAILS: (slug: string) => `customer/products/${slug}`,
     ADD_CART: "customer/add-cart-item",
     GET_CART: "customer/get-cart-items",
     UPDATE_CART: "customer/update-cart-item",
-    REMOVE_CART: (id: number | string) => `customer/remove-cart-item/${id}`,
     CLEAR_CART: "customer/clear-cart",
     CART_COUNT: "customer/cart-count",
+    REMOVE_CART: (id: number | string) => `customer/remove-cart-item/${id}`,
+    PRODUCT_DETAILS: (slug: string) => `customer/products/${slug}`,
   },
 
   ORDERS: {
