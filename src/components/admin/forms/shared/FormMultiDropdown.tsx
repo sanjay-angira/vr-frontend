@@ -74,11 +74,29 @@ export function FormMultiDropdown({
       <FormLabel label={label} required={required} />
 
       <div
-        className={`flex min-h-11 w-full items-center justify-between gap-2 rounded-lg border bg-white px-3.5 py-2 text-left text-sm transition-colors focus-within:border-admin-primary focus-within:ring-2 focus-within:ring-admin-primary/15 ${
-          disabled ? "cursor-not-allowed opacity-60" : ""
+        role="button"
+        tabIndex={disabled ? -1 : 0}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-controls={listId}
+        aria-disabled={disabled}
+        onClick={() => {
+          if (!disabled) {
+            setOpen((prev) => !prev);
+          }
+        }}
+        onKeyDown={(event) => {
+          if (disabled) return;
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            setOpen((prev) => !prev);
+          }
+        }}
+        className={`flex min-h-11 w-full items-center justify-between gap-2 rounded-lg border bg-white px-3.5 py-2 text-left text-sm transition-colors focus:border-admin-primary focus:outline-none focus:ring-2 focus:ring-admin-primary/15 ${
+          disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer"
         } ${error ? "border-red-500" : "border-zinc-300"}`}
       >
-        <div className="flex min-w-0 flex-1 flex-wrap gap-1.5">
+        <span className="flex min-w-0 flex-1 flex-wrap gap-1.5">
           {selectedOptions.length === 0 ? (
             <span className="text-zinc-400">{placeholder}</span>
           ) : (
@@ -103,21 +121,11 @@ export function FormMultiDropdown({
               </span>
             ))
           )}
-        </div>
-        <button
-          type="button"
-          disabled={disabled}
-          aria-haspopup="listbox"
-          aria-expanded={open}
-          aria-controls={listId}
-          aria-label={`${open ? "Close" : "Open"} ${label} options`}
-          onClick={() => setOpen((prev) => !prev)}
-          className="shrink-0 rounded-md p-1 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-admin-primary/15 disabled:pointer-events-none"
-        >
-          <ChevronDown
-            className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`}
-          />
-        </button>
+        </span>
+        <ChevronDown
+          className={`h-4 w-4 shrink-0 text-zinc-400 transition-transform ${open ? "rotate-180" : ""}`}
+          aria-hidden
+        />
       </div>
 
       {open && (
@@ -125,7 +133,7 @@ export function FormMultiDropdown({
           id={listId}
           role="listbox"
           aria-multiselectable="true"
-          className="absolute z-30 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-zinc-200 bg-white py-1 shadow-lg"
+          className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-zinc-200 bg-white py-1 shadow-lg"
         >
           {options.length === 0 ? (
             <li className="px-3.5 py-2.5 text-sm text-zinc-400">No options available</li>
