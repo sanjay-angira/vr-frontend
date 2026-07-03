@@ -76,7 +76,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
       id: Number(offer.id),
       offerName: String(offer.offerName),
       offerSlug: String(offer.offerSlug),
-      type: String(offer.type),
+      discountType: String(offer.discountType ?? offer.type),
       discountValue: Number(offer.discountValue),
       sources: (offer.sources as string[]) || [],
     })),

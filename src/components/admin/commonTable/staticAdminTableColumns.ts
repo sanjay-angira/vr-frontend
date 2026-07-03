@@ -45,7 +45,7 @@ export const CategoryComponentColumns: AdminTableColumnDefinition[] = [
 export const OffersAndDealsColumns: AdminTableColumnDefinition[] = [
   { label: "ID", property: "id", type: "text", datatype: "id", visible: true, cssClasses: ["font-medium"] },
   { label: "Offer Name", property: "offerName", type: "text", datatype: "offerName", visible: true, cssClasses: ["font-medium"] },
-  { label: "Offer Type", property: "type", type: "text", datatype: "type", visible: true, cssClasses: ["font-medium"] },
+  { label: "Discount Type", property: "discountType", type: "text", datatype: "discountType", visible: true, cssClasses: ["font-medium"] },
   { label: "Discount Value", property: "discountValue", type: "text", datatype: "discountValue", visible: true, cssClasses: ["font-medium"] },
   { label: "Start Date", property: "startDate", type: "text", datatype: "time", visible: true, cssClasses: ["font-medium"] },
   { label: "End Date", property: "endDate", type: "text", datatype: "time", visible: true, cssClasses: ["font-medium"] },

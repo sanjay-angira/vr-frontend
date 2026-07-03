@@ -131,7 +131,7 @@ export function normalizeVariants(
           id: Number(variant.appliedOffer.id),
           offerName: String(variant.appliedOffer.offerName),
           offerSlug: String(variant.appliedOffer.offerSlug),
-          type: String(variant.appliedOffer.type),
+          discountType: String(variant.appliedOffer.discountType ?? variant.appliedOffer.type),
           discountValue: Number(variant.appliedOffer.discountValue),
         }
       : null,
@@ -139,7 +139,7 @@ export function normalizeVariants(
       offerId: Number(offerPrice.offerId),
       offerName: String(offerPrice.offerName),
       offerSlug: String(offerPrice.offerSlug),
-      type: String(offerPrice.type),
+      discountType: String(offerPrice.discountType ?? offerPrice.type),
       discountValue: Number(offerPrice.discountValue),
       originalPrice: toNumber(offerPrice.originalPrice as string | number | null),
       finalPrice: toNumber(offerPrice.finalPrice as string | number | null),

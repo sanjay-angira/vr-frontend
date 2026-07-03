@@ -9,6 +9,7 @@ import {
   FormActions,
   FormCheckbox,
   FormFullWidth,
+  FormImageUpload,
   FormInput,
   FormMultiSelect,
   FormSection,
@@ -17,10 +18,14 @@ import {
 } from "./shared/FormFields";
 import { getData } from "@/services/api/apiService";
 import { useAdminCrudForm } from "./shared/useAdminCrudForm";
-import { activeField, requiredString } from "./shared/validation";
+import { useSlugSync } from "./shared/useSlugSync";
+import { UPLOAD_PATHS } from "./shared/uploadPaths";
+import { activeField, requiredString, slugField } from "./shared/validation";
 
 type Values = {
   couponCode: string;
+  couponSlug: string;
+  image: string;
   discountType: string;
   discountValue: number | "";
   startDate: string;
@@ -32,6 +37,8 @@ type Values = {
 
 const initialValues: Values = {
   couponCode: "",
+  couponSlug: "",
+  image: "",
   discountType: "percentage",
   discountValue: "",
   startDate: "",
@@ -43,6 +50,8 @@ const initialValues: Values = {
 
 const schema = Yup.object({
   couponCode: requiredString("Coupon code", 2, 50),
+  couponSlug: slugField("Coupon slug"),
+  image: Yup.string(),
   discountType: Yup.string().oneOf(["percentage", "fixed"]).required(),
   discountValue: Yup.number().min(0).required("Discount value is required"),
   startDate: Yup.string().required("Start date is required"),
@@ -78,36 +87,35 @@ export function CouponForm({ module, recordId }: AdminFormProps) {
       const userIds = Array.isArray(r.users)
         ? (r.users as Array<{ id: number }>).map((u) => u.id)
         : [];
-      const start = r.startDate ?? r.start_date;
-      const end = r.endDate ?? r.end_date;
 
       return {
         couponCode: String(r.couponCode ?? ""),
-        discountType: String(r.discountType ?? r.discount_type ?? "percentage"),
-        discountValue: Number(r.discountValue ?? r.discount_value ?? 0),
-        startDate: start ? String(start).slice(0, 10) : "",
-        endDate: end ? String(end).slice(0, 10) : "",
-        isActive: Boolean(r.isActive ?? r.is_active ?? true),
+        couponSlug: String(r.couponSlug ?? ""),
+        image: String(r.image ?? ""),
+        discountType: String(r.discountType ?? "percentage"),
+        discountValue: Number(r.discountValue ?? 0),
+        startDate: r.startDate ? String(r.startDate).slice(0, 10) : "",
+        endDate: r.endDate ? String(r.endDate).slice(0, 10) : "",
+        isActive: Boolean(r.isActive ?? true),
         isUserSpecific: Boolean(r.isUserSpecific ?? userIds.length > 0),
         userIds,
       };
     },
     mapValuesToPayload: (v) => ({
       couponCode: v.couponCode.trim(),
+      couponSlug: v.couponSlug.trim(),
+      image: v.image || null,
       discountType: v.discountType,
-      discount_type: v.discountType,
       discountValue: Number(v.discountValue),
-      discount_value: Number(v.discountValue),
       startDate: v.startDate,
-      start_date: v.startDate,
       endDate: v.endDate,
-      end_date: v.endDate,
       isActive: v.isActive,
-      is_active: v.isActive,
       isUserSpecific: v.isUserSpecific,
-      ...(v.isUserSpecific ? { userIds: v.userIds, user_ids: v.userIds } : {}),
+      ...(v.isUserSpecific ? { userIds: v.userIds } : {}),
     }),
   });
+
+  useSlugSync(formik, "couponCode", "couponSlug", !isEdit);
 
   useEffect(() => {
     if (formik.values.isUserSpecific) {
@@ -126,6 +134,7 @@ export function CouponForm({ module, recordId }: AdminFormProps) {
       <form onSubmit={formik.handleSubmit} className="space-y-8">
         <FormSection title="Coupon details">
           <FormInput formik={formik} name="couponCode" label="Coupon Code" required />
+          <FormInput formik={formik} name="couponSlug" label="Coupon Slug" required />
           <FormSelect
             formik={formik}
             name="discountType"
@@ -137,17 +146,18 @@ export function CouponForm({ module, recordId }: AdminFormProps) {
             ]}
           />
           <FormInput formik={formik} name="discountValue" label="Discount Value" type="number" required />
+          <FormImageUpload formik={formik} name="image" label="Image" uploadPath={UPLOAD_PATHS.coupons} />
           <FormInput formik={formik} name="startDate" label="Start Date" type="date" required />
           <FormInput formik={formik} name="endDate" label="End Date" type="date" required />
-          <FormToggle formik={formik} name="isActive" label="Active Status" />
-          <FormFullWidth>
-            <FormCheckbox formik={formik} name="isUserSpecific" label="User Specific Coupon" />
-          </FormFullWidth>
+          <FormCheckbox formik={formik} name="isUserSpecific" label="User Specific Coupon" />
           {formik.values.isUserSpecific && (
             <FormFullWidth>
               <FormMultiSelect formik={formik} name="userIds" label="Users" options={users} />
             </FormFullWidth>
           )}
+          <FormFullWidth>
+            <FormToggle formik={formik} name="isActive" label="Active Status" />
+          </FormFullWidth>
         </FormSection>
         <FormActions
           isEdit={isEdit}

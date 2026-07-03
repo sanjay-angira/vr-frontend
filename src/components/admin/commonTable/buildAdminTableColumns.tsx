@@ -268,8 +268,14 @@ function renderAdminCell(
       }
       return <span>N/A</span>;
     }
-    case "discountValue":
-      return <span>{roundDiscount(value)}%</span>;
+    case "discountValue": {
+      const discount = roundDiscount(value);
+      if (!discount) return <span>NA</span>;
+      const discountType = String(row.discountType ?? row.type ?? "").toLowerCase();
+      return (
+        <span>{discountType === "fixed" ? `₹${discount}` : `${discount}%`}</span>
+      );
+    }
     case "status":
       return <StatusBadge value={value} />;
     case "on-off":
@@ -309,7 +315,6 @@ function renderAdminCell(
     case "brandName":
     case "offerName":
     case "couponCode":
-    case "discountType":
     case "attributeName":
     case "value":
     case "question":
@@ -319,6 +324,25 @@ function renderAdminCell(
     case "description":
     case "type":
       return <DefaultCell value={value} />;
+    case "discountType": {
+      const discountType = String(value ?? row.type ?? "").trim();
+      return discountType ? <span>{titleCase(discountType)}</span> : <span>NA</span>;
+    }
+    case "couponSlug": {
+      const slug =
+        (typeof value === "string" && value.trim()) ||
+        (typeof row.couponSlug === "string" && row.couponSlug.trim()) ||
+        (typeof row.couponCode === "string"
+          ? row.couponCode
+              .toLowerCase()
+              .trim()
+              .replace(/\s+/g, "-")
+              .replace(/[^\w-]+/g, "")
+              .replace(/-+/g, "-")
+              .replace(/^-+|-+$/g, "")
+          : "");
+      return slug ? <span>{slug}</span> : <span>NA</span>;
+    }
     default:
       return <DefaultCell value={value} />;
   }

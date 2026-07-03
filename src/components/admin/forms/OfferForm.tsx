@@ -23,7 +23,7 @@ type Values = {
   offerName: string;
   offerSlug: string;
   image: string;
-  type: string;
+  discountType: string;
   discountValue: number | "";
   startDateTime: string;
   endDateTime: string;
@@ -35,7 +35,7 @@ const initialValues: Values = {
   offerName: "",
   offerSlug: "",
   image: "",
-  type: "percentage",
+  discountType: "percentage",
   discountValue: "",
   startDateTime: "",
   endDateTime: "",
@@ -47,7 +47,9 @@ const schema = Yup.object({
   offerName: requiredString("Offer name", 2, 250),
   offerSlug: slugField("Offer slug"),
   image: Yup.string(),
-  type: Yup.string().oneOf(["percentage", "fixed"]).required(),
+  discountType: Yup.string()
+    .oneOf(["percentage", "fixed"])
+    .required("Discount type is required"),
   discountValue: Yup.number().min(0).required("Discount value is required"),
   startDateTime: Yup.string(),
   endDateTime: Yup.string(),
@@ -66,7 +68,7 @@ export function OfferForm({ module, recordId }: AdminFormProps) {
       offerName: String(r.offerName ?? ""),
       offerSlug: String(r.offerSlug ?? ""),
       image: String(r.image ?? ""),
-      type: String(r.type ?? "percentage"),
+      discountType: String(r.discountType ?? r.type ?? "percentage"),
       discountValue: Number(r.discountValue ?? 0),
       startDateTime: r.startDate ? String(r.startDate).slice(0, 16) : "",
       endDateTime: r.endDate ? String(r.endDate).slice(0, 16) : "",
@@ -77,15 +79,15 @@ export function OfferForm({ module, recordId }: AdminFormProps) {
       offerName: v.offerName,
       offerSlug: v.offerSlug,
       image: v.image || null,
-      type: v.type,
+      discountType: v.discountType,
       discountValue: Number(v.discountValue),
       timeBased: v.timeBased,
       isActive: v.isActive,
       ...(v.timeBased
         ? {
-            startDate: v.startDateTime ? new Date(v.startDateTime).toISOString() : null,
-            endDate: v.endDateTime ? new Date(v.endDateTime).toISOString() : null,
-          }
+          startDate: v.startDateTime ? new Date(v.startDateTime).toISOString() : null,
+          endDate: v.endDateTime ? new Date(v.endDateTime).toISOString() : null,
+        }
         : {}),
     }),
   });
@@ -104,11 +106,10 @@ export function OfferForm({ module, recordId }: AdminFormProps) {
         <FormSection title="Offer details">
           <FormInput formik={formik} name="offerName" label="Offer Name" required />
           <FormInput formik={formik} name="offerSlug" label="Offer Slug" required />
-          <FormImageUpload formik={formik} name="image" label="Image" uploadPath={UPLOAD_PATHS.offers} />
           <FormSelect
             formik={formik}
-            name="type"
-            label="Offer Type"
+            name="discountType"
+            label="Discount Type"
             required
             options={[
               { label: "Percentage", value: "percentage" },
@@ -116,6 +117,7 @@ export function OfferForm({ module, recordId }: AdminFormProps) {
             ]}
           />
           <FormInput formik={formik} name="discountValue" label="Discount Value" type="number" required />
+          <FormImageUpload formik={formik} name="image" label="Image" uploadPath={UPLOAD_PATHS.offers} />
           <FormCheckbox formik={formik} name="timeBased" label="Time Based Offer" />
           {formik.values.timeBased && (
             <>

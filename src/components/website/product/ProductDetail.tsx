@@ -40,7 +40,7 @@ export type ProductVariantView = {
     id: number;
     offerName: string;
     offerSlug: string;
-    type: string;
+    discountType: string;
     discountValue: number;
   } | null;
   stock: number | null;
@@ -51,7 +51,7 @@ export type ProductVariantView = {
     offerId: number;
     offerName: string;
     offerSlug: string;
-    type: string;
+    discountType: string;
     discountValue: number;
     originalPrice: number | null;
     finalPrice: number | null;
@@ -65,7 +65,7 @@ export type ProductOfferView = {
   id: number;
   offerName: string;
   offerSlug: string;
-  type: string;
+  discountType: string;
   discountValue: number;
   sources: string[];
 };
@@ -308,7 +308,7 @@ function toCurrency(value: number | null | undefined): string | null {
 
 function getOfferSummary(offer: {
   offerName: string;
-  type: string;
+  discountType: string;
   discountValue: number;
   discountAmount?: number;
   discountPercentage?: number;
@@ -317,7 +317,7 @@ function getOfferSummary(offer: {
     return `${offer.offerName}: Save ${toCurrency(offer.discountAmount)} (${offer.discountPercentage?.toFixed(0) || 0}% off)`;
   }
 
-  if (offer.type === "fixed") {
+  if (offer.discountType === "fixed") {
     return `${offer.offerName}: Save ${toCurrency(offer.discountValue)}`;
   }
 

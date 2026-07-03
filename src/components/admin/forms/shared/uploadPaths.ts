@@ -9,6 +9,7 @@ export const UPLOAD_PATHS = {
     icon: "/product-category/icons",
   },
   offers: "/offers/images",
+  coupons: "/coupons/images",
   banners: "/banners/images",
   blogs: "/blog/images",
   users: "/user/images",
