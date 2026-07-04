@@ -1,10 +1,61 @@
 import type { FormikErrors } from "formik";
 import { getIn } from "formik";
 
+export type AttributeViewOption = "value" | "code" | "image";
+
+export const ATTRIBUTE_VIEW_OPTIONS: Array<{
+  label: string;
+  value: AttributeViewOption;
+}> = [
+  { label: "Color Name", value: "value" },
+  { label: "Color Code", value: "code" },
+  { label: "Color Image", value: "image" },
+];
+
 export type VariantAttributeValue = {
   attributeId: number;
   value: string;
+  code?: string;
+  image?: string;
+  viewOption?: AttributeViewOption;
 };
+
+export function isColorAttribute(attributeName: string): boolean {
+  return attributeName.trim().toLowerCase() === "color";
+}
+
+export function buildAttributeNameById(
+  attributeIds: number[],
+  options: Array<{ label: string; value: string | number }>
+): Record<number, string> {
+  const map: Record<number, string> = {};
+
+  for (const attributeId of attributeIds) {
+    const option = options.find((item) => Number(item.value) === attributeId);
+    if (option) {
+      map[attributeId] = option.label;
+    }
+  }
+
+  return map;
+}
+
+export function createEmptyVariantAttribute(
+  attributeId: number,
+  attributeName?: string
+): VariantAttributeValue {
+  if (attributeName && isColorAttribute(attributeName)) {
+    return {
+      attributeId,
+      value: "",
+      code: "#000000",
+      image: "",
+      viewOption: "value",
+    };
+  }
+
+  return { attributeId, value: "" };
+}
 
 export type ProductVariant = {
   id?: number;
@@ -89,15 +140,30 @@ export const productFormInitialValues: ProductFormValues = {
 
 export function syncVariantAttributes(
   variants: ProductVariant[],
-  attributeIds: number[]
+  attributeIds: number[],
+  attributeNameById: Record<number, string> = {}
 ): ProductVariant[] {
   return variants.map((variant) => ({
     ...variant,
     variantAttributes: attributeIds.map((attributeId) => {
+      const attributeName = attributeNameById[attributeId];
       const existing = variant.variantAttributes.find(
         (item) => item.attributeId === attributeId
       );
-      return existing ?? { attributeId, value: "" };
+
+      if (existing) {
+        if (attributeName && isColorAttribute(attributeName)) {
+          return {
+            ...existing,
+            code: existing.code ?? "#000000",
+            image: existing.image ?? "",
+            viewOption: existing.viewOption ?? "value",
+          };
+        }
+        return existing;
+      }
+
+      return createEmptyVariantAttribute(attributeId, attributeName);
     }),
   }));
 }
@@ -138,10 +204,32 @@ export function mapVariantAttributesFromRecord(
   if (!Array.isArray(variant.variantAttributes)) return [];
 
   return (variant.variantAttributes as Record<string, unknown>[])
-    .map((item) => ({
-      attributeId: Number((item.attribute as { id?: number } | undefined)?.id ?? item.attributeId),
-      value: String(item.value ?? ""),
-    }))
+    .map((item) => {
+      const attributeName = String(
+        (item.attribute as { name?: string } | undefined)?.name ?? ""
+      );
+      const mapped: VariantAttributeValue = {
+        attributeId: Number(
+          (item.attribute as { id?: number } | undefined)?.id ?? item.attributeId
+        ),
+        value: String(item.value ?? ""),
+      };
+
+      if (item.code != null || isColorAttribute(attributeName)) {
+        mapped.code = String(item.code ?? "#000000");
+      }
+      if (item.image != null || isColorAttribute(attributeName)) {
+        mapped.image = String(item.image ?? "");
+      }
+      if (item.viewOption != null || isColorAttribute(attributeName)) {
+        const viewOption = String(item.viewOption ?? "value");
+        if (viewOption === "value" || viewOption === "code" || viewOption === "image") {
+          mapped.viewOption = viewOption;
+        }
+      }
+
+      return mapped;
+    })
     .filter((item) => !Number.isNaN(item.attributeId) && item.attributeId > 0);
 }
 
@@ -248,10 +336,24 @@ export function buildProductPayload(values: ProductFormValues): Record<string, u
 
       const variantAttributes = variant.variantAttributes
         .filter((item) => item.value.trim())
-        .map((item) => ({
-          attributeId: item.attributeId,
-          value: item.value.trim(),
-        }));
+        .map((item) => {
+          const payload: Record<string, unknown> = {
+            attributeId: item.attributeId,
+            value: item.value.trim(),
+          };
+
+          if (item.code?.trim()) {
+            payload.code = item.code.trim();
+          }
+          if (item.image?.trim()) {
+            payload.image = item.image.trim();
+          }
+          if (item.viewOption) {
+            payload.viewOption = item.viewOption;
+          }
+
+          return payload;
+        });
 
       if (variantAttributes.length > 0) {
         variantPayload.variantAttributes = variantAttributes;
@@ -276,7 +378,10 @@ function hasFieldError(errors: FormikErrors<ProductFormValues>, path: string) {
   return Boolean(getIn(errors, path));
 }
 
-function variantAttributesAreValid(values: ProductFormValues) {
+function variantAttributesAreValid(
+  values: ProductFormValues,
+  attributeNameById: Record<number, string> = {}
+) {
   if (values.attributeIds.length === 0) return true;
 
   return values.variants.every((variant) =>
@@ -284,7 +389,18 @@ function variantAttributesAreValid(values: ProductFormValues) {
       const match = variant.variantAttributes.find(
         (item) => item.attributeId === attributeId
       );
-      return Boolean(match?.value?.trim());
+      if (!match?.value?.trim()) return false;
+
+      const attributeName = attributeNameById[attributeId] ?? "";
+      if (!isColorAttribute(attributeName)) {
+        return true;
+      }
+
+      return (
+        Boolean(match.code?.trim()) &&
+        Boolean(match.image?.trim()) &&
+        Boolean(match.viewOption)
+      );
     })
   );
 }
@@ -292,7 +408,8 @@ function variantAttributesAreValid(values: ProductFormValues) {
 export function isProductStepValid(
   step: number,
   values: ProductFormValues,
-  errors: FormikErrors<ProductFormValues>
+  errors: FormikErrors<ProductFormValues>,
+  attributeNameById: Record<number, string> = {}
 ): boolean {
   switch (step) {
     case 1: {
@@ -328,7 +445,7 @@ export function isProductStepValid(
             !hasFieldError(errors, `variants.${index}.name`) &&
             !hasFieldError(errors, `variants.${index}.price`) &&
             !hasFieldError(errors, `variants.${index}.stock`)
-        ) && variantAttributesAreValid(values)
+        ) && variantAttributesAreValid(values, attributeNameById)
       );
     }
     case 3:
