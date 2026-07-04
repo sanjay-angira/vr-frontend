@@ -9,7 +9,7 @@ import {
   Plus,
   Trash2,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent, type MouseEvent } from "react";
 import * as Yup from "yup";
 import { Button } from "@/components/common/Button";
 import { Input } from "@/components/common/Input";
@@ -549,16 +549,33 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
     }
   }
 
-  async function handleNextStep() {
+  async function handleNextStep(event: MouseEvent<HTMLButtonElement>) {
+    event.preventDefault();
+    event.stopPropagation();
+
     await touchStepFields(currentStep);
     const errors = await formik.validateForm();
-    const attributeNameById = buildAttributeNameById(
-      formik.values.attributeIds,
-      attributes
-    );
-    if (isProductStepValid(currentStep, formik.values, errors, attributeNameById)) {
-      setCurrentStep((step) => Math.min(step + 1, PRODUCT_FORM_STEPS.length));
+    const namesById = buildAttributeNameById(formik.values.attributeIds, attributes);
+
+    if (!isProductStepValid(currentStep, formik.values, errors, namesById)) {
+      return;
     }
+
+    // Defer step change so the same click cannot land on the submit button
+    // when Next is replaced after advancing to the final step.
+    window.setTimeout(() => {
+      setCurrentStep((step) => Math.min(step + 1, PRODUCT_FORM_STEPS.length));
+    }, 0);
+  }
+
+  function handleFormSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (currentStep !== PRODUCT_FORM_STEPS.length) {
+      return;
+    }
+
+    void formik.handleSubmit(event);
   }
 
   function handlePreviousStep() {
@@ -592,7 +609,7 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
       submitError={formik.status as string | undefined}
     >
       <FormikProvider value={formik}>
-        <form onSubmit={formik.handleSubmit} className="space-y-6">
+        <form onSubmit={handleFormSubmit} className="space-y-6">
           <FormStepper
             steps={[...PRODUCT_FORM_STEPS]}
             currentStep={currentStep}
@@ -864,12 +881,19 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
             )}
 
             {currentStep < 3 ? (
-              <Button type="button" onClick={handleNextStep} disabled={!stepValid}>
+              <Button
+                type="button"
+                onClick={handleNextStep}
+                disabled={!stepValid}
+              >
                 Next
                 <ArrowRight className="h-4 w-4" />
               </Button>
             ) : (
-              <Button type="submit" disabled={!stepValid || formik.isSubmitting}>
+              <Button
+                type="submit"
+                disabled={!stepValid || formik.isSubmitting}
+              >
                 {formik.isSubmitting
                   ? isEdit
                     ? "Updating Product..."
