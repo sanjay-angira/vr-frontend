@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from "react-redux";
 import { Heart, PackageCheck, ShoppingCart, Sparkles, Star } from "lucide-react";
 import ProductImageGallery from "@/components/website/product/ProductImageGallery";
 import { fetchWebsiteCart } from "@/services/redux/slices/websiteSlices/cartSlice";
@@ -14,16 +14,6 @@ import { isAuthPagePath } from "@/utils/authRoutes";
 export type ProductAttributeView = {
   id: number;
   name: string;
-  type?: string;
-  value: string;
-  isRequired?: boolean;
-  isFilterable?: boolean;
-};
-
-export type ProductVariantAttributeView = {
-  attributeId: number;
-  name: string;
-  type?: string;
   value: string;
 };
 
@@ -46,7 +36,6 @@ export type ProductVariantView = {
   stock: number | null;
   sku: string | null;
   images: string[];
-  attributes: ProductVariantAttributeView[];
   offerPrices: Array<{
     offerId: number;
     offerName: string;
@@ -88,19 +77,6 @@ export type ProductDetailView = {
   reviewCount: number;
 };
 
-type VariationGroup = {
-  attributeId: number;
-  name: string;
-  type?: string;
-  values: string[];
-};
-
-type CombinationOption = {
-  key: string;
-  label: string;
-  variant: ProductVariantView;
-};
-
 type Props = {
   product: ProductDetailView;
   fallbackImages?: string[];
@@ -110,192 +86,14 @@ function getPreferredVariant(
   variants: ProductVariantView[],
   preferredVariantId?: number | null
 ): ProductVariantView | null {
-  if (!variants.length) {
-    return null;
-  }
+  if (!variants.length) return null;
 
   if (preferredVariantId) {
-    const matchedVariant = variants.find((variant) => variant.id === preferredVariantId);
-    if (matchedVariant) {
-      return matchedVariant;
-    }
+    const matched = variants.find((variant) => variant.id === preferredVariantId);
+    if (matched) return matched;
   }
 
   return variants[0] || null;
-}
-
-function buildVariationGroups(variants: ProductVariantView[]): VariationGroup[] {
-  const groups = new Map<number, VariationGroup>();
-
-  variants.forEach((variant) => {
-    variant.attributes.forEach((attribute) => {
-      const existing = groups.get(attribute.attributeId);
-      if (!existing) {
-        groups.set(attribute.attributeId, {
-          attributeId: attribute.attributeId,
-          name: attribute.name,
-          type: attribute.type,
-          values: attribute.value ? [attribute.value] : [],
-        });
-        return;
-      }
-
-      if (attribute.value && !existing.values.includes(attribute.value)) {
-        existing.values.push(attribute.value);
-      }
-    });
-  });
-
-  return Array.from(groups.values());
-}
-
-function isColorGroup(group: VariationGroup): boolean {
-  const normalizedName = group.name.trim().toLowerCase();
-  return normalizedName === "color" || normalizedName === "colour" || normalizedName.includes("color") || normalizedName.includes("colour");
-}
-
-function getVariantAttributeValue(
-  variant: ProductVariantView,
-  attributeId: number
-): string {
-  return (
-    variant.attributes.find((attribute) => attribute.attributeId === attributeId)?.value || ""
-  );
-}
-
-function buildCombinationLabel(
-  variant: ProductVariantView,
-  groups: VariationGroup[]
-): string {
-  const parts = groups
-    .map((group) => {
-      const value = getVariantAttributeValue(variant, group.attributeId);
-      return value ? `${value} ${group.name}` : null;
-    })
-    .filter(Boolean);
-
-  return parts.join(" / ") || variant.name;
-}
-
-function buildCombinationOptions(
-  variants: ProductVariantView[],
-  groups: VariationGroup[]
-): CombinationOption[] {
-  const uniqueCombinations = new Map<string, CombinationOption>();
-
-  variants.forEach((variant) => {
-    const key = groups
-      .map((group) => getVariantAttributeValue(variant, group.attributeId))
-      .join("||");
-
-    if (!key || uniqueCombinations.has(key)) {
-      return;
-    }
-
-    uniqueCombinations.set(key, {
-      key,
-      label: buildCombinationLabel(variant, groups),
-      variant,
-    });
-  });
-
-  return Array.from(uniqueCombinations.values());
-}
-
-function buildCombinationOptionsByColor(
-  variants: ProductVariantView[],
-  colorGroup: VariationGroup | null,
-  groups: VariationGroup[]
-): Record<string, CombinationOption[]> {
-  if (!colorGroup) {
-    return {};
-  }
-
-  return colorGroup.values.reduce<Record<string, CombinationOption[]>>((result, colorValue) => {
-    const variantsForColor = variants.filter(
-      (variant) => getVariantAttributeValue(variant, colorGroup.attributeId) === colorValue
-    );
-
-    result[colorValue] = buildCombinationOptions(variantsForColor, groups);
-    return result;
-  }, {});
-}
-
-function buildInitialSelection(
-  groups: VariationGroup[],
-  variants: ProductVariantView[],
-  preferredVariantId?: number | null
-): Record<number, string> {
-  const preferredVariant =
-    (preferredVariantId
-      ? variants.find((variant) => variant.id === preferredVariantId)
-      : null) || null;
-  const firstVariantWithAttributes =
-    preferredVariant && preferredVariant.attributes.length > 0
-      ? preferredVariant
-      : variants.find((variant) => variant.attributes.length > 0);
-  const selection: Record<number, string> = {};
-
-  groups.forEach((group) => {
-    const variantValue = firstVariantWithAttributes?.attributes.find(
-      (attribute) => attribute.attributeId === group.attributeId
-    )?.value;
-
-    selection[group.attributeId] = variantValue || group.values[0] || "";
-  });
-
-  return selection;
-}
-
-function buildSelectionFromVariant(
-  variant: ProductVariantView | null,
-  groups: VariationGroup[],
-  fallbackSelection: Record<number, string> = {}
-): Record<number, string> {
-  if (!variant) {
-    return fallbackSelection;
-  }
-
-  const selection = { ...fallbackSelection };
-
-  groups.forEach((group) => {
-    const variantValue = variant.attributes.find(
-      (attribute) => attribute.attributeId === group.attributeId
-    )?.value;
-
-    if (variantValue) {
-      selection[group.attributeId] = variantValue;
-    }
-  });
-
-  return selection;
-}
-
-function variantMatchesSelection(
-  variant: ProductVariantView,
-  selection: Record<number, string>,
-  groups: VariationGroup[]
-): boolean {
-  return groups.every((group) => {
-    const selectedValue = selection[group.attributeId];
-    if (!selectedValue) {
-      return true;
-    }
-
-    const variantValue = variant.attributes.find(
-      (attribute) => attribute.attributeId === group.attributeId
-    )?.value;
-
-    return variantValue === selectedValue;
-  });
-}
-
-function getCompatibleVariant(
-  variants: ProductVariantView[],
-  selection: Record<number, string>,
-  groups: VariationGroup[]
-): ProductVariantView | null {
-  return variants.find((variant) => variantMatchesSelection(variant, selection, groups)) || null;
 }
 
 function toCurrency(value: number | null | undefined): string | null {
@@ -328,22 +126,16 @@ export default function ProductDetail({ product, fallbackImages = [] }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const dispatch = useDispatch();
-  const isAuthenticated = useSelector(
-    (state: RootState) => state.userAuth.isAuthenticated
-  );
-  const canonicalVariants = [...product.variants].sort((left, right) => left.id - right.id);
-  const variationGroups = buildVariationGroups(canonicalVariants);
-  const colorGroup = variationGroups.find((group) => isColorGroup(group)) || null;
-  const nonColorGroups = colorGroup
-    ? variationGroups.filter((group) => group.attributeId !== colorGroup.attributeId)
-    : [];
+  const isAuthenticated = useSelector((state: RootState) => state.userAuth.isAuthenticated);
+
   const preferredVariant = getPreferredVariant(product.variants, product.selectedVariantId);
   const highlightTags = product.attributes
     .map((attribute) => attribute.value || attribute.name)
     .filter(Boolean)
     .slice(0, 4);
-  const [selectedValues, setSelectedValues] = useState<Record<number, string>>(() =>
-    buildInitialSelection(variationGroups, product.variants, product.selectedVariantId)
+
+  const [selectedVariantId, setSelectedVariantId] = useState<number | null>(
+    preferredVariant?.id ?? null
   );
   const [selectedOfferId, setSelectedOfferId] = useState<number | null>(
     preferredVariant?.appliedOffer?.id ?? null
@@ -352,12 +144,15 @@ export default function ProductDetail({ product, fallbackImages = [] }: Props) {
   const [hasUserSelectedVariant, setHasUserSelectedVariant] = useState(false);
 
   useEffect(() => {
-    setSelectedValues(buildInitialSelection(variationGroups, product.variants, product.selectedVariantId));
-    setSelectedOfferId(getPreferredVariant(product.variants, product.selectedVariantId)?.appliedOffer?.id ?? null);
+    const nextPreferred = getPreferredVariant(product.variants, product.selectedVariantId);
+    setSelectedVariantId(nextPreferred?.id ?? null);
+    setSelectedOfferId(nextPreferred?.appliedOffer?.id ?? null);
     setHasUserSelectedVariant(false);
-  }, [product.id, product.selectedVariantId]);
+  }, [product.id, product.selectedVariantId, product.variants]);
 
-  const selectedVariant = getCompatibleVariant(product.variants, selectedValues, variationGroups);
+  const selectedVariant =
+    product.variants.find((variant) => variant.id === selectedVariantId) ??
+    getPreferredVariant(product.variants, product.selectedVariantId);
 
   useEffect(() => {
     if (!selectedVariant) {
@@ -374,29 +169,6 @@ export default function ProductDetail({ product, fallbackImages = [] }: Props) {
     }
   }, [selectedVariant, selectedOfferId]);
 
-  const selectedColorValue =
-    colorGroup && selectedVariant
-      ? getVariantAttributeValue(selectedVariant, colorGroup.attributeId)
-      : colorGroup
-        ? selectedValues[colorGroup.attributeId] || ""
-        : "";
-  const combinationOptionsByColor =
-    colorGroup && nonColorGroups.length > 0
-      ? buildCombinationOptionsByColor(canonicalVariants, colorGroup, nonColorGroups)
-      : {};
-  const combinationOptions =
-    colorGroup && selectedColorValue
-      ? combinationOptionsByColor[selectedColorValue] || []
-      : nonColorGroups.length > 0
-        ? buildCombinationOptions(canonicalVariants, nonColorGroups)
-        : [];
-  const selectedCombinationKey =
-    selectedVariant && nonColorGroups.length > 0
-      ? nonColorGroups
-        .map((group) => getVariantAttributeValue(selectedVariant, group.attributeId))
-        .join("||")
-      : "";
-
   useEffect(() => {
     if (!hasUserSelectedVariant || !selectedVariant?.slug) {
       return;
@@ -410,28 +182,20 @@ export default function ProductDetail({ product, fallbackImages = [] }: Props) {
 
   const handleWishlist = () => {
     if (!isAuthenticated) {
-      if (isAuthPagePath(pathname)) {
-        return;
-      }
+      if (isAuthPagePath(pathname)) return;
       dispatch(setAuthModalOpen(true));
-      return;
     }
-    // TODO: implement add to wishlist when API is ready
   };
 
   const handleAddToCart = async () => {
-    if (!selectedVariant) {
-      return;
-    }
+    if (!selectedVariant) return;
 
     try {
-      // Use addOrUpdateCartItem which checks if item exists and updates (replaces) instead of adding
       await addOrUpdateCartItem(selectedVariant.id, quantity);
-      // Fetch the full cart data to get all product details
-      // @ts-ignore - Ignore type error since dispatch handles Thunks with standard configureStore setup
+      // @ts-ignore
       dispatch(fetchWebsiteCart());
     } catch (error) {
-      console.error('Unable to add product to cart', error);
+      console.error("Unable to add product to cart", error);
     }
   };
 
@@ -452,6 +216,7 @@ export default function ProductDetail({ product, fallbackImages = [] }: Props) {
   const displayImages = selectedImages.length > 0 ? selectedImages : fallbackImages;
   const selectedStock = selectedVariant?.stock ?? null;
   const inStock = typeof selectedStock === "number" ? selectedStock > 0 : product.variants.length === 0;
+  const showVariantPicker = product.variants.length > 1;
 
   return (
     <div className="product-detail-grid">
@@ -462,12 +227,7 @@ export default function ProductDetail({ product, fallbackImages = [] }: Props) {
       <div className="product-detail-content product-detail-panel">
         <div
           className="product-detail-meta-chips"
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            gap: 8,
-            marginBottom: 10,
-          }}
+          style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 10 }}
         >
           {product.categoryName && (
             <span
@@ -527,11 +287,7 @@ export default function ProductDetail({ product, fallbackImages = [] }: Props) {
         {product.shortDescription && (
           <p
             className="product-detail-subtitle"
-            style={{
-              marginBottom: 14,
-              fontSize: 15,
-              color: "rgba(31, 43, 59, 0.78)",
-            }}
+            style={{ marginBottom: 14, fontSize: 15, color: "rgba(31, 43, 59, 0.78)" }}
           >
             {product.shortDescription}
           </p>
@@ -609,16 +365,15 @@ export default function ProductDetail({ product, fallbackImages = [] }: Props) {
                   gap: 8,
                   padding: "11px 14px",
                   borderRadius: 14,
-                  border: selectedOfferId === offer.offerId
-                    ? "1px solid #f97316"
-                    : "1px solid transparent",
+                  border: selectedOfferId === offer.offerId ? "1px solid #f97316" : "1px solid transparent",
                   background: "#fff1dc",
                   color: "#ea580c",
                   fontSize: 13,
                   fontWeight: 700,
-                  boxShadow: selectedOfferId === offer.offerId
-                    ? "0 8px 20px rgba(234, 88, 12, 0.12)"
-                    : "0 6px 16px rgba(234, 88, 12, 0.06)",
+                  boxShadow:
+                    selectedOfferId === offer.offerId
+                      ? "0 8px 20px rgba(234, 88, 12, 0.12)"
+                      : "0 6px 16px rgba(234, 88, 12, 0.06)",
                   cursor: "pointer",
                   width: "fit-content",
                   maxWidth: "100%",
@@ -634,7 +389,7 @@ export default function ProductDetail({ product, fallbackImages = [] }: Props) {
           </div>
         )}
 
-        {variationGroups.length > 0 && (
+        {showVariantPicker && (
           <div
             className="product-variation-panel"
             style={{
@@ -648,243 +403,42 @@ export default function ProductDetail({ product, fallbackImages = [] }: Props) {
             <div className="product-variation-head" style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
               <Sparkles size={15} color="var(--text-saffron)" />
               <h3 className="product-variation-title" style={{ fontSize: 16, fontWeight: 700, color: "var(--text-gray)" }}>
-                Choose Your Variation
+                Choose Variant
               </h3>
             </div>
 
-            <div className="product-variation-groups" style={{ display: "grid", gap: 14 }}>
-              {colorGroup && (
-                <div key={colorGroup.attributeId} className="product-variation-group">
-                  <div
-                    className="product-variation-group-head"
+            <div className="product-variation-options" style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+              {product.variants.map((variant) => {
+                const isSelected = selectedVariantId === variant.id;
+
+                return (
+                  <button
+                    key={variant.id}
+                    type="button"
+                    onClick={() => {
+                      setHasUserSelectedVariant(true);
+                      setSelectedVariantId(variant.id);
+                    }}
+                    className={`product-variation-option ${isSelected ? "is-selected" : ""}`}
                     style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      gap: 12,
-                      marginBottom: 8,
+                      borderRadius: 999,
+                      border: isSelected ? "1px solid var(--text-saffron)" : "1px solid rgba(31, 43, 59, 0.16)",
+                      background: isSelected ? "rgba(211, 84, 0, 0.08)" : "#fff",
+                      color: "var(--text-gray)",
+                      padding: "8px 14px",
+                      minWidth: 70,
+                      fontWeight: 600,
+                      cursor: "pointer",
                     }}
                   >
-                    <span className="product-variation-label" style={{ fontWeight: 700, color: "var(--text-gray)" }}>
-                      {colorGroup.name}
-                    </span>
-                    <span className="product-variation-selected" style={{ fontSize: 12, color: "#6b7280" }}>
-                      {selectedColorValue || "Select a color"}
-                    </span>
-                  </div>
-
-                  <div className="product-variation-options" style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                    {colorGroup.values.map((value) => {
-                      const isSelected = selectedColorValue === value;
-
-                      return (
-                        <button
-                          key={`${colorGroup.attributeId}-${value}`}
-                          type="button"
-                          onClick={() => {
-                            setHasUserSelectedVariant(true);
-                            setSelectedValues((current) => {
-                              const nextSelection = {
-                                ...current,
-                                [colorGroup.attributeId]: value,
-                              };
-
-                              const exactVariant = getCompatibleVariant(
-                                product.variants,
-                                nextSelection,
-                                variationGroups
-                              );
-
-                              if (exactVariant) {
-                                return buildSelectionFromVariant(
-                                  exactVariant,
-                                  variationGroups,
-                                  nextSelection
-                                );
-                              }
-
-                              const fallbackVariant =
-                                canonicalVariants.find(
-                                  (variant) =>
-                                    getVariantAttributeValue(variant, colorGroup.attributeId) === value
-                                ) || null;
-
-                              return buildSelectionFromVariant(
-                                fallbackVariant,
-                                variationGroups,
-                                nextSelection
-                              );
-                            });
-                          }}
-                          className={`product-variation-option ${isSelected ? "is-selected" : ""}`}
-                          style={{
-                            borderRadius: 999,
-                            border: isSelected
-                              ? "1px solid var(--text-saffron)"
-                              : "1px solid rgba(31, 43, 59, 0.16)",
-                            background: isSelected ? "rgba(211, 84, 0, 0.08)" : "#fff",
-                            color: "var(--text-gray)",
-                            padding: "8px 14px",
-                            minWidth: 70,
-                            fontWeight: 600,
-                            cursor: "pointer",
-                          }}
-                        >
-                          {value}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {colorGroup && nonColorGroups.length > 0 && (
-                <div className="product-variation-group">
-                  <div
-                    className="product-variation-group-head"
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      gap: 12,
-                      marginBottom: 8,
-                    }}
-                  >
-                    <span className="product-variation-label" style={{ fontWeight: 700, color: "var(--text-gray)" }}>
-                      {selectedColorValue ? `${selectedColorValue} ${nonColorGroups.map(g => g.name).join(" / ")}` : nonColorGroups.map(g => g.name).join(" / ")}
-                    </span>
-                    <span className="product-variation-selected" style={{ fontSize: 12, color: "#6b7280" }}>
-                      {selectedVariant ? buildCombinationLabel(selectedVariant, nonColorGroups) : "Select an option"}
-                    </span>
-                  </div>
-
-                  <div className="product-variation-options" style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                    {combinationOptions.map((option) => {
-                      const isSelected = option.key === selectedCombinationKey;
-
-                      return (
-                        <button
-                          key={option.key}
-                          type="button"
-                          onClick={() => {
-                            setHasUserSelectedVariant(true);
-                            setSelectedValues((current) =>
-                              buildSelectionFromVariant(option.variant, variationGroups, current)
-                            );
-                          }}
-                          className={`product-variation-option ${isSelected ? "is-selected" : ""}`}
-                          style={{
-                            borderRadius: 999,
-                            border: isSelected
-                              ? "1px solid var(--text-saffron)"
-                              : "1px solid rgba(31, 43, 59, 0.16)",
-                            background: isSelected ? "rgba(211, 84, 0, 0.08)" : "#fff",
-                            color: "var(--text-gray)",
-                            padding: "8px 14px",
-                            minWidth: 70,
-                            fontWeight: 600,
-                            cursor: "pointer",
-                          }}
-                        >
-                          {option.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {!colorGroup && variationGroups.map((group) => (
-                <div key={group.attributeId} className="product-variation-group">
-                  <div
-                    className="product-variation-group-head"
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      gap: 12,
-                      marginBottom: 8,
-                    }}
-                  >
-                    <span className="product-variation-label" style={{ fontWeight: 700, color: "var(--text-gray)" }}>{group.name}</span>
-                    <span className="product-variation-selected" style={{ fontSize: 12, color: "#6b7280" }}>
-                      {selectedVariant?.attributes.find((attribute) => attribute.attributeId === group.attributeId)?.value || "Select an option"}
-                    </span>
-                  </div>
-
-                  <div className="product-variation-options" style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                    {group.values.map((value) => {
-                      const isSelected =
-                        selectedVariant?.attributes.find(
-                          (attribute) => attribute.attributeId === group.attributeId
-                        )?.value === value;
-
-                      return (
-                        <button
-                          key={`${group.attributeId}-${value}`}
-                          type="button"
-                          onClick={() => {
-                            setHasUserSelectedVariant(true);
-                            setSelectedValues((current) => {
-                              const nextSelection = {
-                                ...current,
-                                [group.attributeId]: value,
-                              };
-
-                              const exactVariant = getCompatibleVariant(
-                                product.variants,
-                                nextSelection,
-                                variationGroups
-                              );
-
-                              if (exactVariant) {
-                                return buildSelectionFromVariant(
-                                  exactVariant,
-                                  variationGroups,
-                                  nextSelection
-                                );
-                              }
-
-                              const fallbackVariant =
-                                product.variants.find((variant) =>
-                                  variant.attributes.some(
-                                    (attribute) =>
-                                      attribute.attributeId === group.attributeId &&
-                                      attribute.value === value
-                                  )
-                                ) || null;
-
-                              return buildSelectionFromVariant(
-                                fallbackVariant,
-                                variationGroups,
-                                nextSelection
-                              );
-                            });
-                          }}
-                          className={`product-variation-option ${isSelected ? "is-selected" : ""}`}
-                          style={{
-                            borderRadius: 999,
-                            border: isSelected
-                              ? "1px solid var(--text-saffron)"
-                              : "1px solid rgba(31, 43, 59, 0.16)",
-                            background: isSelected ? "rgba(211, 84, 0, 0.08)" : "#fff",
-                            color: "var(--text-gray)",
-                            padding: "8px 14px",
-                            minWidth: 70,
-                            fontWeight: 600,
-                            cursor: "pointer",
-                          }}
-                        >
-                          {value}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))}
+                    {variant.name}
+                  </button>
+                );
+              })}
             </div>
           </div>
         )}
+
         {product.descriptionHtml && (
           <div
             className="product-description"
@@ -977,8 +531,12 @@ export default function ProductDetail({ product, fallbackImages = [] }: Props) {
                 border: "1px solid #ddd",
                 borderRadius: 6,
                 background: "#fff",
-                cursor: !inStock || (selectedVariant?.stock ? quantity >= selectedVariant.stock : false) ? "not-allowed" : "pointer",
-                opacity: !inStock || (selectedVariant?.stock ? quantity >= selectedVariant.stock : false) ? 0.5 : 1,
+                cursor:
+                  !inStock || (selectedVariant?.stock ? quantity >= selectedVariant.stock : false)
+                    ? "not-allowed"
+                    : "pointer",
+                opacity:
+                  !inStock || (selectedVariant?.stock ? quantity >= selectedVariant.stock : false) ? 0.5 : 1,
               }}
             >
               +
@@ -998,8 +556,8 @@ export default function ProductDetail({ product, fallbackImages = [] }: Props) {
             <PackageCheck size={18} style={{ marginRight: 8 }} />
             Buy Now
           </button>
-          <button 
-            className="btn btn-outline btn-lg product-cta-button" 
+          <button
+            className="btn btn-outline btn-lg product-cta-button"
             onClick={handleWishlist}
             aria-label="Add to wishlist"
             style={{ padding: "0 18px" }}
@@ -1011,4 +569,3 @@ export default function ProductDetail({ product, fallbackImages = [] }: Props) {
     </div>
   );
 }
-

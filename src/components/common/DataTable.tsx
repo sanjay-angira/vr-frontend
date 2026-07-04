@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { FormDropdown } from "@/components/admin/forms/shared/FormDropdown";
+import { DeleteConfirmationModal } from "@/components/admin/shared/DeleteConfirmationModal";
 import { Button } from "@/components/common/Button";
+import { getRowDisplayName } from "@/components/common/getRowDisplayName";
 
 export type DataTableColumn<T extends object> = {
   key: string;
@@ -31,7 +33,9 @@ export type DataTableProps<T extends object> = {
   viewHref?: (row: T) => string;
   onEdit?: (row: T) => void;
   editHref?: (row: T) => string;
-  onDelete?: (row: T) => void;
+  onDelete?: (row: T) => void | Promise<void>;
+  deleteConfirmTitle?: string;
+  deleteConfirmMessage?: string | ((row: T) => string);
   /** Show search input. Default: true */
   searchable?: boolean;
   searchPlaceholder?: string;
@@ -141,6 +145,8 @@ export function DataTable<T extends object>({
   onEdit,
   editHref,
   onDelete,
+  deleteConfirmTitle = "Confirm deletion",
+  deleteConfirmMessage,
   searchable = true,
   searchPlaceholder = "Search...",
   searchValue,
@@ -156,6 +162,8 @@ export function DataTable<T extends object>({
   onPageSizeChange,
 }: DataTableProps<T>) {
   const [internalSearch, setInternalSearch] = useState("");
+  const [pendingDeleteRow, setPendingDeleteRow] = useState<T | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const isControlledSearch = searchValue !== undefined;
   const query = isControlledSearch ? searchValue : internalSearch;
   const isServerSearch = Boolean(onSearchChange);
@@ -206,7 +214,35 @@ export function DataTable<T extends object>({
     if (onSearchChange) return;
   }
 
+  function getDeleteMessage(row: T) {
+    if (typeof deleteConfirmMessage === "function") {
+      return deleteConfirmMessage(row);
+    }
+
+    if (typeof deleteConfirmMessage === "string") {
+      return deleteConfirmMessage;
+    }
+
+    const label = getRowDisplayName(row);
+    return label
+      ? `Are you sure you want to delete "${label}"? This action cannot be undone.`
+      : "Are you sure you want to delete this item? This action cannot be undone.";
+  }
+
+  async function handleConfirmDelete() {
+    if (!pendingDeleteRow || !onDelete) return;
+
+    setIsDeleting(true);
+    try {
+      await onDelete(pendingDeleteRow);
+      setPendingDeleteRow(null);
+    } finally {
+      setIsDeleting(false);
+    }
+  }
+
   return (
+    <>
     <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
       {showToolbar && (
         <div className="flex flex-col gap-3 border-b border-zinc-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
@@ -339,7 +375,7 @@ export function DataTable<T extends object>({
                             <ActionIconButton
                               label="Delete"
                               variant="danger"
-                              onClick={() => onDelete(row)}
+                              onClick={() => setPendingDeleteRow(row)}
                             >
                               <DeleteIcon />
                             </ActionIconButton>
@@ -406,6 +442,19 @@ export function DataTable<T extends object>({
         </div>
       )}
     </div>
+
+    {pendingDeleteRow && onDelete && (
+      <DeleteConfirmationModal
+        title={deleteConfirmTitle}
+        message={getDeleteMessage(pendingDeleteRow)}
+        onCancel={() => {
+          if (!isDeleting) setPendingDeleteRow(null);
+        }}
+        onConfirm={handleConfirmDelete}
+        isDeleting={isDeleting}
+      />
+    )}
+    </>
   );
 }
 

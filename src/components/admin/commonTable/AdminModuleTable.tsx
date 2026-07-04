@@ -198,6 +198,26 @@ export function AdminModuleTable({ module }: AdminModuleTableProps) {
               }
             : undefined
         }
+        deleteConfirmMessage={(row) => {
+          const label = String(
+            row.productName ??
+              row.name ??
+              row.title ??
+              row.categoryName ??
+              row.brandName ??
+              row.tagName ??
+              row.offerName ??
+              row.firstName ??
+              row.roleName ??
+              row.question ??
+              row.couponCode ??
+              ""
+          ).trim();
+
+          return label
+            ? `Are you sure you want to delete "${label}"? This action cannot be undone.`
+            : `Are you sure you want to delete this ${config.label.toLowerCase().replace(/s$/, "")}? This action cannot be undone.`;
+        }}
         getRowId={(row) => String(row.id ?? "")}
       />
     </>

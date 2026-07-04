@@ -7,7 +7,6 @@ export const ADMIN_FORM_MODULES = [
   "categories",
   "brands",
   "attributes",
-  "attribute-options",
   "offers",
   "coupons",
   "banners",

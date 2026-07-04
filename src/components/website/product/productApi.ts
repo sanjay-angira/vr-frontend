@@ -71,27 +71,14 @@ export async function fetchProductBySlug(
 }
 
 export function normalizeAttributes(
-  attributes: Array<{
-    id: number;
-    value: string;
-    attribute?: {
-      id: number;
-      name?: string;
-      type?: string;
-      isRequired?: boolean;
-      isFilterable?: boolean;
-    } | null;
-  }> = []
+  attributes: Array<{ id: number; name: string; value: string }> = []
 ) {
   return attributes
-    .filter((attribute) => attribute.attribute?.name && attribute.value)
+    .filter((attribute) => attribute.name && attribute.value)
     .map((attribute) => ({
       id: attribute.id,
-      name: attribute.attribute?.name || "Attribute",
-      type: attribute.attribute?.type,
+      name: attribute.name,
       value: attribute.value,
-      isRequired: attribute.attribute?.isRequired,
-      isFilterable: attribute.attribute?.isFilterable,
     }));
 }
 
@@ -110,11 +97,6 @@ export function normalizeVariants(
     stock?: string | number | null;
     sku?: string | null;
     images?: Array<{ id: number; url: string; sortOrder: number }>;
-    attributes?: Array<{
-      id: number;
-      value: string;
-      attribute?: { id?: number; name?: string; type?: string } | null;
-    }>;
   }> = []
 ) {
   return variants.map((variant) => ({
@@ -154,14 +136,6 @@ export function normalizeVariants(
       .slice()
       .sort((a, b) => a.sortOrder - b.sortOrder)
       .map((image) => image.url),
-    attributes: (variant.attributes || [])
-      .filter((attribute) => attribute.attribute?.name && attribute.value)
-      .map((attribute) => ({
-        attributeId: attribute.attribute?.id || attribute.id,
-        name: attribute.attribute?.name || "Option",
-        type: attribute.attribute?.type,
-        value: attribute.value,
-      })),
   }));
 }
 

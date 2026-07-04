@@ -7,6 +7,7 @@ import { toast } from "react-toastify";
 import { Button } from "@/components/common/Button";
 import { Input } from "@/components/common/Input";
 import { AdminModal } from "@/components/admin/shared/AdminModal";
+import { useDeleteConfirmation } from "@/components/admin/shared/useDeleteConfirmation";
 import { FormDropdown } from "@/components/admin/forms/shared/FormDropdown";
 import { ImageUploadField } from "@/components/admin/forms/shared/ImageUploadField";
 import { UPLOAD_PATHS } from "@/components/admin/forms/shared/uploadPaths";
@@ -180,6 +181,50 @@ export function HeaderSettingsPage() {
   const [itemForm, setItemForm] = useState<MenuItemFormState | null>(null);
   const [navSaving, setNavSaving] = useState(false);
 
+  const announcementDelete = useDeleteConfirmation<number>({
+    onConfirm: async (id) => {
+      try {
+        await deleteData(API_ENDPOINTS.HEADER.ANNOUNCEMENT_BAR_BY_ID(id));
+        toast.success("Announcement bar deleted");
+        await loadBars();
+      } catch {
+        toast.error("Failed to delete announcement bar");
+      }
+    },
+    getMessage: () =>
+      "Are you sure you want to delete this announcement bar? This action cannot be undone.",
+  });
+
+  const menuDelete = useDeleteConfirmation<number>({
+    onConfirm: async (id) => {
+      try {
+        await deleteData(API_ENDPOINTS.HEADER.MENU_BY_ID(id));
+        toast.success("Menu deleted");
+        setSelectedMenuId(null);
+        await loadMenus();
+        await loadHeaderData();
+      } catch {
+        toast.error("Failed to delete menu");
+      }
+    },
+    getMessage: () =>
+      "Are you sure you want to delete this menu and all its items? This action cannot be undone.",
+  });
+
+  const menuItemDelete = useDeleteConfirmation<number>({
+    onConfirm: async (id) => {
+      try {
+        await deleteData(API_ENDPOINTS.HEADER.MENU_ITEM_BY_ID(id));
+        toast.success("Menu item deleted");
+        await loadMenus();
+      } catch {
+        toast.error("Failed to delete menu item");
+      }
+    },
+    getMessage: () =>
+      "Are you sure you want to delete this menu item? This action cannot be undone.",
+  });
+
   const loadHeaderData = useCallback(async () => {
     setHeaderLoading(true);
     try {
@@ -344,17 +389,6 @@ export function HeaderSettingsPage() {
     }
   };
 
-  const deleteAnnouncement = async (id: number) => {
-    if (!window.confirm("Delete this announcement bar?")) return;
-    try {
-      await deleteData(API_ENDPOINTS.HEADER.ANNOUNCEMENT_BAR_BY_ID(id));
-      toast.success("Announcement bar deleted");
-      await loadBars();
-    } catch {
-      toast.error("Failed to delete announcement bar");
-    }
-  };
-
   const openCreateMenu = () => {
     setMenuForm(emptyMenuForm());
     setMenuModalOpen(true);
@@ -398,19 +432,6 @@ export function HeaderSettingsPage() {
       toast.error("Failed to save menu");
     } finally {
       setNavSaving(false);
-    }
-  };
-
-  const deleteMenu = async (id: number) => {
-    if (!window.confirm("Delete this menu and all its items?")) return;
-    try {
-      await deleteData(API_ENDPOINTS.HEADER.MENU_BY_ID(id));
-      toast.success("Menu deleted");
-      setSelectedMenuId(null);
-      await loadMenus();
-      await loadHeaderData();
-    } catch {
-      toast.error("Failed to delete menu");
     }
   };
 
@@ -470,17 +491,6 @@ export function HeaderSettingsPage() {
     }
   };
 
-  const deleteMenuItem = async (id: number) => {
-    if (!window.confirm("Delete this menu item?")) return;
-    try {
-      await deleteData(API_ENDPOINTS.HEADER.MENU_ITEM_BY_ID(id));
-      toast.success("Menu item deleted");
-      await loadMenus();
-    } catch {
-      toast.error("Failed to delete menu item");
-    }
-  };
-
   const renderMenuItemRow = (item: AdminMenuItem, depth = 0) => {
     const children = getChildren(item.id);
     return (
@@ -515,7 +525,7 @@ export function HeaderSettingsPage() {
             <Button variant="secondary" onClick={() => openEditMenuItem(item)}>
               <Pencil size={16} />
             </Button>
-            <Button variant="secondary" onClick={() => deleteMenuItem(item.id)}>
+            <Button variant="secondary" onClick={() => menuItemDelete.requestDelete(item.id)}>
               <Trash2 size={16} />
             </Button>
           </div>
@@ -733,7 +743,7 @@ export function HeaderSettingsPage() {
                       </Button>
                       <Button
                         variant="secondary"
-                        onClick={() => deleteAnnouncement(bar.id)}
+                        onClick={() => announcementDelete.requestDelete(bar.id)}
                       >
                         <Trash2 size={16} />
                       </Button>
@@ -807,7 +817,7 @@ export function HeaderSettingsPage() {
                       </Button>
                       <Button
                         variant="secondary"
-                        onClick={() => deleteMenu(selectedMenu.id)}
+                        onClick={() => menuDelete.requestDelete(selectedMenu.id)}
                       >
                         Delete menu
                       </Button>
@@ -1086,6 +1096,10 @@ export function HeaderSettingsPage() {
           </div>
         </AdminModal>
       ) : null}
+
+      {announcementDelete.modal}
+      {menuDelete.modal}
+      {menuItemDelete.modal}
     </div>
   );
 }

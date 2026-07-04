@@ -1,9 +1,8 @@
 import type { FormikErrors } from "formik";
 import { getIn } from "formik";
 
-export type VariantAttribute = {
-  attributeId: number | "";
-  optionId: number | "";
+export type ProductAttribute = {
+  name: string;
   value: string;
 };
 
@@ -14,7 +13,6 @@ export type ProductVariant = {
   price: number | "";
   stock: number | "";
   productVariantOffers: number[];
-  attributes: VariantAttribute[];
   images: string[];
 };
 
@@ -41,6 +39,7 @@ export type ProductFormValues = {
   productTags: number[];
   frequentlyBoughtTogether: number[];
   images: string[];
+  attributes: ProductAttribute[];
   variants: ProductVariant[];
   seo: ProductSeoValues;
 };
@@ -57,8 +56,12 @@ export const emptyVariant = (): ProductVariant => ({
   price: "",
   stock: 1,
   productVariantOffers: [],
-  attributes: [],
   images: [],
+});
+
+export const emptyProductAttribute = (): ProductAttribute => ({
+  name: "",
+  value: "",
 });
 
 export const productFormInitialValues: ProductFormValues = {
@@ -76,6 +79,7 @@ export const productFormInitialValues: ProductFormValues = {
   productTags: [],
   frequentlyBoughtTogether: [],
   images: [],
+  attributes: [],
   variants: [emptyVariant()],
   seo: {
     metaTitle: "",
@@ -149,7 +153,6 @@ export function getDeepestCategoryId(values: ProductFormValues): number | "" {
 }
 
 export function buildProductPayload(values: ProductFormValues): Record<string, unknown> {
-  const isSimpleProduct = values.productType === "simple";
   const isVariableProduct = values.productType === "variable";
   const productImages = isVariableProduct
     ? []
@@ -157,6 +160,13 @@ export function buildProductPayload(values: ProductFormValues): Record<string, u
         url,
         sortOrder: index + 1,
       }));
+
+  const attributes = values.attributes
+    .filter((attr) => attr.name.trim() && attr.value.trim())
+    .map((attr) => ({
+      name: attr.name.trim(),
+      value: attr.value.trim(),
+    }));
 
   return {
     productName: values.productName,
@@ -172,6 +182,7 @@ export function buildProductPayload(values: ProductFormValues): Record<string, u
     productTags: values.productTags,
     frequentlyBoughtTogether: values.frequentlyBoughtTogether,
     images: productImages,
+    attributes,
     variants: values.variants.map((variant) => {
       const variantPayload: Record<string, unknown> = {
         ...(variant.id ? { id: variant.id } : {}),
@@ -186,7 +197,7 @@ export function buildProductPayload(values: ProductFormValues): Record<string, u
         sortOrder: idx + 1,
       }));
 
-      if (isSimpleProduct) {
+      if (values.productType === "simple") {
         variantPayload.images = [];
       } else if (variantImages.length > 0) {
         variantPayload.images = variantImages;
@@ -194,18 +205,6 @@ export function buildProductPayload(values: ProductFormValues): Record<string, u
 
       if (variant.productVariantOffers.length > 0) {
         variantPayload.productVariantOffers = variant.productVariantOffers;
-      }
-
-      const attributes = variant.attributes
-        .filter((attr) => attr.attributeId)
-        .map((attr) => ({
-          attributeId: Number(attr.attributeId),
-          ...(attr.optionId ? { optionId: Number(attr.optionId) } : {}),
-          ...(attr.value ? { value: attr.value } : {}),
-        }));
-
-      if (attributes.length > 0) {
-        variantPayload.attributes = attributes;
       }
 
       return variantPayload;

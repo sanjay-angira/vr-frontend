@@ -89,46 +89,6 @@ export async function fetchRolesOptions() {
   return fetchListOptions("roles", "roleName");
 }
 
-export async function fetchAttributesOptions(attributeType?: string) {
-  return fetchListOptions(
-    "attributes",
-    "name",
-    "id",
-    attributeType ? { attributeType } : undefined
-  );
-}
-
-export type AttributeListItem = {
-  id: number;
-  name: string;
-  type: string;
-};
-
-export async function fetchAttributesList(): Promise<AttributeListItem[]> {
-  try {
-    const response = await getData("attributes", {
-      pageNumber: 1,
-      pageSize: 1000,
-      column: "id",
-      order: "DESC",
-    });
-    const rows = response.data?.rows ?? response.data ?? [];
-    if (!Array.isArray(rows)) return [];
-
-    return rows.map((row: Record<string, unknown>) => ({
-      id: Number(row.id),
-      name: String(row.name ?? row.id),
-      type: String(row.type ?? "text"),
-    }));
-  } catch {
-    return [];
-  }
-}
-
-export async function fetchAttributeOptionsByAttributeId(attributeId: number) {
-  return fetchListOptions("attribute-options", "value", "id", { attributeId });
-}
-
 export async function fetchBlogCategoriesOptions() {
   return fetchListOptions("blog-categories", "title");
 }

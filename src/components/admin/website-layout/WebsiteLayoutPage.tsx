@@ -31,6 +31,7 @@ import {
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { API_ENDPOINTS } from "@/services/api/API_ENDPOINT";
+import { useDeleteConfirmation } from "@/components/admin/shared/useDeleteConfirmation";
 import { deleteData, getData, putData } from "@/services/api/apiService";
 
 function unwrap<T>(response: { data?: T } | T): T {
@@ -215,6 +216,19 @@ export function WebsiteLayoutPage() {
   const [reordering, setReordering] = useState(false);
   const [message, setMessage] = useState("");
 
+  const sectionDelete = useDeleteConfirmation<CmsSection>({
+    onConfirm: async (section) => {
+      try {
+        await deleteData(API_ENDPOINTS.CMS_SECTIONS.DELETE(section.id));
+        await loadSections();
+      } catch {
+        setMessage("Failed to delete section.");
+      }
+    },
+    getMessage: (section) =>
+      `Are you sure you want to delete section "${section.title}"? This action cannot be undone.`,
+  });
+
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 8 },
@@ -305,14 +319,8 @@ export function WebsiteLayoutPage() {
     }
   }
 
-  async function handleDelete(section: CmsSection) {
-    if (!confirm(`Delete section "${section.title}"?`)) return;
-    try {
-      await deleteData(API_ENDPOINTS.CMS_SECTIONS.DELETE(section.id));
-      await loadSections();
-    } catch {
-      setMessage("Failed to delete section.");
-    }
+  function handleDelete(section: CmsSection) {
+    sectionDelete.requestDelete(section);
   }
 
   const activeCount = sections.filter((section) => section.status).length;
@@ -413,6 +421,8 @@ export function WebsiteLayoutPage() {
           </DndContext>
         )}
       </div>
+
+      {sectionDelete.modal}
     </div>
   );
 }

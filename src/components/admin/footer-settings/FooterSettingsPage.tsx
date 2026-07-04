@@ -12,6 +12,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/common/Button";
 import { Input } from "@/components/common/Input";
 import { AdminModal } from "@/components/admin/shared/AdminModal";
+import { useDeleteConfirmation } from "@/components/admin/shared/useDeleteConfirmation";
 import { FormDropdown } from "@/components/admin/forms/shared/FormDropdown";
 import { ImageUploadField } from "@/components/admin/forms/shared/ImageUploadField";
 import { UPLOAD_PATHS } from "@/components/admin/forms/shared/uploadPaths";
@@ -256,6 +257,58 @@ export function FooterSettingsPage() {
   const [paymentModal, setPaymentModal] = useState<"create" | "edit" | null>(null);
   const [paymentForm, setPaymentForm] = useState<LinkFormState>(emptyLinkForm());
 
+  const sectionDelete = useDeleteConfirmation<FooterSection>({
+    onConfirm: async (section) => {
+      try {
+        await deleteData(API_ENDPOINTS.FOOTER.SECTION_BY_ID(section.id));
+        await loadAll();
+      } catch {
+        setMessage("Failed to delete section.");
+      }
+    },
+    getMessage: (section) =>
+      `Are you sure you want to delete section "${section.title}"? This action cannot be undone.`,
+  });
+
+  const footerItemDelete = useDeleteConfirmation<FooterLinkRow>({
+    onConfirm: async (row) => {
+      try {
+        await deleteData(API_ENDPOINTS.FOOTER.ITEM_BY_ID(row.id));
+        await loadAll();
+      } catch {
+        setMessage("Failed to delete footer item.");
+      }
+    },
+    getMessage: (row) =>
+      `Are you sure you want to delete "${row.label}"? This action cannot be undone.`,
+  });
+
+  const socialLinkDelete = useDeleteConfirmation<FooterLinkRow>({
+    onConfirm: async (row) => {
+      try {
+        await deleteData(API_ENDPOINTS.FOOTER.SOCIAL_LINK_BY_ID(row.id));
+        await loadAll();
+      } catch {
+        setMessage("Failed to delete social link.");
+      }
+    },
+    getMessage: (row) =>
+      `Are you sure you want to delete "${row.label}"? This action cannot be undone.`,
+  });
+
+  const paymentDelete = useDeleteConfirmation<FooterLinkRow>({
+    onConfirm: async (row) => {
+      try {
+        await deleteData(API_ENDPOINTS.FOOTER.PAYMENT_METHOD_BY_ID(row.id));
+        await loadAll();
+      } catch {
+        setMessage("Failed to delete payment method.");
+      }
+    },
+    getMessage: (row) =>
+      `Are you sure you want to delete "${row.label}"? This action cannot be undone.`,
+  });
+
   const menuSection = useMemo(
     () => sections.find((section) => section.type === "menu"),
     [sections]
@@ -386,13 +439,7 @@ export function FooterSettingsPage() {
   }
 
   async function handleDeleteSection(section: FooterSection) {
-    if (!confirm(`Delete section "${section.title}"?`)) return;
-    try {
-      await deleteData(API_ENDPOINTS.FOOTER.SECTION_BY_ID(section.id));
-      await loadAll();
-    } catch {
-      setMessage("Failed to delete section.");
-    }
+    sectionDelete.requestDelete(section);
   }
 
   async function handleToggleSection(section: FooterSection, status: boolean) {
@@ -633,11 +680,7 @@ export function FooterSettingsPage() {
               });
               setItemModal("edit");
             }}
-            onDelete={async (row) => {
-              if (!confirm("Delete this footer item?")) return;
-              await deleteData(API_ENDPOINTS.FOOTER.ITEM_BY_ID(row.id));
-              await loadAll();
-            }}
+            onDelete={(row) => footerItemDelete.requestDelete(row)}
             onToggleStatus={async (row, status) => {
               await putData(API_ENDPOINTS.FOOTER.ITEM_BY_ID(row.id), { status });
               await loadAll();
@@ -680,11 +723,7 @@ export function FooterSettingsPage() {
               });
               setSocialModal("edit");
             }}
-            onDelete={async (row) => {
-              if (!confirm("Delete this social link?")) return;
-              await deleteData(API_ENDPOINTS.FOOTER.SOCIAL_LINK_BY_ID(row.id));
-              await loadAll();
-            }}
+            onDelete={(row) => socialLinkDelete.requestDelete(row)}
             onToggleStatus={async (row, status) => {
               await putData(API_ENDPOINTS.FOOTER.SOCIAL_LINK_BY_ID(row.id), { status });
               await loadAll();
@@ -728,11 +767,7 @@ export function FooterSettingsPage() {
             });
             setPaymentModal("edit");
           }}
-          onDelete={async (row) => {
-            if (!confirm("Delete this payment method?")) return;
-            await deleteData(API_ENDPOINTS.FOOTER.PAYMENT_METHOD_BY_ID(row.id));
-            await loadAll();
-          }}
+          onDelete={(row) => paymentDelete.requestDelete(row)}
           onToggleStatus={async (row, status) => {
             await putData(API_ENDPOINTS.FOOTER.PAYMENT_METHOD_BY_ID(row.id), { status });
             await loadAll();
@@ -866,6 +901,11 @@ export function FooterSettingsPage() {
           />
         </AdminModal>
       )}
+
+      {sectionDelete.modal}
+      {footerItemDelete.modal}
+      {socialLinkDelete.modal}
+      {paymentDelete.modal}
     </div>
   );
 }

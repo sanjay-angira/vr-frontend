@@ -4,7 +4,6 @@ import type { ComponentType } from "react";
 import type { AdminModuleKey } from "@/components/admin/commonTable/adminModuleTable.config";
 import type { AdminFormProps } from "./types";
 import { AttributeForm } from "./AttributeForm";
-import { AttributeOptionForm } from "./AttributeOptionForm";
 import { BannerForm } from "./BannerForm";
 import { BlogCategoryForm } from "./BlogCategoryForm";
 import { BlogForm } from "./BlogForm";
@@ -28,7 +27,6 @@ const adminFormRegistry: Partial<
   categories: CategoryForm,
   brands: BrandForm,
   attributes: AttributeForm,
-  "attribute-options": AttributeOptionForm,
   offers: OfferForm,
   coupons: CouponForm,
   banners: BannerForm,

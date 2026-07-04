@@ -2,7 +2,6 @@ import type { DataTableAction } from "@/components/common/DataTable";
 import type { AdminTableColumnDefinition } from "@/components/admin/commonTable/staticAdminTableColumns";
 import {
   AttributeComponentColumns,
-  AttributeOptionComponentColumns,
   BannerComponentColumns,
   BlogCategoryComponentColumns,
   BlogComponentColumns,
@@ -26,7 +25,6 @@ export type AdminModuleKey =
   | "categories"
   | "brands"
   | "attributes"
-  | "attribute-options"
   | "offers"
   | "coupons"
   | "banners"
@@ -97,13 +95,6 @@ export const adminModuleTableConfig: Record<
     columns: AttributeComponentColumns,
     actions: ["add", "view", "edit", "delete"],
     addLabel: "Add attribute",
-  },
-  "attribute-options": {
-    label: "Attribute Options",
-    description: "Manage attribute options",
-    columns: AttributeOptionComponentColumns,
-    actions: ["add", "view", "edit", "delete"],
-    addLabel: "Add option",
   },
   offers: {
     label: "Offers & Deals",

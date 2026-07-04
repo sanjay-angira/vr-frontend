@@ -50,11 +50,6 @@ export const adminMenuSections: AdminMenuSection[] = [
         href: "/admin/attributes",
         icon: "sliders-horizontal",
       },
-      {
-        label: "Attribute Options",
-        href: "/admin/attribute-options",
-        icon: "list-checks",
-      },
     ],
   },
   {

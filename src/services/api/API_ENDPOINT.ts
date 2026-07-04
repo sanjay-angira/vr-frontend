@@ -78,14 +78,6 @@ export const API_ENDPOINTS = {
     DELETE: (id: number | string) => `attributes/${id}`,
   },
 
-  ATTRIBUTE_OPTIONS: {
-    LIST: "attribute-options",
-    CREATE: "attribute-options",
-    DETAILS: (id: number | string) => `attribute-options/${id}`,
-    UPDATE: (id: number | string) => `attribute-options/${id}`,
-    DELETE: (id: number | string) => `attribute-options/${id}`,
-  },
-
   PRODUCT_TAGS: {
     LIST: "product-tags",
     CREATE: "product-tags",

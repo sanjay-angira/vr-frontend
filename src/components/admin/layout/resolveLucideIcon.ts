@@ -9,7 +9,6 @@ const legacyIconAliases: Record<string, string> = {
   categories: "layout-grid",
   brands: "award",
   attributes: "sliders-horizontal",
-  "attributes-options": "list-checks",
   "offers-and-deals": "percent",
   coupons: "ticket",
   banners: "image",

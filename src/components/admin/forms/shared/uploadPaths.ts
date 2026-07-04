@@ -13,7 +13,6 @@ export const UPLOAD_PATHS = {
   banners: "/banners/images",
   blogs: "/blog/images",
   users: "/user/images",
-  attributeOptions: "/attributes/options",
   footer: {
     icons: "/footer/icons",
   },
