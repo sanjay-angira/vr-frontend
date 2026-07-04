@@ -7,10 +7,17 @@ export const ATTRIBUTE_VIEW_OPTIONS: Array<{
   label: string;
   value: AttributeViewOption;
 }> = [
-  { label: "Color Name", value: "value" },
-  { label: "Color Code", value: "code" },
-  { label: "Color Image", value: "image" },
+  { label: "Name", value: "value" },
+  { label: "Code", value: "code" },
+  { label: "Image", value: "image" },
 ];
+
+export function getAttributeViewOptions(attributeName: string) {
+  return ATTRIBUTE_VIEW_OPTIONS.map((option) => ({
+    label: `${attributeName} ${option.label}`,
+    value: option.value,
+  }));
+}
 
 export type VariantAttributeValue = {
   attributeId: number;
@@ -160,7 +167,7 @@ export function syncVariantAttributes(
             viewOption: existing.viewOption ?? "value",
           };
         }
-        return existing;
+        return { attributeId, value: existing.value ?? "" };
       }
 
       return createEmptyVariantAttribute(attributeId, attributeName);
@@ -215,16 +222,14 @@ export function mapVariantAttributesFromRecord(
         value: String(item.value ?? ""),
       };
 
-      if (item.code != null || isColorAttribute(attributeName)) {
+      if (isColorAttribute(attributeName) || item.code != null || item.image != null) {
         mapped.code = String(item.code ?? "#000000");
-      }
-      if (item.image != null || isColorAttribute(attributeName)) {
         mapped.image = String(item.image ?? "");
-      }
-      if (item.viewOption != null || isColorAttribute(attributeName)) {
         const viewOption = String(item.viewOption ?? "value");
         if (viewOption === "value" || viewOption === "code" || viewOption === "image") {
           mapped.viewOption = viewOption;
+        } else {
+          mapped.viewOption = "value";
         }
       }
 
@@ -284,7 +289,10 @@ export function getDeepestCategoryId(values: ProductFormValues): number | "" {
   return values.category ? Number(values.category) : "";
 }
 
-export function buildProductPayload(values: ProductFormValues): Record<string, unknown> {
+export function buildProductPayload(
+  values: ProductFormValues,
+  attributeNameById: Record<number, string> = {}
+): Record<string, unknown> {
   const isVariableProduct = values.productType === "variable";
   const productImages = isVariableProduct
     ? []
@@ -337,22 +345,28 @@ export function buildProductPayload(values: ProductFormValues): Record<string, u
       const variantAttributes = variant.variantAttributes
         .filter((item) => item.value.trim())
         .map((item) => {
+          const attributeName = attributeNameById[item.attributeId] ?? "";
           const payload: Record<string, unknown> = {
             attributeId: item.attributeId,
             value: item.value.trim(),
           };
 
-          if (item.code?.trim()) {
-            payload.code = item.code.trim();
-          }
-          if (item.image?.trim()) {
-            payload.image = item.image.trim();
-          }
-          if (item.viewOption) {
-            payload.viewOption = item.viewOption;
+          if (isColorAttribute(attributeName)) {
+            payload.code = item.code?.trim() ?? "";
+            payload.image = item.image?.trim() ?? "";
+            payload.viewOption = item.viewOption ?? "value";
+          } else {
+            if (item.code?.trim()) payload.code = item.code.trim();
+            if (item.image?.trim()) payload.image = item.image.trim();
+            if (item.viewOption) payload.viewOption = item.viewOption;
           }
 
           return payload;
+        })
+        .filter((item) => {
+          const attributeName = attributeNameById[Number(item.attributeId)] ?? "";
+          if (!isColorAttribute(attributeName)) return true;
+          return Boolean(item.value && item.code && item.image && item.viewOption);
         });
 
       if (variantAttributes.length > 0) {

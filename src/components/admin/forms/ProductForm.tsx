@@ -40,10 +40,10 @@ import { useAdminCrudForm } from "./shared/useAdminCrudForm";
 import { useSlugSync } from "./shared/useSlugSync";
 import { activeField, htmlMinLength, requiredString, slugField } from "./shared/validation";
 import {
-  ATTRIBUTE_VIEW_OPTIONS,
   buildAttributeNameById,
   buildProductPayload,
   createEmptyVariantAttribute,
+  getAttributeViewOptions,
   emptyVariant,
   isColorAttribute,
   isProductStepValid,
@@ -230,9 +230,8 @@ function VariantPanel({
                 <div>
                   <h4 className="text-sm font-medium text-zinc-900">Attribute Values</h4>
                   <p className="mt-1 text-xs text-zinc-500">
-                    Enter a value for each selected product attribute on this variant.
-                    For color attributes, provide the name, code, image, and choose what
-                    customers will see on the product page.
+                    Enter a value for each attribute. Color attributes also require
+                    a color code, image, and customer display option.
                   </p>
                 </div>
                 <div className="space-y-4">
@@ -245,103 +244,99 @@ function VariantPanel({
                       attributeIndex >= 0
                         ? variant.variantAttributes[attributeIndex]
                         : undefined;
+                    const isColor = isColorAttribute(attribute.name);
 
-                    if (isColorAttribute(attribute.name)) {
+                    if (!isColor) {
                       return (
-                        <div
+                        <Input
                           key={attribute.id}
-                          className="rounded-lg border border-zinc-200 bg-white p-4"
-                        >
-                          <h5 className="mb-4 text-sm font-semibold text-zinc-900">
-                            {attribute.name}
-                          </h5>
-                          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                            <Input
-                              label="Color Name"
-                              required
-                              name={`${basePath}.value`}
-                              value={attributeValue?.value ?? ""}
-                              onChange={formik.handleChange}
-                              onBlur={formik.handleBlur}
-                              placeholder="e.g. Saffron Red"
-                              error={getNestedError(
-                                formik.touched,
-                                formik.errors,
-                                `${basePath}.value`
-                              )}
-                            />
-                            <Input
-                              label="Color Code"
-                              required
-                              type="color"
-                              name={`${basePath}.code`}
-                              value={attributeValue?.code ?? "#000000"}
-                              onChange={formik.handleChange}
-                              onBlur={formik.handleBlur}
-                              error={getNestedError(
-                                formik.touched,
-                                formik.errors,
-                                `${basePath}.code`
-                              )}
-                            />
-                            <div className="md:col-span-2">
-                              <ImageUploadField
-                                label="Color Image"
-                                required
-                                value={attributeValue?.image ?? ""}
-                                onChange={(url) =>
-                                  formik.setFieldValue(`${basePath}.image`, url)
-                                }
-                                uploadPath={UPLOAD_PATHS.attributeColors}
-                                error={getNestedError(
-                                  formik.touched,
-                                  formik.errors,
-                                  `${basePath}.image`
-                                )}
-                              />
-                            </div>
-                            <div className="md:col-span-2">
-                              <FormDropdown
-                                label="Customer Display"
-                                required
-                                value={attributeValue?.viewOption ?? "value"}
-                                onChange={(value) =>
-                                  formik.setFieldValue(`${basePath}.viewOption`, value)
-                                }
-                                onBlur={() =>
-                                  formik.setFieldTouched(`${basePath}.viewOption`, true)
-                                }
-                                options={[...ATTRIBUTE_VIEW_OPTIONS]}
-                                placeholder="Select what customers see"
-                                hint="Choose whether customers see the color name, color code, or color image."
-                                error={getNestedError(
-                                  formik.touched,
-                                  formik.errors,
-                                  `${basePath}.viewOption`
-                                )}
-                              />
-                            </div>
-                          </div>
-                        </div>
+                          label={attribute.name}
+                          required
+                          name={`${basePath}.value`}
+                          value={attributeValue?.value ?? ""}
+                          onChange={formik.handleChange}
+                          onBlur={formik.handleBlur}
+                          placeholder={`Enter ${attribute.name}`}
+                          error={getNestedError(
+                            formik.touched,
+                            formik.errors,
+                            `${basePath}.value`
+                          )}
+                        />
                       );
                     }
 
                     return (
-                      <Input
+                      <div
                         key={attribute.id}
-                        label={attribute.name}
-                        required
-                        name={`${basePath}.value`}
-                        value={attributeValue?.value ?? ""}
-                        onChange={formik.handleChange}
-                        onBlur={formik.handleBlur}
-                        placeholder={`Enter ${attribute.name}`}
-                        error={getNestedError(
-                          formik.touched,
-                          formik.errors,
-                          `${basePath}.value`
-                        )}
-                      />
+                      >
+                        {/* <h5 className="mb-4 text-sm font-semibold text-zinc-900">
+                          {attribute.name}
+                        </h5> */}
+                        <div className="grid grid-cols-4 gap-4">
+                          <Input
+                            label="Color Name"
+                            required
+                            name={`${basePath}.value`}
+                            value={attributeValue?.value ?? ""}
+                            onChange={formik.handleChange}
+                            onBlur={formik.handleBlur}
+                            placeholder="e.g. Saffron Red"
+                            error={getNestedError(
+                              formik.touched,
+                              formik.errors,
+                              `${basePath}.value`
+                            )}
+                          />
+                          <Input
+                            label="Color Code"
+                            required
+                            type="color"
+                            name={`${basePath}.code`}
+                            value={attributeValue?.code ?? "#000000"}
+                            onChange={formik.handleChange}
+                            onBlur={formik.handleBlur}
+                            error={getNestedError(
+                              formik.touched,
+                              formik.errors,
+                              `${basePath}.code`
+                            )}
+                          />
+                          <ImageUploadField
+                            label="Color Image"
+                            required
+                            variant="compact"
+                            value={attributeValue?.image ?? ""}
+                            onChange={(url) =>
+                              formik.setFieldValue(`${basePath}.image`, url)
+                            }
+                            uploadPath={UPLOAD_PATHS.attributeColors}
+                            error={getNestedError(
+                              formik.touched,
+                              formik.errors,
+                              `${basePath}.image`
+                            )}
+                          />
+                          <FormDropdown
+                            label="Customer Display"
+                            required
+                            value={attributeValue?.viewOption ?? "value"}
+                            onChange={(value) =>
+                              formik.setFieldValue(`${basePath}.viewOption`, value)
+                            }
+                            onBlur={() =>
+                              formik.setFieldTouched(`${basePath}.viewOption`, true)
+                            }
+                            options={getAttributeViewOptions(attribute.name)}
+                            placeholder="Select display"
+                            error={getNestedError(
+                              formik.touched,
+                              formik.errors,
+                              `${basePath}.viewOption`
+                            )}
+                          />
+                        </div>
+                      </div>
                     );
                   })}
                 </div>
@@ -454,7 +449,8 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
         },
       };
     },
-    mapValuesToPayload: (values) => buildProductPayload(values),
+    mapValuesToPayload: (values) =>
+      buildProductPayload(values, buildAttributeNameById(values.attributeIds, attributes)),
   });
 
   useSlugSync(formik, "productName", "productSlug", !isEdit);
@@ -526,13 +522,12 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
         formik.setFieldTouched(`variants.${index}.price`, true, false);
         formik.setFieldTouched(`variants.${index}.stock`, true, false);
         variant.variantAttributes.forEach((item, attributeIndex) => {
-          const attributeName = attributeNameById[item.attributeId] ?? "";
           formik.setFieldTouched(
             `variants.${index}.variantAttributes.${attributeIndex}.value`,
             true,
             false
           );
-          if (isColorAttribute(attributeName)) {
+          if (isColorAttribute(attributeNameById[item.attributeId] ?? "")) {
             formik.setFieldTouched(
               `variants.${index}.variantAttributes.${attributeIndex}.code`,
               true,
@@ -557,8 +552,11 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
   async function handleNextStep() {
     await touchStepFields(currentStep);
     const errors = await formik.validateForm();
-    const namesById = buildAttributeNameById(formik.values.attributeIds, attributes);
-    if (isProductStepValid(currentStep, formik.values, errors, namesById)) {
+    const attributeNameById = buildAttributeNameById(
+      formik.values.attributeIds,
+      attributes
+    );
+    if (isProductStepValid(currentStep, formik.values, errors, attributeNameById)) {
       setCurrentStep((step) => Math.min(step + 1, PRODUCT_FORM_STEPS.length));
     }
   }

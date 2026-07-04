@@ -7,6 +7,7 @@ import {
   deleteUploadedFile,
   deleteUploadedVideo,
   uploadFile,
+  type S3UploadResult,
 } from "@/services/api/uploadService";
 import { resolveImageUrl } from "./resolveImageUrl";
 import { FormLabel } from "./FormLabel";
@@ -33,7 +34,7 @@ type ImageUploadModalProps = {
   accept: string;
   mediaType: "image" | "video";
   onClose: () => void;
-  onUploaded: (url: string) => void;
+  onUploaded: (result: S3UploadResult) => void;
 };
 
 function ImageUploadModal({
@@ -58,6 +59,26 @@ function ImageUploadModal({
       }
     };
   }, [previewUrl]);
+
+  function resetModalState() {
+    if (previewUrl.startsWith("blob:")) {
+      URL.revokeObjectURL(previewUrl);
+    }
+    setPreviewUrl("");
+    setFileName("");
+    setSelectedFile(null);
+    setProgress(0);
+    setError("");
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  }
+
+  function handleClose() {
+    if (uploading) return;
+    resetModalState();
+    window.setTimeout(() => onClose(), 0);
+  }
 
   function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -95,8 +116,9 @@ function ImageUploadModal({
 
     try {
       const result = await uploadFile(selectedFile, uploadPath, setProgress);
-      onUploaded(result.Location);
-      onClose();
+      onUploaded(result);
+      resetModalState();
+      window.setTimeout(() => onClose(), 0);
     } catch (uploadError) {
       setError(
         uploadError instanceof Error ? uploadError.message : "Failed to upload file."
@@ -107,11 +129,19 @@ function ImageUploadModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) {
+          handleClose();
+        }
+      }}
+    >
       <div
         className="w-full max-w-lg overflow-hidden rounded-xl bg-white shadow-xl"
         role="dialog"
         aria-modal="true"
+        onMouseDown={(event) => event.stopPropagation()}
       >
         <div className="flex items-center justify-between bg-admin-primary px-5 py-4 text-white">
           <h2 className="text-lg font-semibold">
@@ -119,7 +149,7 @@ function ImageUploadModal({
           </h2>
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleClose}
             className="rounded-lg p-1 transition-colors hover:bg-white/10"
             aria-label="Close"
           >
@@ -180,7 +210,7 @@ function ImageUploadModal({
         </div>
 
         <div className="flex justify-center gap-3 border-t border-zinc-100 px-5 py-4">
-          <Button type="button" variant="secondary" onClick={onClose} disabled={uploading}>
+          <Button type="button" variant="secondary" onClick={handleClose} disabled={uploading}>
             Cancel
           </Button>
           <Button type="button" onClick={handleUpload} disabled={uploading || !selectedFile}>
@@ -207,7 +237,13 @@ type BaseUploadFieldProps = {
   hint?: string;
   className?: string;
   mediaType?: "image" | "video";
+  /** Matches admin Input / dropdown height (42px) for inline form grids */
+  variant?: "default" | "compact";
 };
+
+const COMPACT_FIELD_HEIGHT = "h-[42px]";
+const COMPACT_BORDER_CLASS =
+  "rounded-lg border border-zinc-300 bg-white transition-colors focus-within:border-admin-primary focus-within:ring-2 focus-within:ring-admin-primary/15";
 
 type SingleImageUploadFieldProps = BaseUploadFieldProps & {
   value: string;
@@ -224,14 +260,26 @@ export function ImageUploadField({
   hint,
   className,
   mediaType = "image",
+  variant = "default",
 }: SingleImageUploadFieldProps) {
   const inputId = useId();
+  const uploadKeysRef = useRef<Record<string, string>>({});
   const [modalOpen, setModalOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [actionError, setActionError] = useState("");
 
   const accept = mediaType === "video" ? "video/*" : "image/*";
   const displayError = error || actionError;
+
+  function rememberUploadKey(location: string, key?: string) {
+    if (key?.trim()) {
+      uploadKeysRef.current[location] = key.trim();
+    }
+  }
+
+  function forgetUploadKey(location: string) {
+    delete uploadKeysRef.current[location];
+  }
 
   async function handleDelete() {
     if (!value) return;
@@ -240,24 +288,104 @@ export function ImageUploadField({
     setActionError("");
 
     try {
+      const objectKey = uploadKeysRef.current[value];
       if (mediaType === "video") {
-        await deleteUploadedVideo(value, uploadPath);
+        await deleteUploadedVideo(value, uploadPath, objectKey);
       } else {
-        await deleteUploadedFile(value, uploadPath);
+        await deleteUploadedFile(value, uploadPath, objectKey);
       }
+      forgetUploadKey(value);
       onChange("");
-    } catch {
-      setActionError("Failed to delete file. Please try again.");
+    } catch (deleteError) {
+      setActionError(
+        deleteError instanceof Error
+          ? deleteError.message
+          : "Failed to delete file from AWS. Please try again."
+      );
     } finally {
       setDeleting(false);
     }
   }
 
+  function handleUploaded(result: S3UploadResult) {
+    rememberUploadKey(result.Location, result.Key);
+    onChange(result.Location);
+  }
+
+  function openModal() {
+    setActionError("");
+    setModalOpen(true);
+  }
+
+  function closeModal() {
+    setActionError("");
+    window.setTimeout(() => setModalOpen(false), 0);
+  }
+
+  const compactBorderClass = error
+    ? "border-red-500 focus-within:border-red-500 focus-within:ring-red-500/10"
+    : "border-zinc-300";
+
   return (
     <div className={className}>
       <FormLabel label={label} required={required} htmlFor={inputId} />
 
-      {value ? (
+      {variant === "compact" ? (
+        value ? (
+          <div
+            className={`flex ${COMPACT_FIELD_HEIGHT} w-full items-center gap-1 overflow-hidden ${COMPACT_BORDER_CLASS} ${compactBorderClass} pl-1 pr-1.5`}
+          >
+            <button
+              type="button"
+              onClick={openModal}
+              className="flex min-w-0 flex-1 items-center gap-2 text-left"
+              aria-label={`Replace ${label}`}
+            >
+              {mediaType === "video" ? (
+                <video
+                  src={resolveImageUrl(value)}
+                  className="h-[34px] w-[34px] shrink-0 rounded-md bg-black object-cover"
+                />
+              ) : (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  src={resolveImageUrl(value)}
+                  alt={label}
+                  className="h-[34px] w-[34px] shrink-0 rounded-md object-cover"
+                />
+              )}
+              <span className="truncate text-sm text-zinc-600">Change image</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleDelete}
+              disabled={deleting}
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-zinc-400 transition-colors hover:bg-red-50 hover:text-red-500 disabled:opacity-60"
+              aria-label={`Remove ${label}`}
+            >
+              {deleting ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <X className="h-3.5 w-3.5" />
+              )}
+            </button>
+          </div>
+        ) : (
+          <button
+            id={inputId}
+            type="button"
+            onClick={openModal}
+            className={`flex ${COMPACT_FIELD_HEIGHT} w-full items-center justify-center gap-2 border border-dashed text-sm font-medium transition-colors hover:bg-admin-primary/10 ${compactBorderClass} ${
+              error
+                ? "border-red-500 text-red-600"
+                : "border-admin-primary/40 bg-admin-primary/5 text-admin-primary"
+            }`}
+          >
+            <CloudUpload className="h-4 w-4 shrink-0" />
+            <span className="truncate">Upload image</span>
+          </button>
+        )
+      ) : value ? (
         <div className="rounded-xl border border-zinc-200 bg-zinc-50/50 p-4">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
             <div className="relative shrink-0 self-start">
@@ -305,7 +433,7 @@ export function ImageUploadField({
 
               <button
                 type="button"
-                onClick={() => setModalOpen(true)}
+                onClick={openModal}
                 className={`${UPLOAD_TRIGGER_CLASS} sm:w-auto sm:min-w-[11rem]`}
               >
                 <ImagePlus className="h-4 w-4" />
@@ -318,7 +446,7 @@ export function ImageUploadField({
         <button
           id={inputId}
           type="button"
-          onClick={() => setModalOpen(true)}
+          onClick={openModal}
           className={UPLOAD_TRIGGER_CLASS}
         >
           <CloudUpload className="h-4 w-4" />
@@ -327,15 +455,17 @@ export function ImageUploadField({
       )}
 
       {displayError && <p className="mt-1.5 text-sm text-red-600">{displayError}</p>}
-      {hint && !displayError && <p className="mt-1.5 text-sm text-zinc-500">{hint}</p>}
+      {variant !== "compact" && hint && !displayError && (
+        <p className="mt-1.5 text-sm text-zinc-500">{hint}</p>
+      )}
 
       {modalOpen && (
         <ImageUploadModal
           uploadPath={uploadPath}
           accept={accept}
           mediaType={mediaType}
-          onClose={() => setModalOpen(false)}
-          onUploaded={onChange}
+          onClose={closeModal}
+          onUploaded={handleUploaded}
         />
       )}
     </div>
@@ -357,27 +487,54 @@ export function MultiImageUploadField({
   hint,
   className,
 }: MultiImageUploadFieldProps) {
+  const uploadKeysRef = useRef<Record<string, string>>({});
   const [modalOpen, setModalOpen] = useState(false);
   const [deletingUrl, setDeletingUrl] = useState<string | null>(null);
   const [actionError, setActionError] = useState("");
   const displayError = error || actionError;
+
+  function rememberUploadKey(location: string, key?: string) {
+    if (key?.trim()) {
+      uploadKeysRef.current[location] = key.trim();
+    }
+  }
+
+  function forgetUploadKey(location: string) {
+    delete uploadKeysRef.current[location];
+  }
 
   async function handleRemove(url: string) {
     setDeletingUrl(url);
     setActionError("");
 
     try {
-      await deleteUploadedFile(url, uploadPath);
+      await deleteUploadedFile(url, uploadPath, uploadKeysRef.current[url]);
+      forgetUploadKey(url);
       onChange(values.filter((item) => item !== url));
-    } catch {
-      setActionError("Failed to delete image. Please try again.");
+    } catch (deleteError) {
+      setActionError(
+        deleteError instanceof Error
+          ? deleteError.message
+          : "Failed to delete image from AWS. Please try again."
+      );
     } finally {
       setDeletingUrl(null);
     }
   }
 
-  function handleAdd(url: string) {
-    onChange([...values, url]);
+  function openModal() {
+    setActionError("");
+    setModalOpen(true);
+  }
+
+  function closeModal() {
+    setActionError("");
+    window.setTimeout(() => setModalOpen(false), 0);
+  }
+
+  function handleAdd(result: S3UploadResult) {
+    rememberUploadKey(result.Location, result.Key);
+    onChange([...values, result.Location]);
   }
 
   return (
@@ -386,7 +543,7 @@ export function MultiImageUploadField({
 
       <button
         type="button"
-        onClick={() => setModalOpen(true)}
+        onClick={openModal}
         className={UPLOAD_TRIGGER_CLASS}
       >
         <CloudUpload className="h-4 w-4" />
@@ -431,10 +588,10 @@ export function MultiImageUploadField({
           uploadPath={uploadPath}
           accept="image/*"
           mediaType="image"
-          onClose={() => setModalOpen(false)}
-          onUploaded={(url) => {
-            handleAdd(url);
-            setModalOpen(false);
+          onClose={closeModal}
+          onUploaded={(result) => {
+            handleAdd(result);
+            closeModal();
           }}
         />
       )}
