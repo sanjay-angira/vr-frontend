@@ -42,16 +42,19 @@ export function useAdminCrudForm<T extends Record<string, unknown>>({
   const isEdit = Boolean(recordId);
   const [loadedValues, setLoadedValues] = useState<T>(initialValues);
   const [loading, setLoading] = useState(isEdit);
+  const [formReady, setFormReady] = useState(!isEdit);
   const [loadError, setLoadError] = useState("");
 
   useEffect(() => {
     if (!recordId) {
       setLoadedValues(initialValues);
       setLoading(false);
+      setFormReady(true);
       return;
     }
 
     let cancelled = false;
+    setFormReady(false);
 
     async function fetchRecord() {
       setLoading(true);
@@ -114,9 +117,25 @@ export function useAdminCrudForm<T extends Record<string, unknown>>({
     },
   });
 
+  useEffect(() => {
+    if (!recordId) {
+      setFormReady(true);
+      return;
+    }
+
+    if (loading) {
+      setFormReady(false);
+      return;
+    }
+
+    formik.resetForm({ values: loadedValues });
+    setFormReady(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [recordId, loading, loadedValues]);
+
   return {
     formik,
-    loading,
+    loading: loading || !formReady,
     loadError,
     isEdit,
     apiPath,

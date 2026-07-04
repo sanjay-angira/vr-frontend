@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import "react-quill-new/dist/quill.snow.css";
 import { FormLabel } from "./FormLabel";
 
@@ -37,6 +37,10 @@ export function FormQuillEditor({
   placeholder = "Product Description",
   className,
 }: FormQuillEditorProps) {
+  const [editorValue, setEditorValue] = useState(value);
+  const [remountKey, setRemountKey] = useState(0);
+  const lastEmittedValue = useRef(value);
+
   const modules = useMemo(
     () => ({
       toolbar: [
@@ -50,6 +54,24 @@ export function FormQuillEditor({
     []
   );
 
+  useEffect(() => {
+    if (value === lastEmittedValue.current) return;
+
+    lastEmittedValue.current = value;
+    setEditorValue(value);
+
+    // ReactQuill only reads the initial value on mount — remount when data loads async.
+    if (value.trim()) {
+      setRemountKey((current) => current + 1);
+    }
+  }, [value]);
+
+  function handleChange(content: string) {
+    lastEmittedValue.current = content;
+    setEditorValue(content);
+    onChange(content);
+  }
+
   return (
     <div className={className}>
       <FormLabel label={label} required={required} />
@@ -61,9 +83,10 @@ export function FormQuillEditor({
         }`}
       >
         <ReactQuill
+          key={remountKey}
           theme="snow"
-          value={value}
-          onChange={onChange}
+          value={editorValue}
+          onChange={handleChange}
           onBlur={onBlur}
           modules={modules}
           placeholder={placeholder}

@@ -1,8 +1,8 @@
 import type { FormikErrors } from "formik";
 import { getIn } from "formik";
 
-export type ProductAttribute = {
-  name: string;
+export type VariantAttributeValue = {
+  attributeId: number;
   value: string;
 };
 
@@ -14,6 +14,7 @@ export type ProductVariant = {
   stock: number | "";
   productVariantOffers: number[];
   images: string[];
+  variantAttributes: VariantAttributeValue[];
 };
 
 export type ProductSeoValues = {
@@ -39,7 +40,7 @@ export type ProductFormValues = {
   productTags: number[];
   frequentlyBoughtTogether: number[];
   images: string[];
-  attributes: ProductAttribute[];
+  attributeIds: number[];
   variants: ProductVariant[];
   seo: ProductSeoValues;
 };
@@ -57,11 +58,7 @@ export const emptyVariant = (): ProductVariant => ({
   stock: 1,
   productVariantOffers: [],
   images: [],
-});
-
-export const emptyProductAttribute = (): ProductAttribute => ({
-  name: "",
-  value: "",
+  variantAttributes: [],
 });
 
 export const productFormInitialValues: ProductFormValues = {
@@ -79,7 +76,7 @@ export const productFormInitialValues: ProductFormValues = {
   productTags: [],
   frequentlyBoughtTogether: [],
   images: [],
-  attributes: [],
+  attributeIds: [],
   variants: [emptyVariant()],
   seo: {
     metaTitle: "",
@@ -90,6 +87,21 @@ export const productFormInitialValues: ProductFormValues = {
   },
 };
 
+export function syncVariantAttributes(
+  variants: ProductVariant[],
+  attributeIds: number[]
+): ProductVariant[] {
+  return variants.map((variant) => ({
+    ...variant,
+    variantAttributes: attributeIds.map((attributeId) => {
+      const existing = variant.variantAttributes.find(
+        (item) => item.attributeId === attributeId
+      );
+      return existing ?? { attributeId, value: "" };
+    }),
+  }));
+}
+
 export function normalizeIds(value: unknown): number[] {
   if (!Array.isArray(value)) return [];
   return value
@@ -99,6 +111,38 @@ export function normalizeIds(value: unknown): number[] {
         : Number(item)
     )
     .filter((id) => !Number.isNaN(id));
+}
+
+export function mapAttributeIdsFromRecord(record: Record<string, unknown>): number[] {
+  if (Array.isArray(record.productAttributes)) {
+    return (record.productAttributes as Record<string, unknown>[])
+      .map((item) => {
+        const attribute = item.attribute as { id?: number } | undefined;
+        return Number(attribute?.id ?? item.attributeId);
+      })
+      .filter((id) => !Number.isNaN(id) && id > 0);
+  }
+
+  if (Array.isArray(record.attributes)) {
+    return (record.attributes as Record<string, unknown>[])
+      .map((item) => Number(item.attributeId ?? item.id))
+      .filter((id) => !Number.isNaN(id) && id > 0);
+  }
+
+  return [];
+}
+
+export function mapVariantAttributesFromRecord(
+  variant: Record<string, unknown>
+): VariantAttributeValue[] {
+  if (!Array.isArray(variant.variantAttributes)) return [];
+
+  return (variant.variantAttributes as Record<string, unknown>[])
+    .map((item) => ({
+      attributeId: Number((item.attribute as { id?: number } | undefined)?.id ?? item.attributeId),
+      value: String(item.value ?? ""),
+    }))
+    .filter((item) => !Number.isNaN(item.attributeId) && item.attributeId > 0);
 }
 
 export function normalizeImageArray(value: unknown): string[] {
@@ -161,12 +205,7 @@ export function buildProductPayload(values: ProductFormValues): Record<string, u
         sortOrder: index + 1,
       }));
 
-  const attributes = values.attributes
-    .filter((attr) => attr.name.trim() && attr.value.trim())
-    .map((attr) => ({
-      name: attr.name.trim(),
-      value: attr.value.trim(),
-    }));
+  const attributes = values.attributeIds.map((attributeId) => ({ attributeId }));
 
   return {
     productName: values.productName,
@@ -207,6 +246,17 @@ export function buildProductPayload(values: ProductFormValues): Record<string, u
         variantPayload.productVariantOffers = variant.productVariantOffers;
       }
 
+      const variantAttributes = variant.variantAttributes
+        .filter((item) => item.value.trim())
+        .map((item) => ({
+          attributeId: item.attributeId,
+          value: item.value.trim(),
+        }));
+
+      if (variantAttributes.length > 0) {
+        variantPayload.variantAttributes = variantAttributes;
+      }
+
       return variantPayload;
     }),
     seo: {
@@ -224,6 +274,19 @@ export function buildProductPayload(values: ProductFormValues): Record<string, u
 
 function hasFieldError(errors: FormikErrors<ProductFormValues>, path: string) {
   return Boolean(getIn(errors, path));
+}
+
+function variantAttributesAreValid(values: ProductFormValues) {
+  if (values.attributeIds.length === 0) return true;
+
+  return values.variants.every((variant) =>
+    values.attributeIds.every((attributeId) => {
+      const match = variant.variantAttributes.find(
+        (item) => item.attributeId === attributeId
+      );
+      return Boolean(match?.value?.trim());
+    })
+  );
 }
 
 export function isProductStepValid(
@@ -254,16 +317,18 @@ export function isProductStepValid(
     }
     case 2: {
       if (values.variants.length === 0) return false;
-      return values.variants.every(
-        (variant, index) =>
-          Boolean(variant.name?.trim()) &&
-          variant.price !== "" &&
-          Number(variant.price) >= 0.01 &&
-          variant.stock !== "" &&
-          Number(variant.stock) >= 0 &&
-          !hasFieldError(errors, `variants.${index}.name`) &&
-          !hasFieldError(errors, `variants.${index}.price`) &&
-          !hasFieldError(errors, `variants.${index}.stock`)
+      return (
+        values.variants.every(
+          (variant, index) =>
+            Boolean(variant.name?.trim()) &&
+            variant.price !== "" &&
+            Number(variant.price) >= 0.01 &&
+            variant.stock !== "" &&
+            Number(variant.stock) >= 0 &&
+            !hasFieldError(errors, `variants.${index}.name`) &&
+            !hasFieldError(errors, `variants.${index}.price`) &&
+            !hasFieldError(errors, `variants.${index}.stock`)
+        ) && variantAttributesAreValid(values)
       );
     }
     case 3:
@@ -289,6 +354,7 @@ export const STEP_TOUCH_FIELDS: Record<number, string[]> = {
     "brandId",
     "category",
     "childCategories",
+    "attributeIds",
   ],
   2: ["variants"],
   3: ["seo.metaTitle", "seo.metaDescription", "seo.metaKeywords", "seo.canonicalUrl", "seo.ogImage"],

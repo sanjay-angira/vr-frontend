@@ -89,6 +89,10 @@ export async function fetchRolesOptions() {
   return fetchListOptions("roles", "roleName");
 }
 
+export async function fetchAttributesOptions() {
+  return fetchListOptions("attributes", "name");
+}
+
 export async function fetchBlogCategoriesOptions() {
   return fetchListOptions("blog-categories", "title");
 }

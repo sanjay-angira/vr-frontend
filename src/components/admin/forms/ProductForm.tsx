@@ -28,6 +28,7 @@ import {
 import { MultiImageUploadField } from "./shared/ImageUploadField";
 import { UPLOAD_PATHS } from "./shared/uploadPaths";
 import {
+  fetchAttributesOptions,
   fetchBrandsOptions,
   fetchChildCategoriesOptions,
   fetchOffersOptions,
@@ -40,14 +41,16 @@ import { useSlugSync } from "./shared/useSlugSync";
 import { activeField, htmlMinLength, requiredString, slugField } from "./shared/validation";
 import {
   buildProductPayload,
-  emptyProductAttribute,
   emptyVariant,
   isProductStepValid,
+  mapAttributeIdsFromRecord,
   mapProductImagesFromRecord,
+  mapVariantAttributesFromRecord,
   normalizeIds,
   normalizeImageArray,
   PRODUCT_FORM_STEPS,
   productFormInitialValues,
+  syncVariantAttributes,
   STEP_TOUCH_FIELDS,
   type ProductFormValues,
   type ProductVariant,
@@ -61,6 +64,12 @@ const variantSchema = Yup.object({
   stock: Yup.number().min(0, "Stock must be 0 or more").required("Stock is required"),
   productVariantOffers: Yup.array().of(Yup.number()),
   images: Yup.array().of(Yup.string()),
+  variantAttributes: Yup.array().of(
+    Yup.object({
+      attributeId: Yup.number().required(),
+      value: Yup.string(),
+    })
+  ),
 });
 
 const schema = Yup.object({
@@ -78,12 +87,7 @@ const schema = Yup.object({
   productTags: Yup.array().of(Yup.number()),
   frequentlyBoughtTogether: Yup.array().of(Yup.number()),
   images: Yup.array().of(Yup.string()),
-  attributes: Yup.array().of(
-    Yup.object({
-      name: Yup.string(),
-      value: Yup.string(),
-    })
-  ),
+  attributeIds: Yup.array().of(Yup.number()),
   variants: Yup.array().of(variantSchema).min(1, "At least one variant is required"),
   seo: Yup.object({
     metaTitle: requiredString("Meta title", 2),
@@ -117,6 +121,7 @@ function VariantPanel({
   isVariableProduct,
   onRemove,
   formik,
+  selectedAttributes,
 }: {
   variant: ProductVariant;
   index: number;
@@ -126,6 +131,7 @@ function VariantPanel({
   isVariableProduct: boolean;
   onRemove: () => void;
   formik: FormikProps<ProductFormValues>;
+  selectedAttributes: Array<{ id: number; name: string }>;
 }) {
   const prefix = `variants.${index}`;
 
@@ -212,6 +218,43 @@ function VariantPanel({
               />
             )}
 
+            {selectedAttributes.length > 0 && (
+              <div className="md:col-span-2 space-y-3 rounded-lg border border-zinc-100 bg-zinc-50 p-4">
+                <div>
+                  <h4 className="text-sm font-medium text-zinc-900">Attribute Values</h4>
+                  <p className="mt-1 text-xs text-zinc-500">
+                    Enter a value for each selected product attribute on this variant.
+                  </p>
+                </div>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  {selectedAttributes.map((attribute) => {
+                    const attributeIndex = variant.variantAttributes.findIndex(
+                      (item) => item.attributeId === attribute.id
+                    );
+                    const valuePath = `${prefix}.variantAttributes.${attributeIndex}.value`;
+
+                    return (
+                      <Input
+                        key={attribute.id}
+                        label={attribute.name}
+                        required
+                        name={valuePath}
+                        value={
+                          attributeIndex >= 0
+                            ? variant.variantAttributes[attributeIndex]?.value ?? ""
+                            : ""
+                        }
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur}
+                        placeholder={`Enter ${attribute.name}`}
+                        error={getNestedError(formik.touched, formik.errors, valuePath)}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             <div className="flex justify-end md:col-span-2">
               <Button type="button" variant="secondary" onClick={onRemove}>
                 <Trash2 className="h-4 w-4" />
@@ -237,6 +280,7 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
   const [offers, setOffers] = useState<Array<{ label: string; value: string | number }>>([]);
   const [tags, setTags] = useState<Array<{ label: string; value: string | number }>>([]);
   const [products, setProducts] = useState<Array<{ label: string; value: string | number }>>([]);
+  const [attributes, setAttributes] = useState<Array<{ label: string; value: string | number }>>([]);
 
   useEffect(() => {
     fetchBrandsOptions().then(setBrands);
@@ -244,6 +288,7 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
     fetchOffersOptions().then(setOffers);
     fetchProductTagsOptions().then(setTags);
     fetchProductsOptions().then(setProducts);
+    fetchAttributesOptions().then(setAttributes);
   }, []);
 
   const { formik, loading, loadError, isEdit } = useAdminCrudForm<ProductFormValues>({
@@ -268,15 +313,15 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
             images: normalizeImageArray(
               variant.images ?? variant.variantImages ?? variant.image
             ),
+            variantAttributes: mapVariantAttributesFromRecord(variant),
           }))
         : [emptyVariant()];
 
-      const attributes = Array.isArray(record.attributes)
-        ? (record.attributes as Record<string, unknown>[]).map((attr) => ({
-            name: String(attr.name ?? ""),
-            value: String(attr.value ?? ""),
-          }))
-        : [];
+      const attributeIds = mapAttributeIdsFromRecord(record);
+      const syncedVariants = syncVariantAttributes(
+        variants.length > 0 ? variants : [emptyVariant()],
+        attributeIds
+      );
 
       return {
         productName: String(record.productName ?? ""),
@@ -292,9 +337,9 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
         productOffers: normalizeIds(record.productOffers),
         productTags: normalizeIds(record.productTags ?? record.tags),
         frequentlyBoughtTogether: normalizeIds(record.frequentlyBoughtTogether),
-        images: mapProductImagesFromRecord(record, productType, variants),
-        attributes,
-        variants: variants.length > 0 ? variants : [emptyVariant()],
+        images: mapProductImagesFromRecord(record, productType, syncedVariants),
+        attributeIds,
+        variants: syncedVariants,
         seo: {
           metaTitle: String(seo.metaTitle ?? record.metaTitle ?? ""),
           metaDescription: String(seo.metaDescription ?? record.metaDescription ?? ""),
@@ -366,10 +411,17 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
       await formik.setFieldTouched(field, true, false);
     }
     if (step === 2) {
-      formik.values.variants.forEach((_, index) => {
+      formik.values.variants.forEach((variant, index) => {
         formik.setFieldTouched(`variants.${index}.name`, true, false);
         formik.setFieldTouched(`variants.${index}.price`, true, false);
         formik.setFieldTouched(`variants.${index}.stock`, true, false);
+        variant.variantAttributes.forEach((_, attributeIndex) => {
+          formik.setFieldTouched(
+            `variants.${index}.variantAttributes.${attributeIndex}.value`,
+            true,
+            false
+          );
+        });
       });
     }
   }
@@ -389,6 +441,14 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
   const isSimpleProduct = formik.values.productType === "simple";
   const isVariableProduct = formik.values.productType === "variable";
   const stepValid = isProductStepValid(currentStep, formik.values, formik.errors);
+  const selectedAttributes = formik.values.attributeIds
+    .map((attributeId) => {
+      const option = attributes.find((item) => Number(item.value) === attributeId);
+      return option
+        ? { id: attributeId, name: option.label }
+        : null;
+    })
+    .filter((item): item is { id: number; name: string } => item !== null);
 
   return (
     <AdminFormLayout
@@ -529,63 +589,21 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
               </FormFullWidth>
 
               <FormFullWidth>
-                <div className="mb-3 flex items-center justify-between">
-                  <h4 className="text-sm font-medium text-zinc-900">Product Attributes</h4>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    onClick={() =>
-                      formik.setFieldValue("attributes", [
-                        ...formik.values.attributes,
-                        emptyProductAttribute(),
-                      ])
-                    }
-                  >
-                    <Plus className="h-4 w-4" />
-                    Add Attribute
-                  </Button>
-                </div>
-
-                <div className="space-y-3">
-                  {formik.values.attributes.map((attribute, index) => (
-                    <div
-                      key={index}
-                      className="grid grid-cols-1 items-start gap-3 rounded-lg border border-zinc-100 bg-zinc-50 p-3 md:grid-cols-12"
-                    >
-                      <div className="md:col-span-5">
-                        <Input
-                          label="Name"
-                          name={`attributes.${index}.name`}
-                          value={attribute.name}
-                          onChange={formik.handleChange}
-                          placeholder="e.g. Weight, Material"
-                        />
-                      </div>
-                      <div className="md:col-span-6">
-                        <Input
-                          label="Value"
-                          name={`attributes.${index}.value`}
-                          value={attribute.value}
-                          onChange={formik.handleChange}
-                          placeholder="e.g. 500g, Brass"
-                        />
-                      </div>
-                      <div className="flex items-end md:col-span-1">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const next = formik.values.attributes.filter((_, i) => i !== index);
-                            formik.setFieldValue("attributes", next);
-                          }}
-                          className="rounded-lg p-2 text-red-500 hover:bg-red-50"
-                          aria-label="Remove attribute"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <FormMultiDropdown
+                  label="Product Attributes"
+                  value={formik.values.attributeIds}
+                  onChange={(values) => {
+                    formik.setFieldValue("attributeIds", values);
+                    formik.setFieldValue(
+                      "variants",
+                      syncVariantAttributes(formik.values.variants, values)
+                    );
+                  }}
+                  onBlur={() => formik.setFieldTouched("attributeIds", true)}
+                  options={attributes}
+                  placeholder="Select attributes for this product"
+                  hint="Choose catalog attributes here. Enter values for each variant on the Variations step."
+                />
               </FormFullWidth>
 
               {isSimpleProduct && (
@@ -628,6 +646,7 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
                             isVariableProduct={isVariableProduct}
                             onRemove={() => remove(index)}
                             formik={formik}
+                            selectedAttributes={selectedAttributes}
                           />
                         ))}
                       </div>
@@ -644,7 +663,13 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
                       <Button
                         type="button"
                         onClick={() => {
-                          push(emptyVariant());
+                          push({
+                            ...emptyVariant(),
+                            variantAttributes: formik.values.attributeIds.map((attributeId) => ({
+                              attributeId,
+                              value: "",
+                            })),
+                          });
                           setExpandedVariant(formik.values.variants.length);
                         }}
                       >

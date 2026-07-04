@@ -34,6 +34,7 @@ export function FormMultiDropdown({
 }: FormMultiDropdownProps) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
+  const onBlurRef = useRef(onBlur);
   const listId = useId();
 
   const selectedValues = value.map(String);
@@ -42,16 +43,24 @@ export function FormMultiDropdown({
   );
 
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (rootRef.current && !rootRef.current.contains(event.target as Node)) {
-        setOpen(false);
-        onBlur?.();
-      }
+    onBlurRef.current = onBlur;
+  }, [onBlur]);
+
+  useEffect(() => {
+    if (!open) return;
+
+    function handlePointerDown(event: PointerEvent) {
+      const target = event.target;
+      if (!(target instanceof Node)) return;
+      if (rootRef.current?.contains(target)) return;
+
+      setOpen(false);
+      onBlurRef.current?.();
     }
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [onBlur]);
+    document.addEventListener("pointerdown", handlePointerDown, true);
+    return () => document.removeEventListener("pointerdown", handlePointerDown, true);
+  }, [open]);
 
   function toggleOption(optionValue: string | number) {
     const key = String(optionValue);
