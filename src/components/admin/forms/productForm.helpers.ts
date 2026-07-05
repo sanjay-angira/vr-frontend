@@ -3,20 +3,122 @@ import { getIn } from "formik";
 
 export type AttributeViewOption = "value" | "code" | "image";
 
-export const ATTRIBUTE_VIEW_OPTIONS: Array<{
+export const COLOR_CUSTOMER_DISPLAY_OPTIONS: Array<{
   label: string;
   value: AttributeViewOption;
+  description: string;
 }> = [
-  { label: "Name", value: "value" },
-  { label: "Code", value: "code" },
-  { label: "Image", value: "image" },
+  {
+    label: "Color Name only",
+    value: "value",
+    description: "Customers see the color name text only.",
+  },
+  {
+    label: "Color Code (swatch)",
+    value: "code",
+    description: "Customers see a color swatch from the hex code.",
+  },
+  {
+    label: "Color Image",
+    value: "image",
+    description: "Customers see the uploaded color image.",
+  },
 ];
 
-export function getAttributeViewOptions(attributeName: string) {
-  return ATTRIBUTE_VIEW_OPTIONS.map((option) => ({
-    label: `${attributeName} ${option.label}`,
-    value: option.value,
-  }));
+export function hasColorAttribute(
+  attributeIds: number[],
+  attributeNameById: Record<number, string>
+): boolean {
+  return attributeIds.some((attributeId) =>
+    isColorAttribute(attributeNameById[attributeId] ?? "")
+  );
+}
+
+export function getColorAttributeId(
+  attributeIds: number[],
+  attributeNameById: Record<number, string>
+): number | undefined {
+  return attributeIds.find((attributeId) =>
+    isColorAttribute(attributeNameById[attributeId] ?? "")
+  );
+}
+
+export function normalizeViewOption(value: unknown): AttributeViewOption | undefined {
+  const normalized = String(value ?? "").trim().toLowerCase();
+  if (normalized === "value" || normalized === "code" || normalized === "image") {
+    return normalized;
+  }
+  return undefined;
+}
+
+export function normalizeColorCode(code: string | undefined): string {
+  if (!code?.trim()) return "#000000";
+  const trimmed = code.trim();
+  if (trimmed.startsWith("#")) return trimmed;
+  if (/^[0-9a-fA-F]{6}$/.test(trimmed)) return `#${trimmed}`;
+  return trimmed;
+}
+
+export function buildAttributeNameByIdFromRecord(
+  record: Record<string, unknown>,
+  variants: ProductVariant[] = []
+): Record<number, string> {
+  const map: Record<number, string> = {};
+
+  if (Array.isArray(record.productAttributes)) {
+    for (const item of record.productAttributes as Record<string, unknown>[]) {
+      const attribute = item.attribute as { id?: number; name?: string } | undefined;
+      if (attribute?.id) {
+        map[attribute.id] = String(attribute.name ?? "");
+      }
+    }
+  }
+
+  if (Array.isArray(record.variants)) {
+    for (const variant of record.variants as Record<string, unknown>[]) {
+      if (!Array.isArray(variant.variantAttributes)) continue;
+
+      for (const item of variant.variantAttributes as Record<string, unknown>[]) {
+        const attribute = item.attribute as { id?: number; name?: string } | undefined;
+        if (attribute?.id) {
+          map[attribute.id] = String(attribute.name ?? map[attribute.id] ?? "");
+        }
+      }
+    }
+  }
+
+  for (const variant of variants) {
+    for (const item of variant.variantAttributes) {
+      if (!map[item.attributeId] && item.viewOption) {
+        map[item.attributeId] = "Color";
+      }
+    }
+  }
+
+  return map;
+}
+
+export function inferColorCustomerDisplay(
+  variants: ProductVariant[],
+  attributeNameById: Record<number, string>
+): AttributeViewOption {
+  for (const variant of variants) {
+    for (const item of variant.variantAttributes) {
+      const attributeName = attributeNameById[item.attributeId] ?? "";
+      const isColor = isColorAttribute(attributeName);
+      const hasColorFields = Boolean(item.viewOption || item.code || item.image);
+
+      if (!isColor && !hasColorFields) continue;
+
+      const fromViewOption = normalizeViewOption(item.viewOption);
+      if (fromViewOption) return fromViewOption;
+
+      if (item.image?.trim()) return "image";
+      if (item.code?.trim()) return "code";
+    }
+  }
+
+  return "value";
 }
 
 export type VariantAttributeValue = {
@@ -57,7 +159,6 @@ export function createEmptyVariantAttribute(
       value: "",
       code: "#000000",
       image: "",
-      viewOption: "value",
     };
   }
 
@@ -99,6 +200,7 @@ export type ProductFormValues = {
   frequentlyBoughtTogether: number[];
   images: string[];
   attributeIds: number[];
+  colorCustomerDisplay: AttributeViewOption;
   variants: ProductVariant[];
   seo: ProductSeoValues;
 };
@@ -135,6 +237,7 @@ export const productFormInitialValues: ProductFormValues = {
   frequentlyBoughtTogether: [],
   images: [],
   attributeIds: [],
+  colorCustomerDisplay: "value",
   variants: [emptyVariant()],
   seo: {
     metaTitle: "",
@@ -161,12 +264,24 @@ export function syncVariantAttributes(
       if (existing) {
         if (attributeName && isColorAttribute(attributeName)) {
           return {
-            ...existing,
-            code: existing.code ?? "#000000",
+            attributeId,
+            value: existing.value ?? "",
+            code: normalizeColorCode(existing.code),
             image: existing.image ?? "",
-            viewOption: existing.viewOption ?? "value",
+            viewOption: normalizeViewOption(existing.viewOption),
           };
         }
+
+        if (existing.code || existing.image || existing.viewOption) {
+          return {
+            attributeId,
+            value: existing.value ?? "",
+            code: existing.code ? normalizeColorCode(existing.code) : undefined,
+            image: existing.image ?? "",
+            viewOption: normalizeViewOption(existing.viewOption),
+          };
+        }
+
         return { attributeId, value: existing.value ?? "" };
       }
 
@@ -223,14 +338,13 @@ export function mapVariantAttributesFromRecord(
       };
 
       if (isColorAttribute(attributeName) || item.code != null || item.image != null) {
-        mapped.code = String(item.code ?? "#000000");
+        mapped.code = normalizeColorCode(
+          item.code != null ? String(item.code) : undefined
+        );
         mapped.image = String(item.image ?? "");
-        const viewOption = String(item.viewOption ?? "value");
-        if (viewOption === "value" || viewOption === "code" || viewOption === "image") {
-          mapped.viewOption = viewOption;
-        } else {
-          mapped.viewOption = "value";
-        }
+        mapped.viewOption =
+          normalizeViewOption(item.viewOption) ??
+          (mapped.image ? "image" : mapped.code && mapped.code !== "#000000" ? "code" : "value");
       }
 
       return mapped;
@@ -352,9 +466,13 @@ export function buildProductPayload(
           };
 
           if (isColorAttribute(attributeName)) {
-            payload.code = item.code?.trim() ?? "";
-            payload.image = item.image?.trim() ?? "";
-            payload.viewOption = item.viewOption ?? "value";
+            payload.viewOption = values.colorCustomerDisplay;
+            if (values.colorCustomerDisplay === "code") {
+              payload.code = normalizeColorCode(item.code?.trim());
+            }
+            if (values.colorCustomerDisplay === "image") {
+              payload.image = item.image?.trim() ?? "";
+            }
           } else {
             if (item.code?.trim()) payload.code = item.code.trim();
             if (item.image?.trim()) payload.image = item.image.trim();
@@ -366,7 +484,18 @@ export function buildProductPayload(
         .filter((item) => {
           const attributeName = attributeNameById[Number(item.attributeId)] ?? "";
           if (!isColorAttribute(attributeName)) return true;
-          return Boolean(item.value && item.code && item.image && item.viewOption);
+
+          if (!item.value) return false;
+
+          if (values.colorCustomerDisplay === "code") {
+            return Boolean(item.code);
+          }
+
+          if (values.colorCustomerDisplay === "image") {
+            return Boolean(item.image);
+          }
+
+          return true;
         });
 
       if (variantAttributes.length > 0) {
@@ -410,11 +539,15 @@ function variantAttributesAreValid(
         return true;
       }
 
-      return (
-        Boolean(match.code?.trim()) &&
-        Boolean(match.image?.trim()) &&
-        Boolean(match.viewOption)
-      );
+      if (values.colorCustomerDisplay === "code") {
+        return Boolean(match.code?.trim());
+      }
+
+      if (values.colorCustomerDisplay === "image") {
+        return Boolean(match.image?.trim());
+      }
+
+      return true;
     })
   );
 }
@@ -429,6 +562,9 @@ export function isProductStepValid(
     case 1: {
       const categorySelected = Boolean(values.category || values.childCategories.some(Boolean));
       const descriptionText = values.description?.replace(/<[^>]*>/g, "").trim() ?? "";
+      const colorDisplayValid =
+        !hasColorAttribute(values.attributeIds, attributeNameById) ||
+        Boolean(values.colorCustomerDisplay);
       return (
         Boolean(values.productName?.trim()) &&
         Boolean(values.productSlug?.trim()) &&
@@ -438,6 +574,7 @@ export function isProductStepValid(
         Boolean(values.publishStatus) &&
         Boolean(values.brandId) &&
         categorySelected &&
+        colorDisplayValid &&
         !hasFieldError(errors, "productName") &&
         !hasFieldError(errors, "productSlug") &&
         !hasFieldError(errors, "shortDescription") &&
@@ -486,6 +623,7 @@ export const STEP_TOUCH_FIELDS: Record<number, string[]> = {
     "category",
     "childCategories",
     "attributeIds",
+    "colorCustomerDisplay",
   ],
   2: ["variants"],
   3: ["seo.metaTitle", "seo.metaDescription", "seo.metaKeywords", "seo.canonicalUrl", "seo.ogImage"],

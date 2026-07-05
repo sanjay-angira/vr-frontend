@@ -41,21 +41,26 @@ import { useSlugSync } from "./shared/useSlugSync";
 import { activeField, htmlMinLength, requiredString, slugField } from "./shared/validation";
 import {
   buildAttributeNameById,
+  buildAttributeNameByIdFromRecord,
   buildProductPayload,
+  COLOR_CUSTOMER_DISPLAY_OPTIONS,
   createEmptyVariantAttribute,
-  getAttributeViewOptions,
   emptyVariant,
+  hasColorAttribute,
+  inferColorCustomerDisplay,
   isColorAttribute,
   isProductStepValid,
   mapAttributeIdsFromRecord,
   mapProductImagesFromRecord,
   mapVariantAttributesFromRecord,
+  normalizeColorCode,
   normalizeIds,
   normalizeImageArray,
   PRODUCT_FORM_STEPS,
   productFormInitialValues,
   syncVariantAttributes,
   STEP_TOUCH_FIELDS,
+  type AttributeViewOption,
   type ProductFormValues,
   type ProductVariant,
 } from "./productForm.helpers";
@@ -95,6 +100,7 @@ const schema = Yup.object({
   frequentlyBoughtTogether: Yup.array().of(Yup.number()),
   images: Yup.array().of(Yup.string()),
   attributeIds: Yup.array().of(Yup.number()),
+  colorCustomerDisplay: Yup.string().oneOf(["value", "code", "image"]),
   variants: Yup.array().of(variantSchema).min(1, "At least one variant is required"),
   seo: Yup.object({
     metaTitle: requiredString("Meta title", 2),
@@ -129,6 +135,7 @@ function VariantPanel({
   onRemove,
   formik,
   selectedAttributes,
+  colorCustomerDisplay,
 }: {
   variant: ProductVariant;
   index: number;
@@ -139,6 +146,7 @@ function VariantPanel({
   onRemove: () => void;
   formik: FormikProps<ProductFormValues>;
   selectedAttributes: Array<{ id: number; name: string }>;
+  colorCustomerDisplay: AttributeViewOption;
 }) {
   const prefix = `variants.${index}`;
 
@@ -230,8 +238,13 @@ function VariantPanel({
                 <div>
                   <h4 className="text-sm font-medium text-zinc-900">Attribute Values</h4>
                   <p className="mt-1 text-xs text-zinc-500">
-                    Enter a value for each attribute. Color attributes also require
-                    a color code, image, and customer display option.
+                    Enter a value for each attribute. Color Name is always required.
+                    {colorCustomerDisplay === "code" &&
+                      " Also enter the color code for each variant."}
+                    {colorCustomerDisplay === "image" &&
+                      " Also upload the color image for each variant."}
+                    {colorCustomerDisplay === "value" &&
+                      " Customer display is set to color name only on the Product Information step."}
                   </p>
                 </div>
                 <div className="space-y-4">
@@ -267,13 +280,13 @@ function VariantPanel({
                     }
 
                     return (
-                      <div
-                        key={attribute.id}
-                      >
-                        {/* <h5 className="mb-4 text-sm font-semibold text-zinc-900">
-                          {attribute.name}
-                        </h5> */}
-                        <div className="grid grid-cols-4 gap-4">
+                      <div key={attribute.id}>
+                        <div
+                          className={`grid grid-cols-1 gap-4 ${colorCustomerDisplay === "value"
+                              ? "md:grid-cols-1"
+                              : "md:grid-cols-2"
+                            }`}
+                        >
                           <Input
                             label="Color Name"
                             required
@@ -288,53 +301,39 @@ function VariantPanel({
                               `${basePath}.value`
                             )}
                           />
-                          <Input
-                            label="Color Code"
-                            required
-                            type="color"
-                            name={`${basePath}.code`}
-                            value={attributeValue?.code ?? "#000000"}
-                            onChange={formik.handleChange}
-                            onBlur={formik.handleBlur}
-                            error={getNestedError(
-                              formik.touched,
-                              formik.errors,
-                              `${basePath}.code`
-                            )}
-                          />
-                          <ImageUploadField
-                            label="Color Image"
-                            required
-                            variant="compact"
-                            value={attributeValue?.image ?? ""}
-                            onChange={(url) =>
-                              formik.setFieldValue(`${basePath}.image`, url)
-                            }
-                            uploadPath={UPLOAD_PATHS.attributeColors}
-                            error={getNestedError(
-                              formik.touched,
-                              formik.errors,
-                              `${basePath}.image`
-                            )}
-                          />
-                          <FormDropdown
-                            label="Customer Display"
-                            required
-                            value={attributeValue?.viewOption ?? "value"}
-                            onChange={(value) =>
-                              formik.setFieldValue(`${basePath}.viewOption`, value)
-                            }
-                            onBlur={() =>
-                              formik.setFieldTouched(`${basePath}.viewOption`, true)
-                            }
-                            options={getAttributeViewOptions(attribute.name)}
-                            placeholder="Select display"
-                            error={getNestedError(
-                              formik.touched,
-                              formik.errors,
-                              `${basePath}.viewOption`
-                            )}
-                          />
+                          {colorCustomerDisplay === "code" && (
+                            <Input
+                              label="Color Code"
+                              required
+                              type="color"
+                              name={`${basePath}.code`}
+                              value={normalizeColorCode(attributeValue?.code)}
+                              onChange={formik.handleChange}
+                              onBlur={formik.handleBlur}
+                              error={getNestedError(
+                                formik.touched,
+                                formik.errors,
+                                `${basePath}.code`
+                              )}
+                            />
+                          )}
+                          {colorCustomerDisplay === "image" && (
+                            <ImageUploadField
+                              label="Color Image"
+                              required
+                              variant="compact"
+                              value={attributeValue?.image ?? ""}
+                              onChange={(url) =>
+                                formik.setFieldValue(`${basePath}.image`, url)
+                              }
+                              uploadPath={UPLOAD_PATHS.attributeColors}
+                              error={getNestedError(
+                                formik.touched,
+                                formik.errors,
+                                `${basePath}.image`
+                              )}
+                            />
+                          )}
                         </div>
                       </div>
                     );
@@ -392,31 +391,28 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
 
       const variants = Array.isArray(record.variants)
         ? (record.variants as Record<string, unknown>[]).map((variant) => ({
-            id: variant.id ? Number(variant.id) : undefined,
-            name: String(variant.name ?? ""),
-            sku: String(variant.sku ?? ""),
-            price: variant.price != null ? Number(variant.price) : ("" as const),
-            stock: variant.stock != null ? Number(variant.stock) : (1 as const),
-            productVariantOffers: normalizeIds(variant.productVariantOffers ?? variant.productOffers),
-            images: normalizeImageArray(
-              variant.images ?? variant.variantImages ?? variant.image
-            ),
-            variantAttributes: mapVariantAttributesFromRecord(variant),
-          }))
+          id: variant.id ? Number(variant.id) : undefined,
+          name: String(variant.name ?? ""),
+          sku: String(variant.sku ?? ""),
+          price: variant.price != null ? Number(variant.price) : ("" as const),
+          stock: variant.stock != null ? Number(variant.stock) : (1 as const),
+          productVariantOffers: normalizeIds(variant.productVariantOffers ?? variant.productOffers),
+          images: normalizeImageArray(
+            variant.images ?? variant.variantImages ?? variant.image
+          ),
+          variantAttributes: mapVariantAttributesFromRecord(variant),
+        }))
         : [emptyVariant()];
 
       const attributeIds = mapAttributeIdsFromRecord(record);
-      const attributeNameById: Record<number, string> = {};
-
-      if (Array.isArray(record.productAttributes)) {
-        for (const item of record.productAttributes as Record<string, unknown>[]) {
-          const attribute = item.attribute as { id?: number; name?: string } | undefined;
-          if (attribute?.id) {
-            attributeNameById[attribute.id] = String(attribute.name ?? "");
-          }
-        }
-      }
-
+      const attributeNameById = buildAttributeNameByIdFromRecord(
+        record,
+        variants.length > 0 ? variants : [emptyVariant()]
+      );
+      const colorCustomerDisplay = inferColorCustomerDisplay(
+        variants.length > 0 ? variants : [emptyVariant()],
+        attributeNameById
+      );
       const syncedVariants = syncVariantAttributes(
         variants.length > 0 ? variants : [emptyVariant()],
         attributeIds,
@@ -439,6 +435,7 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
         frequentlyBoughtTogether: normalizeIds(record.frequentlyBoughtTogether),
         images: mapProductImagesFromRecord(record, productType, syncedVariants),
         attributeIds,
+        colorCustomerDisplay,
         variants: syncedVariants,
         seo: {
           metaTitle: String(seo.metaTitle ?? record.metaTitle ?? ""),
@@ -528,21 +525,20 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
             false
           );
           if (isColorAttribute(attributeNameById[item.attributeId] ?? "")) {
-            formik.setFieldTouched(
-              `variants.${index}.variantAttributes.${attributeIndex}.code`,
-              true,
-              false
-            );
-            formik.setFieldTouched(
-              `variants.${index}.variantAttributes.${attributeIndex}.image`,
-              true,
-              false
-            );
-            formik.setFieldTouched(
-              `variants.${index}.variantAttributes.${attributeIndex}.viewOption`,
-              true,
-              false
-            );
+            if (formik.values.colorCustomerDisplay === "code") {
+              formik.setFieldTouched(
+                `variants.${index}.variantAttributes.${attributeIndex}.code`,
+                true,
+                false
+              );
+            }
+            if (formik.values.colorCustomerDisplay === "image") {
+              formik.setFieldTouched(
+                `variants.${index}.variantAttributes.${attributeIndex}.image`,
+                true,
+                false
+              );
+            }
           }
         });
       });
@@ -593,6 +589,13 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
     })
     .filter((item): item is { id: number; name: string } => item !== null);
   const attributeNameById = buildAttributeNameById(formik.values.attributeIds, attributes);
+  const showColorDisplaySettings = hasColorAttribute(
+    formik.values.attributeIds,
+    attributeNameById
+  );
+  const selectedColorDisplayOption = COLOR_CUSTOMER_DISPLAY_OPTIONS.find(
+    (option) => option.value === formik.values.colorCustomerDisplay
+  );
   const stepValid = isProductStepValid(
     currentStep,
     formik.values,
@@ -739,27 +742,63 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
               </FormFullWidth>
 
               <FormFullWidth>
-                <FormMultiDropdown
-                  label="Product Attributes"
-                  value={formik.values.attributeIds}
-                  onChange={(values) => {
-                    const nextAttributeNameById = buildAttributeNameById(values, attributes);
-                    formik.setFieldValue("attributeIds", values);
-                    formik.setFieldValue(
-                      "variants",
-                      syncVariantAttributes(
-                        formik.values.variants,
-                        values,
-                        nextAttributeNameById
-                      )
-                    );
-                  }}
-                  onBlur={() => formik.setFieldTouched("attributeIds", true)}
-                  options={attributes}
-                  placeholder="Select attributes for this product"
-                  hint="Choose catalog attributes here. Enter values for each variant on the Variations step."
-                />
+                <div
+                  className={`grid grid-cols-1 gap-5 ${
+                    showColorDisplaySettings ? "md:grid-cols-2" : ""
+                  }`}
+                >
+                  <FormMultiDropdown
+                    label="Product Attributes"
+                    value={formik.values.attributeIds}
+                    onChange={(values) => {
+                      const nextAttributeNameById = buildAttributeNameById(values, attributes);
+                      const includesColor = hasColorAttribute(values, nextAttributeNameById);
+
+                      formik.setFieldValue("attributeIds", values);
+                      formik.setFieldValue(
+                        "variants",
+                        syncVariantAttributes(
+                          formik.values.variants,
+                          values,
+                          nextAttributeNameById
+                        )
+                      );
+
+                      if (!includesColor) {
+                        formik.setFieldValue("colorCustomerDisplay", "value");
+                      }
+                    }}
+                    onBlur={() => formik.setFieldTouched("attributeIds", true)}
+                    options={attributes}
+                    placeholder="Select attributes for this product"
+                  />
+                  {showColorDisplaySettings && (
+                    <FormDropdown
+                      label="Display on customer side"
+                      required
+                      value={formik.values.colorCustomerDisplay}
+                      onChange={(value) =>
+                        formik.setFieldValue(
+                          "colorCustomerDisplay",
+                          value as AttributeViewOption
+                        )
+                      }
+                      onBlur={() => formik.setFieldTouched("colorCustomerDisplay", true)}
+                      options={COLOR_CUSTOMER_DISPLAY_OPTIONS.map((option) => ({
+                        label: option.label,
+                        value: option.value,
+                      }))}
+                      placeholder="Select color display"
+                      error={getNestedError(
+                        formik.touched,
+                        formik.errors,
+                        "colorCustomerDisplay"
+                      )}
+                    />
+                  )}
+                </div>
               </FormFullWidth>
+
 
               {isSimpleProduct && (
                 <MultiImageUploadField
@@ -802,6 +841,7 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
                             onRemove={() => remove(index)}
                             formik={formik}
                             selectedAttributes={selectedAttributes}
+                            colorCustomerDisplay={formik.values.colorCustomerDisplay}
                           />
                         ))}
                       </div>
