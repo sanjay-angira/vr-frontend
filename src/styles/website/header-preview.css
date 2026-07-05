@@ -51,7 +51,7 @@
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--header-border);
   z-index: 100;
-  box-shadow: 0 8px 24px rgba(21, 32, 46, 0.18);
+  box-shadow: 0 8px 24px rgba(10, 42, 27, 0.1);
 }
 
 .header-content {
@@ -108,17 +108,17 @@
 
 .nav-button:hover {
   color: var(--header-accent);
-  background-color: rgba(255, 255, 255, 0.08);
+  background-color: var(--vr-gold-muted);
 }
 
 .dropdown {
   position: absolute;
   top: 100%;
   left: 0;
-  border: 1px solid rgba(31, 43, 59, 0.12);
-  background-color: #fffdf8;
+  border: 1px solid rgba(10, 42, 27, 0.12);
+  background-color: var(--vr-white);
   border-radius: 0.5rem;
-  box-shadow: 0 12px 30px rgba(31, 43, 59, 0.16);
+  box-shadow: 0 12px 30px rgba(10, 42, 27, 0.12);
   min-width: 200px;
   z-index: 1000;
   visibility: hidden;
@@ -173,7 +173,7 @@
 
 .icon-button:hover {
   color: var(--header-accent);
-  background-color: rgba(255, 255, 255, 0.08);
+  background-color: var(--vr-gold-muted);
 }
 
 .mobile-nav-panel {
@@ -189,7 +189,7 @@
 
 .mobile-nav-panel .nav-button.is-sub {
   padding-left: 1.5rem;
-  color: rgba(254, 249, 229, 0.78);
+  color: var(--vr-text-muted);
   font-weight: 400;
 }
 

@@ -2,7 +2,7 @@
   display: flex;
   min-height: 100vh;
   flex-direction: column;
-  background: var(--cream-background, #fef9e5);
+  background: var(--cream-background, var(--vr-cream));
 }
 
 .auth-page-shell {

@@ -365,15 +365,15 @@ export default function ProductDetail({ product, fallbackImages = [] }: Props) {
                   gap: 8,
                   padding: "11px 14px",
                   borderRadius: 14,
-                  border: selectedOfferId === offer.offerId ? "1px solid #f97316" : "1px solid transparent",
-                  background: "#fff1dc",
-                  color: "#ea580c",
+                  border: selectedOfferId === offer.offerId ? "1px solid #c59d5f" : "1px solid transparent",
+                  background: "#f8f1e6",
+                  color: "#a67c3d",
                   fontSize: 13,
                   fontWeight: 700,
                   boxShadow:
                     selectedOfferId === offer.offerId
-                      ? "0 8px 20px rgba(234, 88, 12, 0.12)"
-                      : "0 6px 16px rgba(234, 88, 12, 0.06)",
+                      ? "0 8px 20px rgba(197, 157, 95, 0.18)"
+                      : "0 6px 16px rgba(197, 157, 95, 0.08)",
                   cursor: "pointer",
                   width: "fit-content",
                   maxWidth: "100%",

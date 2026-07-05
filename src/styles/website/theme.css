@@ -1,0 +1,57 @@
+/* Vrindavan Rasa — brand palette (from storefront design) */
+
+:root {
+  /* Core brand */
+  --vr-cream: #fcf9f2;
+  --vr-cream-dark: #f5efe4;
+  --vr-white: #ffffff;
+
+  --vr-gold: #c59d5f;
+  --vr-gold-light: #d4b483;
+  --vr-gold-dark: #a67c3d;
+  --vr-gold-muted: rgba(197, 157, 95, 0.14);
+
+  --vr-forest: #0a2a1b;
+  --vr-forest-light: #123d28;
+  --vr-forest-dark: #051a10;
+
+  --vr-text: #2d2926;
+  --vr-text-muted: #666666;
+  --vr-text-light: #8a8278;
+
+  /* Semantic tokens */
+  --primary-background: var(--vr-forest);
+  --header-bg: var(--vr-cream);
+  --header-text: var(--vr-text);
+  --header-accent: var(--vr-gold);
+  --header-border: rgba(197, 157, 95, 0.22);
+
+  --announcement-bg: var(--vr-forest);
+  --announcement-text: var(--vr-cream);
+
+  --cream-background: var(--vr-cream);
+  --primary-text: var(--vr-text);
+  --text-gray: var(--vr-text);
+  --text-muted: var(--vr-text-muted);
+
+  /* Legacy aliases → gold (keeps existing CSS working) */
+  --text-saffron: var(--vr-gold);
+  --saffron-primary: var(--vr-gold);
+  --saffron-light: var(--vr-gold-light);
+  --saffron-dark: var(--vr-gold-dark);
+  --gold: var(--vr-gold);
+
+  --cream: var(--vr-cream);
+  --brown: var(--vr-text);
+  --brown-light: #6b5b4f;
+  --white: var(--vr-white);
+  --gray-light: var(--vr-cream-dark);
+  --gray-medium: var(--vr-text-light);
+  --shadow: rgba(10, 42, 27, 0.14);
+
+  /* Footer */
+  --footer-bg: var(--vr-forest);
+  --footer-text: rgba(252, 249, 242, 0.78);
+  --footer-heading: var(--vr-gold);
+  --footer-border: rgba(197, 157, 95, 0.22);
+}

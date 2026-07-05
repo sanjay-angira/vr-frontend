@@ -1,13 +1,7 @@
 /* Website footer — single source of truth for live site + admin preview */
 
 .footer {
-  --header-accent: #e8a838;
-  --footer-bg: #15202e;
-  --footer-text: #d8cdb8;
-  --footer-heading: #ffffff;
-  --footer-border: rgba(232, 220, 200, 0.14);
-
-  background: linear-gradient(180deg, var(--footer-bg) 0%, #0f1724 100%);
+  background: linear-gradient(180deg, var(--footer-bg) 0%, var(--vr-forest-dark) 100%);
   padding: 3.5rem 0 2rem;
   color: var(--footer-text);
 }
@@ -90,8 +84,8 @@
 }
 
 .footer-social-link:hover {
-  background: rgba(232, 168, 56, 0.15);
-  border-color: rgba(232, 168, 56, 0.45);
+  background: var(--vr-gold-muted);
+  border-color: rgba(197, 157, 95, 0.45);
 }
 
 .footer-social-icon {
