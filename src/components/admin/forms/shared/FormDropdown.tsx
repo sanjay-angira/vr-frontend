@@ -37,11 +37,65 @@ export function FormDropdown({
   className,
 }: FormDropdownProps) {
   const [open, setOpen] = useState(false);
+  const [placement, setPlacement] = useState<"bottom" | "top">("bottom");
+  const [menuMaxHeight, setMenuMaxHeight] = useState(240);
   const rootRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const listRef = useRef<HTMLUListElement>(null);
   const onBlurRef = useRef(onBlur);
   const listId = useId();
 
   const selected = options.find((option) => String(option.value) === String(value));
+
+  const MENU_GAP = 4;
+  const MENU_MAX_HEIGHT = 240;
+  const OPTION_HEIGHT = 42;
+
+  function estimateMenuHeight() {
+    return Math.min(options.length * OPTION_HEIGHT + 8, MENU_MAX_HEIGHT);
+  }
+
+  function updateMenuPlacement() {
+    const trigger = triggerRef.current;
+    if (!trigger) return;
+
+    const rect = trigger.getBoundingClientRect();
+    const estimatedHeight = listRef.current?.offsetHeight ?? estimateMenuHeight();
+    const spaceBelow = window.innerHeight - rect.bottom - MENU_GAP;
+    const spaceAbove = rect.top - MENU_GAP;
+    const openUpward = spaceBelow < estimatedHeight && spaceAbove > spaceBelow;
+
+    setPlacement(openUpward ? "top" : "bottom");
+    setMenuMaxHeight(
+      Math.max(120, Math.min(MENU_MAX_HEIGHT, openUpward ? spaceAbove : spaceBelow))
+    );
+  }
+
+  function handleToggle() {
+    if (disabled) return;
+
+    if (open) {
+      setOpen(false);
+      onBlurRef.current?.();
+      return;
+    }
+
+    const trigger = triggerRef.current;
+    if (trigger) {
+      const rect = trigger.getBoundingClientRect();
+      const estimatedHeight = estimateMenuHeight();
+      const spaceBelow = window.innerHeight - rect.bottom - MENU_GAP;
+      const spaceAbove = rect.top - MENU_GAP;
+      const openUpward = spaceBelow < estimatedHeight && spaceAbove > spaceBelow;
+
+      setPlacement(openUpward ? "top" : "bottom");
+      setMenuMaxHeight(
+        Math.max(120, Math.min(MENU_MAX_HEIGHT, openUpward ? spaceAbove : spaceBelow))
+      );
+    }
+
+    setOpen(true);
+  }
 
   useEffect(() => {
     onBlurRef.current = onBlur;
@@ -49,6 +103,8 @@ export function FormDropdown({
 
   useEffect(() => {
     if (!open) return;
+
+    updateMenuPlacement();
 
     function handlePointerDown(event: PointerEvent) {
       const target = event.target;
@@ -59,21 +115,33 @@ export function FormDropdown({
       onBlurRef.current?.();
     }
 
+    function handleReposition() {
+      updateMenuPlacement();
+    }
+
     document.addEventListener("pointerdown", handlePointerDown, true);
-    return () => document.removeEventListener("pointerdown", handlePointerDown, true);
-  }, [open]);
+    window.addEventListener("resize", handleReposition);
+    window.addEventListener("scroll", handleReposition, true);
+
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown, true);
+      window.removeEventListener("resize", handleReposition);
+      window.removeEventListener("scroll", handleReposition, true);
+    };
+  }, [open, options.length]);
 
   return (
     <div className={`relative ${className ?? ""}`} ref={rootRef}>
       <FormLabel label={label} required={required} />
 
       <button
+        ref={triggerRef}
         type="button"
         disabled={disabled}
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-controls={listId}
-        onClick={() => setOpen((prev) => !prev)}
+        onClick={handleToggle}
         className={`flex w-full items-center justify-between rounded-lg border bg-white px-3.5 py-2.5 text-left text-sm transition-colors focus:border-admin-primary focus:outline-none focus:ring-2 focus:ring-admin-primary/15 disabled:cursor-not-allowed disabled:opacity-60 ${
           error ? "border-red-500" : "border-zinc-300"
         }`}
@@ -88,9 +156,13 @@ export function FormDropdown({
 
       {open && (
         <ul
+          ref={listRef}
           id={listId}
           role="listbox"
-          className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-zinc-200 bg-white py-1 shadow-lg"
+          style={{ maxHeight: menuMaxHeight }}
+          className={`absolute z-50 w-full overflow-auto rounded-lg border border-zinc-200 bg-white py-1 shadow-lg ${
+            placement === "top" ? "bottom-full mb-1" : "top-full mt-1"
+          }`}
         >
           {options.length === 0 ? (
             <li className="px-3.5 py-2.5 text-sm text-zinc-400">No options available</li>

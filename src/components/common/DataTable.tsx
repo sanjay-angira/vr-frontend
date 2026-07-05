@@ -243,7 +243,7 @@ export function DataTable<T extends object>({
 
   return (
     <>
-    <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
+    <div className="rounded-xl border border-zinc-200 bg-white shadow-sm">
       {showToolbar && (
         <div className="flex flex-col gap-3 border-b border-zinc-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
           {searchable ? (
@@ -392,7 +392,7 @@ export function DataTable<T extends object>({
       </div>
 
       {isPaginated && (
-        <div className="flex flex-col gap-3 border-t border-zinc-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="relative z-10 flex flex-col gap-3 overflow-visible border-t border-zinc-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm text-zinc-500">
             {totalCount > 0
               ? `Showing ${rangeStart}–${rangeEnd} of ${totalCount} records`
@@ -401,7 +401,7 @@ export function DataTable<T extends object>({
 
           <div className="flex flex-wrap items-center gap-3">
             {onPageSizeChange && (
-              <div className="flex items-center gap-2">
+              <div className="relative z-20 flex items-center gap-2">
                 <span className="text-sm text-zinc-600">Rows per page</span>
                 <FormDropdown
                   label=""
