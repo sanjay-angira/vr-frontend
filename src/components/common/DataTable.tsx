@@ -30,9 +30,9 @@ export type DataTableProps<T extends object> = {
   onAdd?: () => void;
   addHref?: string;
   onView?: (row: T) => void;
-  viewHref?: (row: T) => string;
+  viewHref?: (row: T) => string | undefined;
   onEdit?: (row: T) => void;
-  editHref?: (row: T) => string;
+  editHref?: (row: T) => string | undefined;
   onDelete?: (row: T) => void | Promise<void>;
   deleteConfirmTitle?: string;
   deleteConfirmMessage?: string | ((row: T) => string);
