@@ -173,7 +173,7 @@ function VariantPanel({
   const slugManuallyEdited = useRef(Boolean(variant.id && variant.slug));
 
   useEffect(() => {
-    if (slugManuallyEdited.current || !isVariableProduct) return;
+    if (slugManuallyEdited.current) return;
 
     const nextSlug = variant.name.trim()
       ? buildVariantSlug(productSlug, variant.name)
@@ -182,12 +182,12 @@ function VariantPanel({
     if (variant.slug !== nextSlug) {
       void formik.setFieldValue(`${prefix}.slug`, nextSlug, false);
     }
-  }, [formik, isVariableProduct, prefix, productSlug, variant.name, variant.slug]);
+  }, [formik, prefix, productSlug, variant.name, variant.slug]);
 
   function handleVariantNameChange(value: string) {
     void formik.setFieldValue(`${prefix}.name`, value, false);
 
-    if (!slugManuallyEdited.current && isVariableProduct) {
+    if (!slugManuallyEdited.current) {
       const nextSlug = value.trim()
         ? buildVariantSlug(productSlug, value)
         : getVariantSlugPrefix(productSlug);
@@ -237,18 +237,16 @@ function VariantPanel({
                   : "Optional for simple products. Defaults to product name."
               }
             />
-            {isVariableProduct && (
-              <Input
-                label="Variant Slug"
-                required
-                name={`${prefix}.slug`}
-                value={variant.slug}
-                onChange={(event) => handleVariantSlugChange(event.target.value)}
-                onBlur={formik.handleBlur}
-                error={getNestedError(formik.touched, formik.errors, `${prefix}.slug`)}
-                hint={`Starts with product slug: ${getVariantSlugPrefix(productSlug) || "{product-slug}-"}`}
-              />
-            )}
+            <Input
+              label="Variant Slug"
+              required={isVariableProduct}
+              name={`${prefix}.slug`}
+              value={variant.slug}
+              onChange={(event) => handleVariantSlugChange(event.target.value)}
+              onBlur={formik.handleBlur}
+              error={getNestedError(formik.touched, formik.errors, `${prefix}.slug`)}
+              hint={`Starts with product slug: ${getVariantSlugPrefix(productSlug) || "{product-slug}-"}`}
+            />
             <Input
               label="SKU"
               name={`${prefix}.sku`}

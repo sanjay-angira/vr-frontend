@@ -452,9 +452,7 @@ export function buildProductPayload(
       const variantPayload: Record<string, unknown> = {
         ...(variant.id ? { id: variant.id } : {}),
         name: variantName,
-        slug: isVariableProduct
-          ? variant.slug.trim()
-          : variant.slug.trim() || values.productSlug.trim(),
+        slug: variant.slug.trim() || values.productSlug.trim(),
         price: Number(variant.price),
         stock: Number(variant.stock),
         ...(variant.sku ? { sku: variant.sku } : {}),

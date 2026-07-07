@@ -337,8 +337,12 @@ export function ProductView({ module, recordId }: AdminViewProps) {
                       <td className="px-3 py-3 font-medium text-zinc-900">
                         {variant.name || "—"}
                       </td>
-                      <td className="max-w-[180px] truncate px-3 py-3 text-zinc-600">
-                        {variant.slug || "—"}
+                      <td className="px-3 py-3 break-all text-zinc-600">
+                        {variant.slug ? (
+                          <span title={variant.slug}>{variant.slug}</span>
+                        ) : (
+                          "—"
+                        )}
                       </td>
                       <td className="px-3 py-3 text-zinc-600">{variant.sku || "—"}</td>
                       <td className="px-3 py-3 text-zinc-900">{formatPrice(variant.price)}</td>
