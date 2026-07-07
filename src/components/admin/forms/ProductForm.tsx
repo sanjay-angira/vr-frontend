@@ -9,7 +9,7 @@ import {
   Plus,
   Trash2,
 } from "lucide-react";
-import { useEffect, useState, type FormEvent, type MouseEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent, type MouseEvent } from "react";
 import * as Yup from "yup";
 import { Button } from "@/components/common/Button";
 import { Input } from "@/components/common/Input";
@@ -38,6 +38,7 @@ import {
 } from "./shared/fetchOptions";
 import { useAdminCrudForm } from "./shared/useAdminCrudForm";
 import { useSlugSync } from "./shared/useSlugSync";
+import { buildVariantSlug } from "./shared/generateSlug";
 import { activeField, htmlMinLength, requiredString, slugField } from "./shared/validation";
 import {
   buildAttributeNameById,
@@ -46,6 +47,8 @@ import {
   COLOR_CUSTOMER_DISPLAY_OPTIONS,
   createEmptyVariantAttribute,
   emptyVariant,
+  getVariantSlugPrefix,
+  VARIANT_SLUG_PATTERN,
   hasColorAttribute,
   inferColorCustomerDisplay,
   isColorAttribute,
@@ -68,6 +71,7 @@ import { FormQuillEditor } from "./shared/FormQuillEditor";
 
 const variantSchema = Yup.object({
   name: requiredString("Variant name", 1),
+  slug: Yup.string(),
   sku: Yup.string(),
   price: Yup.number().min(0.01, "Price must be at least 0.01").required("Price is required"),
   stock: Yup.number().min(0, "Stock must be 0 or more").required("Stock is required"),
@@ -101,7 +105,22 @@ const schema = Yup.object({
   images: Yup.array().of(Yup.string()),
   attributeIds: Yup.array().of(Yup.number()),
   colorCustomerDisplay: Yup.string().oneOf(["value", "code", "image"]),
-  variants: Yup.array().of(variantSchema).min(1, "At least one variant is required"),
+  variants: Yup.array()
+    .of(variantSchema)
+    .min(1, "At least one variant is required")
+    .test(
+      "variable-variant-slugs",
+      "Each variant needs a valid slug",
+      function (variants) {
+        if (this.parent.productType !== "variable") return true;
+        if (!Array.isArray(variants)) return false;
+        return variants.every(
+          (variant) =>
+            typeof variant?.slug === "string" &&
+            VARIANT_SLUG_PATTERN.test(variant.slug.trim())
+        );
+      }
+    ),
   seo: Yup.object({
     metaTitle: requiredString("Meta title", 2),
     metaDescription: requiredString("Meta description", 2),
@@ -132,6 +151,7 @@ function VariantPanel({
   onToggle,
   offers,
   isVariableProduct,
+  productSlug,
   onRemove,
   formik,
   selectedAttributes,
@@ -143,12 +163,42 @@ function VariantPanel({
   onToggle: () => void;
   offers: Array<{ label: string; value: string | number }>;
   isVariableProduct: boolean;
+  productSlug: string;
   onRemove: () => void;
   formik: FormikProps<ProductFormValues>;
   selectedAttributes: Array<{ id: number; name: string }>;
   colorCustomerDisplay: AttributeViewOption;
 }) {
   const prefix = `variants.${index}`;
+  const slugManuallyEdited = useRef(Boolean(variant.id && variant.slug));
+
+  useEffect(() => {
+    if (slugManuallyEdited.current || !isVariableProduct) return;
+
+    const nextSlug = variant.name.trim()
+      ? buildVariantSlug(productSlug, variant.name)
+      : getVariantSlugPrefix(productSlug);
+
+    if (variant.slug !== nextSlug) {
+      void formik.setFieldValue(`${prefix}.slug`, nextSlug, false);
+    }
+  }, [formik, isVariableProduct, prefix, productSlug, variant.name, variant.slug]);
+
+  function handleVariantNameChange(value: string) {
+    void formik.setFieldValue(`${prefix}.name`, value, false);
+
+    if (!slugManuallyEdited.current && isVariableProduct) {
+      const nextSlug = value.trim()
+        ? buildVariantSlug(productSlug, value)
+        : getVariantSlugPrefix(productSlug);
+      void formik.setFieldValue(`${prefix}.slug`, nextSlug, false);
+    }
+  }
+
+  function handleVariantSlugChange(value: string) {
+    slugManuallyEdited.current = true;
+    void formik.setFieldValue(`${prefix}.slug`, value, false);
+  }
 
   return (
     <div className="overflow-hidden rounded-lg border border-zinc-200 bg-white">
@@ -175,13 +225,30 @@ function VariantPanel({
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
             <Input
               label="Variant Name"
-              required
+              required={isVariableProduct}
               name={`${prefix}.name`}
               value={variant.name}
-              onChange={formik.handleChange}
+              onChange={(event) => handleVariantNameChange(event.target.value)}
               onBlur={formik.handleBlur}
               error={getNestedError(formik.touched, formik.errors, `${prefix}.name`)}
+              hint={
+                isVariableProduct
+                  ? "Required. Slug auto-fills from this name."
+                  : "Optional for simple products. Defaults to product name."
+              }
             />
+            {isVariableProduct && (
+              <Input
+                label="Variant Slug"
+                required
+                name={`${prefix}.slug`}
+                value={variant.slug}
+                onChange={(event) => handleVariantSlugChange(event.target.value)}
+                onBlur={formik.handleBlur}
+                error={getNestedError(formik.touched, formik.errors, `${prefix}.slug`)}
+                hint={`Starts with product slug: ${getVariantSlugPrefix(productSlug) || "{product-slug}-"}`}
+              />
+            )}
             <Input
               label="SKU"
               name={`${prefix}.sku`}
@@ -343,10 +410,12 @@ function VariantPanel({
             )}
 
             <div className="flex justify-end md:col-span-2">
-              <Button type="button" variant="secondary" onClick={onRemove}>
-                <Trash2 className="h-4 w-4" />
-                Remove Variant
-              </Button>
+              {isVariableProduct && (
+                <Button type="button" variant="secondary" onClick={onRemove}>
+                  <Trash2 className="h-4 w-4" />
+                  Remove Variant
+                </Button>
+              )}
             </div>
           </div>
         </div>
@@ -393,6 +462,7 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
         ? (record.variants as Record<string, unknown>[]).map((variant) => ({
           id: variant.id ? Number(variant.id) : undefined,
           name: String(variant.name ?? ""),
+          slug: String(variant.slug ?? ""),
           sku: String(variant.sku ?? ""),
           price: variant.price != null ? Number(variant.price) : ("" as const),
           stock: variant.stock != null ? Number(variant.stock) : (1 as const),
@@ -516,6 +586,7 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
 
       formik.values.variants.forEach((variant, index) => {
         formik.setFieldTouched(`variants.${index}.name`, true, false);
+        formik.setFieldTouched(`variants.${index}.slug`, true, false);
         formik.setFieldTouched(`variants.${index}.price`, true, false);
         formik.setFieldTouched(`variants.${index}.stock`, true, false);
         variant.variantAttributes.forEach((item, attributeIndex) => {
@@ -555,6 +626,15 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
 
     if (!isProductStepValid(currentStep, formik.values, errors, namesById)) {
       return;
+    }
+
+    if (currentStep === 1 && formik.values.productType === "variable") {
+      const slugPrefix = getVariantSlugPrefix(formik.values.productSlug);
+      formik.values.variants.forEach((variant, index) => {
+        if (!variant.slug.trim()) {
+          void formik.setFieldValue(`variants.${index}.slug`, slugPrefix, false);
+        }
+      });
     }
 
     // Defer step change so the same click cannot land on the submit button
@@ -663,7 +743,7 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
                 onChange={(value) => {
                   formik.setFieldValue("productType", value);
                   if (value === "simple" && formik.values.variants.length === 0) {
-                    formik.setFieldValue("variants", [emptyVariant()]);
+                    formik.setFieldValue("variants", [emptyVariant(formik.values.productSlug)]);
                   }
                 }}
                 onBlur={() => formik.setFieldTouched("productType", true)}
@@ -838,6 +918,7 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
                             }
                             offers={offers}
                             isVariableProduct={isVariableProduct}
+                            productSlug={formik.values.productSlug}
                             onRemove={() => remove(index)}
                             formik={formik}
                             selectedAttributes={selectedAttributes}
@@ -854,26 +935,28 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
                       </div>
                     )}
 
-                    <div className="border-t border-zinc-200 pt-5 text-center">
-                      <Button
-                        type="button"
-                        onClick={() => {
-                          push({
-                            ...emptyVariant(),
-                            variantAttributes: formik.values.attributeIds.map((attributeId) =>
-                              createEmptyVariantAttribute(
-                                attributeId,
-                                attributeNameById[attributeId]
-                              )
-                            ),
-                          });
-                          setExpandedVariant(formik.values.variants.length);
-                        }}
-                      >
-                        <Plus className="h-4 w-4" />
-                        Add Variant
-                      </Button>
-                    </div>
+                    {isVariableProduct && (
+                      <div className="border-t border-zinc-200 pt-5 text-center">
+                        <Button
+                          type="button"
+                          onClick={() => {
+                            push({
+                              ...emptyVariant(formik.values.productSlug),
+                              variantAttributes: formik.values.attributeIds.map((attributeId) =>
+                                createEmptyVariantAttribute(
+                                  attributeId,
+                                  attributeNameById[attributeId]
+                                )
+                              ),
+                            });
+                            setExpandedVariant(formik.values.variants.length);
+                          }}
+                        >
+                          <Plus className="h-4 w-4" />
+                          Add Variant
+                        </Button>
+                      </div>
+                    )}
                   </>
                 )}
               </FieldArray>

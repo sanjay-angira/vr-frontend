@@ -1,12 +1,7 @@
-import type { AdminModuleKey } from "@/components/admin/commonTable/adminModuleTable.config";
+import { getAdminModuleTableConfig } from "@/components/admin/commonTable/adminModuleTable.config";
 
-/** Modules with a dedicated read-only view page */
-export const ADMIN_VIEW_MODULES = [
-  "cms-pages",
-] as const satisfies readonly AdminModuleKey[];
-
-const adminViewModuleSet = new Set<string>(ADMIN_VIEW_MODULES);
-
+/** Modules whose table config includes a view action */
 export function hasAdminView(module: string): boolean {
-  return adminViewModuleSet.has(module);
+  const config = getAdminModuleTableConfig(module);
+  return Boolean(config?.actions.includes("view"));
 }

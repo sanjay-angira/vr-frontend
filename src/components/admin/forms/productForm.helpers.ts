@@ -1,5 +1,15 @@
 import type { FormikErrors } from "formik";
 import { getIn } from "formik";
+import { buildVariantSlug } from "./shared/generateSlug";
+
+export { buildVariantSlug };
+
+export function getVariantSlugPrefix(productSlug: string): string {
+  const prefix = productSlug.trim();
+  return prefix ? `${prefix}-` : "";
+}
+
+export const VARIANT_SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)+$/;
 
 export type AttributeViewOption = "value" | "code" | "image";
 
@@ -168,6 +178,7 @@ export function createEmptyVariantAttribute(
 export type ProductVariant = {
   id?: number;
   name: string;
+  slug: string;
   sku: string;
   price: number | "";
   stock: number | "";
@@ -211,8 +222,9 @@ export const PRODUCT_FORM_STEPS = [
   { id: 3, label: "Product SEO Settings" },
 ] as const;
 
-export const emptyVariant = (): ProductVariant => ({
+export const emptyVariant = (productSlug = ""): ProductVariant => ({
   name: "",
+  slug: getVariantSlugPrefix(productSlug),
   sku: "",
   price: "",
   stock: 1,
@@ -433,9 +445,16 @@ export function buildProductPayload(
     images: productImages,
     attributes,
     variants: values.variants.map((variant) => {
+      const variantName = isVariableProduct
+        ? variant.name.trim()
+        : variant.name.trim() || values.productName.trim();
+
       const variantPayload: Record<string, unknown> = {
         ...(variant.id ? { id: variant.id } : {}),
-        name: variant.name,
+        name: variantName,
+        slug: isVariableProduct
+          ? variant.slug.trim()
+          : variant.slug.trim() || values.productSlug.trim(),
         price: Number(variant.price),
         stock: Number(variant.stock),
         ...(variant.sku ? { sku: variant.sku } : {}),
@@ -585,17 +604,33 @@ export function isProductStepValid(
     }
     case 2: {
       if (values.variants.length === 0) return false;
+      const requiresVariantName = values.productType === "variable";
       return (
         values.variants.every(
-          (variant, index) =>
-            Boolean(variant.name?.trim()) &&
-            variant.price !== "" &&
-            Number(variant.price) >= 0.01 &&
-            variant.stock !== "" &&
-            Number(variant.stock) >= 0 &&
-            !hasFieldError(errors, `variants.${index}.name`) &&
-            !hasFieldError(errors, `variants.${index}.price`) &&
-            !hasFieldError(errors, `variants.${index}.stock`)
+          (variant, index) => {
+            const hasValidName = requiresVariantName
+              ? Boolean(variant.name?.trim())
+              : Boolean(variant.name?.trim() || values.productName?.trim());
+
+            const slugValid = requiresVariantName
+              ? Boolean(variant.slug?.trim()) &&
+                VARIANT_SLUG_PATTERN.test(variant.slug.trim()) &&
+                !hasFieldError(errors, `variants.${index}.slug`)
+              : true;
+
+            return (
+              hasValidName &&
+              slugValid &&
+              variant.price !== "" &&
+              Number(variant.price) >= 0.01 &&
+              variant.stock !== "" &&
+              Number(variant.stock) >= 0 &&
+              !hasFieldError(errors, `variants.${index}.name`) &&
+              !hasFieldError(errors, `variants.${index}.slug`) &&
+              !hasFieldError(errors, `variants.${index}.price`) &&
+              !hasFieldError(errors, `variants.${index}.stock`)
+            );
+          }
         ) && variantAttributesAreValid(values, attributeNameById)
       );
     }

@@ -10,3 +10,12 @@ export function generateSlug(text: string): string {
     .replace(/^-+/, "")
     .replace(/-+$/, "");
 }
+
+export function buildVariantSlug(productSlug: string, variantName: string): string {
+  const nameSlug = generateSlug(variantName);
+  const prefix = productSlug.trim();
+  if (!nameSlug) {
+    return prefix;
+  }
+  return prefix ? `${prefix}-${nameSlug}` : nameSlug;
+}

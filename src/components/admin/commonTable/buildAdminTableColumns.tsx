@@ -233,7 +233,7 @@ function DefaultCell({ value }: { value: unknown }) {
   return <span>{String(value)}</span>;
 }
 
-function renderAdminCell(
+export function renderAdminCell(
   row: ModuleTableRow,
   column: AdminTableColumnDefinition
 ): React.ReactNode {

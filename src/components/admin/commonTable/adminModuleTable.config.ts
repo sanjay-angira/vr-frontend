@@ -53,8 +53,6 @@ export type AdminModuleTableConfig = {
   columns: AdminTableColumnDefinition[];
   actions: DataTableAction[];
   addLabel?: string;
-  /** Use `/admin/{module}/view/{id}` for view action (e.g. cms-pages) */
-  viewSubpath?: "view";
 };
 
 export const adminModuleTableConfig: Record<
@@ -198,7 +196,6 @@ export const adminModuleTableConfig: Record<
     columns: CmsPagesComponentColumns,
     actions: ["add", "view", "edit", "delete"],
     addLabel: "Add page",
-    viewSubpath: "view",
   },
   "header-settings": {
     label: "Header Settings",
@@ -289,13 +286,9 @@ export function getAdminModuleEditPath(
 
 export function getAdminModuleViewPath(
   module: string,
-  id: string | number,
-  viewSubpath?: "view"
+  id: string | number
 ): string {
-  if (viewSubpath) {
-    return `/admin/${module}/${viewSubpath}/${id}`;
-  }
-  return getAdminModuleEditPath(module, id);
+  return `/admin/${module}/view/${id}`;
 }
 
 export function getVisibleAdminColumns(

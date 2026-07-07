@@ -170,16 +170,22 @@ export function AdminModuleTable({ module }: AdminModuleTableProps) {
         onSearchChange={setSearch}
         isSearching={isLoading && Boolean(search.trim())}
         searchPlaceholder={`Search ${config.label.toLowerCase()}...`}
-        viewHref={(row) =>
-          getAdminModuleViewPath(
-            module,
-            String(row.id),
-            config.viewSubpath
-          )
-        }
+        viewHref={(row) => {
+          const id = row.id;
+          if (id === null || id === undefined || id === "") {
+            return undefined;
+          }
+          return getAdminModuleViewPath(module, String(id));
+        }}
         editHref={
           supportsEdit
-            ? (row) => getAdminModuleEditPath(module, String(row.id))
+            ? (row) => {
+                const id = row.id;
+                if (id === null || id === undefined || id === "") {
+                  return `/admin/${module}`;
+                }
+                return getAdminModuleEditPath(module, String(id));
+              }
             : undefined
         }
         onDelete={
