@@ -1,7 +1,9 @@
 "use client";
 
-import { ChevronDown, X } from "lucide-react";
+import { ChevronDown, Plus, Trash2, X } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
+import { DeleteConfirmationModal } from "@/components/admin/shared/DeleteConfirmationModal";
+import { Button } from "@/components/common/Button";
 import type { DropdownOption } from "./FormDropdown";
 import { FormLabel } from "./FormLabel";
 
@@ -17,6 +19,14 @@ type FormMultiDropdownProps = {
   hint?: string;
   disabled?: boolean;
   className?: string;
+  /** Show inline "add new" field at top of dropdown */
+  creatable?: boolean;
+  createLabel?: string;
+  createPlaceholder?: string;
+  onCreate?: (name: string) => Promise<DropdownOption | null>;
+  /** Show delete button on each option row */
+  deletable?: boolean;
+  onDeleteOption?: (option: DropdownOption) => Promise<void>;
 };
 
 export function FormMultiDropdown({
@@ -31,8 +41,19 @@ export function FormMultiDropdown({
   hint,
   disabled,
   className,
+  creatable = false,
+  createLabel = "Add",
+  createPlaceholder = "New item name",
+  onCreate,
+  deletable = false,
+  onDeleteOption,
 }: FormMultiDropdownProps) {
   const [open, setOpen] = useState(false);
+  const [newItemName, setNewItemName] = useState("");
+  const [isCreating, setIsCreating] = useState(false);
+  const [createError, setCreateError] = useState("");
+  const [pendingDeleteOption, setPendingDeleteOption] = useState<DropdownOption | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const onBlurRef = useRef(onBlur);
   const listId = useId();
@@ -76,6 +97,53 @@ export function FormMultiDropdown({
 
   function removeOption(optionValue: string | number) {
     toggleOption(optionValue);
+  }
+
+  async function handleCreate() {
+    if (!onCreate || !newItemName.trim() || isCreating) return;
+
+    setIsCreating(true);
+    setCreateError("");
+
+    try {
+      const created = await onCreate(newItemName.trim());
+      if (created) {
+        const createdId = Number(created.value);
+        if (!selectedValues.includes(String(created.value))) {
+          onChange([...value.map((item) => Number(item)), createdId]);
+        }
+        setNewItemName("");
+      }
+    } catch (createErr) {
+      const message =
+        createErr instanceof Error ? createErr.message : "Failed to create item";
+      setCreateError(message);
+    } finally {
+      setIsCreating(false);
+    }
+  }
+
+  async function handleConfirmDelete() {
+    if (!pendingDeleteOption || !onDeleteOption || isDeleting) return;
+
+    setIsDeleting(true);
+
+    try {
+      await onDeleteOption(pendingDeleteOption);
+      const deletedKey = String(pendingDeleteOption.value);
+      if (selectedValues.includes(deletedKey)) {
+        onChange(
+          value
+            .filter((item) => String(item) !== deletedKey)
+            .map((item) => Number(item))
+        );
+      }
+      setPendingDeleteOption(null);
+    } catch {
+      // Parent handles toast/error; keep modal open
+    } finally {
+      setIsDeleting(false);
+    }
   }
 
   return (
@@ -142,8 +210,49 @@ export function FormMultiDropdown({
           id={listId}
           role="listbox"
           aria-multiselectable="true"
-          className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-zinc-200 bg-white py-1 shadow-lg"
+          className="absolute z-50 mt-1 max-h-72 w-full overflow-auto rounded-lg border border-zinc-200 bg-white py-1 shadow-lg"
         >
+          {creatable && onCreate && (
+            <li className="border-b border-zinc-100 px-3 py-2">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={newItemName}
+                  onChange={(event) => {
+                    setNewItemName(event.target.value);
+                    if (createError) setCreateError("");
+                  }}
+                  onKeyDown={(event) => {
+                    event.stopPropagation();
+                    if (event.key === "Enter") {
+                      event.preventDefault();
+                      void handleCreate();
+                    }
+                  }}
+                  placeholder={createPlaceholder}
+                  disabled={isCreating}
+                  className="min-w-0 flex-1 rounded-md border border-zinc-300 bg-white px-2.5 py-1.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-admin-primary focus:outline-none focus:ring-2 focus:ring-admin-primary/15 disabled:opacity-60"
+                  onClick={(event) => event.stopPropagation()}
+                />
+                <Button
+                  type="button"
+                  disabled={!newItemName.trim() || isCreating}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    void handleCreate();
+                  }}
+                  className="shrink-0 gap-1 px-2.5 py-1.5 text-xs"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  {createLabel}
+                </Button>
+              </div>
+              {createError && (
+                <p className="mt-1.5 text-xs text-red-600">{createError}</p>
+              )}
+            </li>
+          )}
+
           {options.length === 0 ? (
             <li className="px-3.5 py-2.5 text-sm text-zinc-400">No options available</li>
           ) : (
@@ -151,24 +260,44 @@ export function FormMultiDropdown({
               const isSelected = selectedValues.includes(String(option.value));
               return (
                 <li key={option.value} role="option" aria-selected={isSelected}>
-                  <button
-                    type="button"
-                    className={`flex w-full items-center gap-3 px-3.5 py-2.5 text-left text-sm transition-colors hover:bg-zinc-50 ${
-                      isSelected ? "bg-admin-primary/5 text-admin-primary" : "text-zinc-700"
+                  <div
+                    className={`flex w-full items-center gap-2 px-2 py-1 transition-colors hover:bg-zinc-50 ${
+                      isSelected ? "bg-admin-primary/5" : ""
                     }`}
-                    onClick={() => toggleOption(option.value)}
                   >
-                    <span
-                      className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border ${
-                        isSelected
-                          ? "border-admin-primary bg-admin-primary text-white"
-                          : "border-zinc-300 bg-white"
+                    <button
+                      type="button"
+                      className={`flex min-w-0 flex-1 items-center gap-3 px-1.5 py-1.5 text-left text-sm ${
+                        isSelected ? "text-admin-primary" : "text-zinc-700"
                       }`}
+                      onClick={() => toggleOption(option.value)}
                     >
-                      {isSelected ? "✓" : ""}
-                    </span>
-                    {option.label}
-                  </button>
+                      <span
+                        className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border ${
+                          isSelected
+                            ? "border-admin-primary bg-admin-primary text-white"
+                            : "border-zinc-300 bg-white"
+                        }`}
+                      >
+                        {isSelected ? "✓" : ""}
+                      </span>
+                      <span className="truncate">{option.label}</span>
+                    </button>
+                    {deletable && onDeleteOption && (
+                      <button
+                        type="button"
+                        title={`Delete ${option.label}`}
+                        aria-label={`Delete ${option.label}`}
+                        className="shrink-0 rounded-md p-1.5 text-zinc-400 transition-colors hover:bg-red-50 hover:text-red-600"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          setPendingDeleteOption(option);
+                        }}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    )}
+                  </div>
                 </li>
               );
             })
@@ -178,6 +307,19 @@ export function FormMultiDropdown({
 
       {error && <p className="mt-1.5 text-sm text-red-600">{error}</p>}
       {hint && !error && <p className="mt-1.5 text-sm text-zinc-500">{hint}</p>}
+
+      {pendingDeleteOption && onDeleteOption && (
+        <DeleteConfirmationModal
+          title="Delete tag"
+          message={`Delete "${pendingDeleteOption.label}"? This cannot be undone.`}
+          confirmLabel="Delete tag"
+          onCancel={() => {
+            if (!isDeleting) setPendingDeleteOption(null);
+          }}
+          onConfirm={() => void handleConfirmDelete()}
+          isDeleting={isDeleting}
+        />
+      )}
     </div>
   );
 }

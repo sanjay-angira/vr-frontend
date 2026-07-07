@@ -31,11 +31,6 @@ export const adminMenuSections: AdminMenuSection[] = [
         icon: "package",
       },
       {
-        label: "Product Tags",
-        href: "/admin/product-tags",
-        icon: "tags",
-      },
-      {
         label: "Categories",
         href: "/admin/categories",
         icon: "layout-grid",

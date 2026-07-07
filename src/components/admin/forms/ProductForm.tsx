@@ -9,7 +9,7 @@ import {
   Plus,
   Trash2,
 } from "lucide-react";
-import { useEffect, useRef, useState, type FormEvent, type MouseEvent } from "react";
+import { useEffect, useRef, useState, useCallback, type FormEvent, type MouseEvent } from "react";
 import * as Yup from "yup";
 import { Button } from "@/components/common/Button";
 import { Input } from "@/components/common/Input";
@@ -34,6 +34,8 @@ import {
   fetchOffersOptions,
   fetchProductsOptions,
   fetchProductTagsOptions,
+  createProductTag,
+  deleteProductTag,
   fetchRootCategoriesOptions,
 } from "./shared/fetchOptions";
 import { useAdminCrudForm } from "./shared/useAdminCrudForm";
@@ -436,14 +438,38 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
   const [products, setProducts] = useState<Array<{ label: string; value: string | number }>>([]);
   const [attributes, setAttributes] = useState<Array<{ label: string; value: string | number }>>([]);
 
+  const loadTags = useCallback(async () => {
+    const nextTags = await fetchProductTagsOptions();
+    setTags(nextTags);
+    return nextTags;
+  }, []);
+
+  const handleCreateTag = useCallback(async (tagName: string) => {
+    const created = await createProductTag(tagName);
+    setTags((current) => {
+      if (current.some((tag) => String(tag.value) === String(created.value))) {
+        return current;
+      }
+      return [...current, created];
+    });
+    return created;
+  }, []);
+
+  const handleDeleteTag = useCallback(async (option: { label: string; value: string | number }) => {
+    await deleteProductTag(option.value);
+    setTags((current) =>
+      current.filter((tag) => String(tag.value) !== String(option.value))
+    );
+  }, []);
+
   useEffect(() => {
     fetchBrandsOptions().then(setBrands);
     fetchRootCategoriesOptions().then(setRootCategories);
     fetchOffersOptions().then(setOffers);
-    fetchProductTagsOptions().then(setTags);
+    void loadTags();
     fetchProductsOptions().then(setProducts);
     fetchAttributesOptions().then(setAttributes);
-  }, []);
+  }, [loadTags]);
 
   const { formik, loading, loadError, isEdit } = useAdminCrudForm<ProductFormValues>({
     module,
@@ -816,6 +842,13 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
                   value={formik.values.productTags}
                   onChange={(values) => formik.setFieldValue("productTags", values)}
                   options={tags}
+                  placeholder="Select or create tags"
+                  creatable
+                  createLabel="Add tag"
+                  createPlaceholder="New tag name"
+                  onCreate={handleCreateTag}
+                  deletable
+                  onDeleteOption={handleDeleteTag}
                 />
               </FormFullWidth>
 

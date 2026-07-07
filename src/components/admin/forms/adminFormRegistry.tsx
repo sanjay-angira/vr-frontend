@@ -15,7 +15,6 @@ import { CouponForm } from "./CouponForm";
 import { OfferForm } from "./OfferForm";
 import { ProductFaqForm } from "./ProductFaqForm";
 import { ProductForm } from "./ProductForm";
-import { ProductTagForm } from "./ProductTagForm";
 import { ReviewForm } from "./ReviewForm";
 import { UserForm } from "./UserForm";
 
@@ -23,7 +22,6 @@ const adminFormRegistry: Partial<
   Record<AdminModuleKey, ComponentType<AdminFormProps>>
 > = {
   products: ProductForm,
-  "product-tags": ProductTagForm,
   categories: CategoryForm,
   brands: BrandForm,
   attributes: AttributeForm,

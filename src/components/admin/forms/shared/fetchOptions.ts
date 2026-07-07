@@ -1,4 +1,5 @@
-import { getData } from "@/services/api/apiService";
+import { deleteData, getData, postData } from "@/services/api/apiService";
+import { generateSlug } from "./generateSlug";
 
 type ListOption = { label: string; value: string | number };
 
@@ -103,6 +104,35 @@ export async function fetchBlogTagsOptions() {
 
 export async function fetchProductTagsOptions() {
   return fetchListOptions("product-tags", "tagName");
+}
+
+export async function createProductTag(tagName: string): Promise<ListOption> {
+  const trimmedName = tagName.trim();
+  if (!trimmedName) {
+    throw new Error("Tag name is required");
+  }
+
+  const response = await postData("product-tags", {
+    tagName: trimmedName,
+    tagSlug: generateSlug(trimmedName),
+    isActive: true,
+  });
+
+  const record = (response?.data ?? response) as Record<string, unknown>;
+  const id = Number(record.id);
+
+  if (!id) {
+    throw new Error("Failed to create tag");
+  }
+
+  return {
+    label: String(record.tagName ?? trimmedName),
+    value: id,
+  };
+}
+
+export async function deleteProductTag(id: number | string): Promise<void> {
+  await deleteData(`product-tags/${id}`);
 }
 
 export async function fetchBlogsOptions() {

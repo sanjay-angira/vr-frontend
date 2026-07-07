@@ -14,14 +14,12 @@ import {
   OffersAndDealsColumns,
   ProductComponentColumns,
   ProductFaqComponentColumns,
-  ProductTagComponentColumns,
   ReviewsComponentColumns,
   UserComponentColumns,
 } from "@/components/admin/commonTable/staticAdminTableColumns";
 
 export type AdminModuleKey =
   | "products"
-  | "product-tags"
   | "categories"
   | "brands"
   | "attributes"
@@ -65,13 +63,6 @@ export const adminModuleTableConfig: Record<
     columns: ProductComponentColumns,
     actions: ["add", "view", "edit", "delete"],
     addLabel: "Add product",
-  },
-  "product-tags": {
-    label: "Product Tags",
-    description: "Manage product tags",
-    columns: ProductTagComponentColumns,
-    actions: ["add", "view", "edit", "delete"],
-    addLabel: "Add tag",
   },
   categories: {
     label: "Categories",

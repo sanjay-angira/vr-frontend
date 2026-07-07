@@ -3,7 +3,6 @@ import type { AdminModuleKey } from "@/components/admin/commonTable/adminModuleT
 /** Modules with add/edit forms — safe to import from Server Components */
 export const ADMIN_FORM_MODULES = [
   "products",
-  "product-tags",
   "categories",
   "brands",
   "attributes",
