@@ -19,6 +19,10 @@ function mapProducts(products: HomepageSection["products"]): WebsiteProductCardD
     name: product.name,
     description: product.description,
     price: product.price,
+    originalPrice:
+      product.originalPrice && product.originalPrice > product.price
+        ? product.originalPrice
+        : undefined,
     image: resolveImageUrl(product.image),
     category: product.category,
     rating: product.rating,

@@ -37,23 +37,25 @@ import {
   createProductTag,
   deleteProductTag,
   fetchRootCategoriesOptions,
+  type AttributeOption,
 } from "./shared/fetchOptions";
 import { useAdminCrudForm } from "./shared/useAdminCrudForm";
 import { useSlugSync } from "./shared/useSlugSync";
 import { buildVariantSlug } from "./shared/generateSlug";
 import { activeField, htmlMinLength, requiredString, slugField } from "./shared/validation";
 import {
+  ATTRIBUTE_CUSTOMER_DISPLAY_OPTIONS,
+  attributeSupportsImage,
+  buildAttributeMetaById,
+  buildAttributeMetaByIdFromRecord,
   buildAttributeNameById,
   buildAttributeNameByIdFromRecord,
   buildProductPayload,
-  COLOR_CUSTOMER_DISPLAY_OPTIONS,
   createEmptyVariantAttribute,
   emptyVariant,
+  getImageEnabledAttributeIds,
   getVariantSlugPrefix,
-  VARIANT_SLUG_PATTERN,
-  hasColorAttribute,
-  inferColorCustomerDisplay,
-  isColorAttribute,
+  inferAttributeCustomerDisplay,
   isProductStepValid,
   mapAttributeIdsFromRecord,
   mapProductImagesFromRecord,
@@ -63,8 +65,11 @@ import {
   normalizeImageArray,
   PRODUCT_FORM_STEPS,
   productFormInitialValues,
+  syncAttributeCustomerDisplay,
   syncVariantAttributes,
   STEP_TOUCH_FIELDS,
+  VARIANT_SLUG_PATTERN,
+  type AttributeMeta,
   type AttributeViewOption,
   type ProductFormValues,
   type ProductVariant,
@@ -106,7 +111,7 @@ const schema = Yup.object({
   frequentlyBoughtTogether: Yup.array().of(Yup.number()),
   images: Yup.array().of(Yup.string()),
   attributeIds: Yup.array().of(Yup.number()),
-  colorCustomerDisplay: Yup.string().oneOf(["value", "code", "image"]),
+  attributeCustomerDisplay: Yup.object(),
   variants: Yup.array()
     .of(variantSchema)
     .min(1, "At least one variant is required")
@@ -157,7 +162,8 @@ function VariantPanel({
   onRemove,
   formik,
   selectedAttributes,
-  colorCustomerDisplay,
+  attributeMetaById,
+  attributeCustomerDisplay,
 }: {
   variant: ProductVariant;
   index: number;
@@ -169,7 +175,8 @@ function VariantPanel({
   onRemove: () => void;
   formik: FormikProps<ProductFormValues>;
   selectedAttributes: Array<{ id: number; name: string }>;
-  colorCustomerDisplay: AttributeViewOption;
+  attributeMetaById: Record<number, AttributeMeta>;
+  attributeCustomerDisplay: Record<number, AttributeViewOption>;
 }) {
   const prefix = `variants.${index}`;
   const slugManuallyEdited = useRef(Boolean(variant.id && variant.slug));
@@ -305,13 +312,8 @@ function VariantPanel({
                 <div>
                   <h4 className="text-sm font-medium text-zinc-900">Attribute Values</h4>
                   <p className="mt-1 text-xs text-zinc-500">
-                    Enter a value for each attribute. Color Name is always required.
-                    {colorCustomerDisplay === "code" &&
-                      " Also enter the color code for each variant."}
-                    {colorCustomerDisplay === "image" &&
-                      " Also upload the color image for each variant."}
-                    {colorCustomerDisplay === "value" &&
-                      " Customer display is set to color name only on the Product Information step."}
+                    Enter a value for each attribute. Image-enabled attributes may also need a
+                    color code or image depending on the display setting chosen above.
                   </p>
                 </div>
                 <div className="space-y-4">
@@ -324,9 +326,14 @@ function VariantPanel({
                       attributeIndex >= 0
                         ? variant.variantAttributes[attributeIndex]
                         : undefined;
-                    const isColor = isColorAttribute(attribute.name);
+                    const supportsImage = attributeSupportsImage(
+                      attribute.id,
+                      attributeMetaById
+                    );
+                    const customerDisplay =
+                      attributeCustomerDisplay[attribute.id] ?? "value";
 
-                    if (!isColor) {
+                    if (!supportsImage) {
                       return (
                         <Input
                           key={attribute.id}
@@ -349,28 +356,27 @@ function VariantPanel({
                     return (
                       <div key={attribute.id}>
                         <div
-                          className={`grid grid-cols-1 gap-4 ${colorCustomerDisplay === "value"
-                              ? "md:grid-cols-1"
-                              : "md:grid-cols-2"
-                            }`}
+                          className={`grid grid-cols-1 gap-4 ${
+                            customerDisplay === "value" ? "md:grid-cols-1" : "md:grid-cols-2"
+                          }`}
                         >
                           <Input
-                            label="Color Name"
+                            label={`${attribute.name} value`}
                             required
                             name={`${basePath}.value`}
                             value={attributeValue?.value ?? ""}
                             onChange={formik.handleChange}
                             onBlur={formik.handleBlur}
-                            placeholder="e.g. Saffron Red"
+                            placeholder={`Enter ${attribute.name}`}
                             error={getNestedError(
                               formik.touched,
                               formik.errors,
                               `${basePath}.value`
                             )}
                           />
-                          {colorCustomerDisplay === "code" && (
+                          {customerDisplay === "code" && (
                             <Input
-                              label="Color Code"
+                              label={`${attribute.name} color code`}
                               required
                               type="color"
                               name={`${basePath}.code`}
@@ -384,9 +390,9 @@ function VariantPanel({
                               )}
                             />
                           )}
-                          {colorCustomerDisplay === "image" && (
+                          {customerDisplay === "image" && (
                             <ImageUploadField
-                              label="Color Image"
+                              label={`${attribute.name} image`}
                               required
                               variant="compact"
                               value={attributeValue?.image ?? ""}
@@ -436,7 +442,7 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
   const [offers, setOffers] = useState<Array<{ label: string; value: string | number }>>([]);
   const [tags, setTags] = useState<Array<{ label: string; value: string | number }>>([]);
   const [products, setProducts] = useState<Array<{ label: string; value: string | number }>>([]);
-  const [attributes, setAttributes] = useState<Array<{ label: string; value: string | number }>>([]);
+  const [attributes, setAttributes] = useState<AttributeOption[]>([]);
 
   const loadTags = useCallback(async () => {
     const nextTags = await fetchProductTagsOptions();
@@ -499,18 +505,16 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
         : [emptyVariant()];
 
       const attributeIds = mapAttributeIdsFromRecord(record);
-      const attributeNameById = buildAttributeNameByIdFromRecord(
-        record,
-        variants.length > 0 ? variants : [emptyVariant()]
-      );
-      const colorCustomerDisplay = inferColorCustomerDisplay(
+      const attributeMetaById = buildAttributeMetaByIdFromRecord(record, variants);
+      const imageAttributeIds = getImageEnabledAttributeIds(attributeIds, attributeMetaById);
+      const attributeCustomerDisplay = inferAttributeCustomerDisplay(
         variants.length > 0 ? variants : [emptyVariant()],
-        attributeNameById
+        imageAttributeIds
       );
       const syncedVariants = syncVariantAttributes(
         variants.length > 0 ? variants : [emptyVariant()],
         attributeIds,
-        attributeNameById
+        attributeMetaById
       );
 
       return {
@@ -529,7 +533,7 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
         frequentlyBoughtTogether: normalizeIds(record.frequentlyBoughtTogether),
         images: mapProductImagesFromRecord(record, productType, syncedVariants),
         attributeIds,
-        colorCustomerDisplay,
+        attributeCustomerDisplay,
         variants: syncedVariants,
         seo: {
           metaTitle: String(seo.metaTitle ?? record.metaTitle ?? ""),
@@ -541,7 +545,7 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
       };
     },
     mapValuesToPayload: (values) =>
-      buildProductPayload(values, buildAttributeNameById(values.attributeIds, attributes)),
+      buildProductPayload(values, buildAttributeMetaById(attributes)),
   });
 
   useSlugSync(formik, "productName", "productSlug", !isEdit);
@@ -603,10 +607,7 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
       await formik.setFieldTouched(field, true, false);
     }
     if (step === 2) {
-      const attributeNameById = buildAttributeNameById(
-        formik.values.attributeIds,
-        attributes
-      );
+      const attributeMetaById = buildAttributeMetaById(attributes);
 
       formik.values.variants.forEach((variant, index) => {
         formik.setFieldTouched(`variants.${index}.name`, true, false);
@@ -619,21 +620,23 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
             true,
             false
           );
-          if (isColorAttribute(attributeNameById[item.attributeId] ?? "")) {
-            if (formik.values.colorCustomerDisplay === "code") {
-              formik.setFieldTouched(
-                `variants.${index}.variantAttributes.${attributeIndex}.code`,
-                true,
-                false
-              );
-            }
-            if (formik.values.colorCustomerDisplay === "image") {
-              formik.setFieldTouched(
-                `variants.${index}.variantAttributes.${attributeIndex}.image`,
-                true,
-                false
-              );
-            }
+          if (!attributeSupportsImage(item.attributeId, attributeMetaById)) return;
+
+          const display =
+            formik.values.attributeCustomerDisplay[item.attributeId] ?? "value";
+          if (display === "code") {
+            formik.setFieldTouched(
+              `variants.${index}.variantAttributes.${attributeIndex}.code`,
+              true,
+              false
+            );
+          }
+          if (display === "image") {
+            formik.setFieldTouched(
+              `variants.${index}.variantAttributes.${attributeIndex}.image`,
+              true,
+              false
+            );
           }
         });
       });
@@ -646,9 +649,9 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
 
     await touchStepFields(currentStep);
     const errors = await formik.validateForm();
-    const namesById = buildAttributeNameById(formik.values.attributeIds, attributes);
+    const metaById = buildAttributeMetaById(attributes);
 
-    if (!isProductStepValid(currentStep, formik.values, errors, namesById)) {
+    if (!isProductStepValid(currentStep, formik.values, errors, metaById)) {
       return;
     }
 
@@ -692,19 +695,16 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
         : null;
     })
     .filter((item): item is { id: number; name: string } => item !== null);
-  const attributeNameById = buildAttributeNameById(formik.values.attributeIds, attributes);
-  const showColorDisplaySettings = hasColorAttribute(
+  const attributeMetaById = buildAttributeMetaById(attributes);
+  const imageEnabledAttributes = getImageEnabledAttributeIds(
     formik.values.attributeIds,
-    attributeNameById
-  );
-  const selectedColorDisplayOption = COLOR_CUSTOMER_DISPLAY_OPTIONS.find(
-    (option) => option.value === formik.values.colorCustomerDisplay
+    attributeMetaById
   );
   const stepValid = isProductStepValid(
     currentStep,
     formik.values,
     formik.errors,
-    attributeNameById
+    attributeMetaById
   );
 
   return (
@@ -853,61 +853,70 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
               </FormFullWidth>
 
               <FormFullWidth>
-                <div
-                  className={`grid grid-cols-1 gap-5 ${
-                    showColorDisplaySettings ? "md:grid-cols-2" : ""
-                  }`}
-                >
-                  <FormMultiDropdown
-                    label="Product Attributes"
-                    value={formik.values.attributeIds}
-                    onChange={(values) => {
-                      const nextAttributeNameById = buildAttributeNameById(values, attributes);
-                      const includesColor = hasColorAttribute(values, nextAttributeNameById);
+                <FormMultiDropdown
+                  label="Product Attributes"
+                  value={formik.values.attributeIds}
+                  onChange={(values) => {
+                    const nextMetaById = buildAttributeMetaById(
+                      attributes.filter((option) => values.includes(Number(option.value)))
+                    );
 
-                      formik.setFieldValue("attributeIds", values);
-                      formik.setFieldValue(
-                        "variants",
-                        syncVariantAttributes(
-                          formik.values.variants,
-                          values,
-                          nextAttributeNameById
-                        )
+                    formik.setFieldValue("attributeIds", values);
+                    formik.setFieldValue(
+                      "variants",
+                      syncVariantAttributes(
+                        formik.values.variants,
+                        values,
+                        nextMetaById
+                      )
+                    );
+                    formik.setFieldValue(
+                      "attributeCustomerDisplay",
+                      syncAttributeCustomerDisplay(
+                        values,
+                        nextMetaById,
+                        formik.values.attributeCustomerDisplay
+                      )
+                    );
+                  }}
+                  onBlur={() => formik.setFieldTouched("attributeIds", true)}
+                  options={attributes}
+                  placeholder="Select attributes for this product"
+                />
+
+                {imageEnabledAttributes.length > 0 && (
+                  <div className="mt-5 grid grid-cols-1 gap-5 md:grid-cols-2">
+                    {imageEnabledAttributes.map((attributeId) => {
+                      const attributeName =
+                        attributeMetaById[attributeId]?.name ??
+                        attributes.find((item) => Number(item.value) === attributeId)?.label ??
+                        "Attribute";
+
+                      return (
+                        <FormDropdown
+                          key={attributeId}
+                          label={`Display on customer side (${attributeName})`}
+                          required
+                          value={formik.values.attributeCustomerDisplay[attributeId] ?? "value"}
+                          onChange={(value) =>
+                            formik.setFieldValue("attributeCustomerDisplay", {
+                              ...formik.values.attributeCustomerDisplay,
+                              [attributeId]: value as AttributeViewOption,
+                            })
+                          }
+                          onBlur={() =>
+                            formik.setFieldTouched("attributeCustomerDisplay", true)
+                          }
+                          options={ATTRIBUTE_CUSTOMER_DISPLAY_OPTIONS.map((option) => ({
+                            label: option.label,
+                            value: option.value,
+                          }))}
+                          placeholder="Select display type"
+                        />
                       );
-
-                      if (!includesColor) {
-                        formik.setFieldValue("colorCustomerDisplay", "value");
-                      }
-                    }}
-                    onBlur={() => formik.setFieldTouched("attributeIds", true)}
-                    options={attributes}
-                    placeholder="Select attributes for this product"
-                  />
-                  {showColorDisplaySettings && (
-                    <FormDropdown
-                      label="Display on customer side"
-                      required
-                      value={formik.values.colorCustomerDisplay}
-                      onChange={(value) =>
-                        formik.setFieldValue(
-                          "colorCustomerDisplay",
-                          value as AttributeViewOption
-                        )
-                      }
-                      onBlur={() => formik.setFieldTouched("colorCustomerDisplay", true)}
-                      options={COLOR_CUSTOMER_DISPLAY_OPTIONS.map((option) => ({
-                        label: option.label,
-                        value: option.value,
-                      }))}
-                      placeholder="Select color display"
-                      error={getNestedError(
-                        formik.touched,
-                        formik.errors,
-                        "colorCustomerDisplay"
-                      )}
-                    />
-                  )}
-                </div>
+                    })}
+                  </div>
+                )}
               </FormFullWidth>
 
 
@@ -953,7 +962,8 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
                             onRemove={() => remove(index)}
                             formik={formik}
                             selectedAttributes={selectedAttributes}
-                            colorCustomerDisplay={formik.values.colorCustomerDisplay}
+                            attributeMetaById={attributeMetaById}
+                            attributeCustomerDisplay={formik.values.attributeCustomerDisplay}
                           />
                         ))}
                       </div>
@@ -974,10 +984,7 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
                             push({
                               ...emptyVariant(formik.values.productSlug),
                               variantAttributes: formik.values.attributeIds.map((attributeId) =>
-                                createEmptyVariantAttribute(
-                                  attributeId,
-                                  attributeNameById[attributeId]
-                                )
+                                createEmptyVariantAttribute(attributeId, attributeMetaById)
                               ),
                             });
                             setExpandedVariant(formik.values.variants.length);

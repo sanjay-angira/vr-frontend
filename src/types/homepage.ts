@@ -22,6 +22,16 @@ export type HomepageProduct = {
   name: string;
   description: string;
   price: number;
+  originalPrice?: number;
+  discountAmount?: number;
+  discountPercentage?: number;
+  appliedOffer?: {
+    id: number;
+    offerName: string;
+    offerSlug: string;
+    discountType: string;
+    discountValue: number;
+  } | null;
   image: string;
   category: string;
   rating: number;

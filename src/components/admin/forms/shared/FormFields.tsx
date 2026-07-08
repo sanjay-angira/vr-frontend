@@ -246,31 +246,33 @@ export function FormToggle<T extends Record<string, unknown>>({
   formik,
   name,
   label,
+  required,
   className,
 }: BaseFieldProps<T>) {
-  const checked = Boolean(formik.values[name]);
+  const checked = Boolean(getIn(formik.values, name));
 
   return (
-    <label
-      className={`flex items-center justify-between gap-4 rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-3 ${className ?? ""}`}
-    >
-      <span className="text-sm font-medium text-zinc-700">{label}</span>
-      <button
-        type="button"
-        role="switch"
-        aria-checked={checked}
-        onClick={() => formik.setFieldValue(name, !checked)}
-        className={`relative inline-flex h-6 w-11 shrink-0 rounded-full transition-colors ${
-          checked ? "bg-admin-primary" : "bg-zinc-300"
-        }`}
-      >
-        <span
-          className={`inline-block h-5 w-5 translate-y-0.5 rounded-full bg-white shadow transition-transform ${
-            checked ? "translate-x-5" : "translate-x-0.5"
+    <div className={className}>
+      <FormLabel label={label} required={required} />
+      <div className="flex h-[42px] items-center justify-end rounded-lg border border-zinc-200 bg-zinc-50 px-3.5">
+        <button
+          type="button"
+          role="switch"
+          aria-checked={checked}
+          aria-label={label}
+          onClick={() => formik.setFieldValue(name, !checked)}
+          className={`relative inline-flex h-6 w-11 shrink-0 rounded-full transition-colors ${
+            checked ? "bg-admin-primary" : "bg-zinc-300"
           }`}
-        />
-      </button>
-    </label>
+        >
+          <span
+            className={`inline-block h-5 w-5 translate-y-0.5 rounded-full bg-white shadow transition-transform ${
+              checked ? "translate-x-5" : "translate-x-0.5"
+            }`}
+          />
+        </button>
+      </div>
+    </div>
   );
 }
 

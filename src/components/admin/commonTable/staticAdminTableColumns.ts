@@ -180,6 +180,7 @@ export const AttributeComponentColumns: AdminTableColumnDefinition[] = [
   { label: "Name", property: "name", type: "text", datatype: "name", visible: true, cssClasses: ["font-medium"] },
   { label: "Filterable", property: "isFilterable", type: "text", datatype: "on-off", visible: true, cssClasses: ["font-medium"] },
   { label: "Required", property: "isRequired", type: "text", datatype: "on-off", visible: true, cssClasses: ["font-medium"] },
+  { label: "Image / Swatch", property: "supportsImage", type: "text", datatype: "on-off", visible: true, cssClasses: ["font-medium"] },
   { label: "Created On", property: "createdAt", type: "text", datatype: "date", visible: true, cssClasses: ["font-medium"] },
   { label: "Updated On", property: "updatedAt", type: "text", datatype: "date", visible: true, cssClasses: ["font-medium"] },
   { label: "Actions", property: "actions", type: "button", datatype: "button", visible: true, cssClasses: ["font-medium"] },

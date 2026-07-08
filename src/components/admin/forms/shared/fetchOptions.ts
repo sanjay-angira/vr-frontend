@@ -3,6 +3,10 @@ import { generateSlug } from "./generateSlug";
 
 type ListOption = { label: string; value: string | number };
 
+export type AttributeOption = ListOption & {
+  supportsImage: boolean;
+};
+
 
 export async function fetchListOptions(
   path: string,
@@ -90,8 +94,26 @@ export async function fetchRolesOptions() {
   return fetchListOptions("roles", "roleName");
 }
 
-export async function fetchAttributesOptions() {
-  return fetchListOptions("attributes", "name");
+export async function fetchAttributesOptions(): Promise<AttributeOption[]> {
+  try {
+    const response = await getData("attributes", {
+      pageNumber: 1,
+      pageSize: 1000,
+      column: "id",
+      order: "DESC",
+    });
+
+    const rows = response.data?.rows ?? response.data ?? [];
+    if (!Array.isArray(rows)) return [];
+
+    return rows.map((row: Record<string, unknown>) => ({
+      label: String(row.name ?? row.id),
+      value: Number(row.id) || String(row.id),
+      supportsImage: Boolean(row.supportsImage ?? false),
+    }));
+  } catch {
+    return [];
+  }
 }
 
 export async function fetchBlogCategoriesOptions() {

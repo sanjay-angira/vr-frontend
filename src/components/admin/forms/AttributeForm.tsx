@@ -31,37 +31,24 @@ import { requiredString } from "./shared/validation";
 
 
 type Values = {
-
   name: string;
-
   isFilterable: boolean;
-
   isRequired: boolean;
-
+  supportsImage: boolean;
 };
-
-
 
 const initialValues: Values = {
-
   name: "",
-
   isFilterable: true,
-
   isRequired: false,
-
+  supportsImage: false,
 };
 
-
-
 const schema = Yup.object({
-
   name: requiredString("Name", 2, 100),
-
   isFilterable: Yup.boolean(),
-
   isRequired: Yup.boolean(),
-
+  supportsImage: Yup.boolean(),
 });
 
 
@@ -81,23 +68,16 @@ export function AttributeForm({ module, recordId }: AdminFormProps) {
     validationSchema: schema,
 
     mapRecordToValues: (r) => ({
-
       name: String(r.name ?? ""),
-
       isFilterable: Boolean(r.isFilterable ?? true),
-
       isRequired: Boolean(r.isRequired ?? false),
-
+      supportsImage: Boolean(r.supportsImage ?? false),
     }),
-
     mapValuesToPayload: (v) => ({
-
       name: v.name.trim(),
-
       isFilterable: v.isFilterable,
-
       isRequired: v.isRequired,
-
+      supportsImage: v.supportsImage,
     }),
 
   });
@@ -120,6 +100,11 @@ export function AttributeForm({ module, recordId }: AdminFormProps) {
             <FormInput formik={formik} name="name" label="Name" required />
             <FormToggle formik={formik} name="isFilterable" label="Filterable" />
             <FormToggle formik={formik} name="isRequired" label="Required" />
+            <FormToggle
+              formik={formik}
+              name="supportsImage"
+              label="Allow image / swatch on product"
+            />
           </FormSection>
 
           <FormActions
