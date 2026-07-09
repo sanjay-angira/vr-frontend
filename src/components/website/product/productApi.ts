@@ -1,6 +1,44 @@
 import { getData } from "@/services/api/apiService";
 import { API_ENDPOINTS } from "@/services/api/API_ENDPOINT";
 
+import { normalizeVariantAttributes, type VariantAttributeView } from "./productVariantUtils";
+
+export type { VariantAttributeView };
+
+export type ProductVariantView = {
+  id: number;
+  slug?: string | null;
+  name: string;
+  price: number | null;
+  originalPrice: number | null;
+  finalPrice: number | null;
+  discountAmount: number;
+  discountPercentage: number;
+  appliedOffer?: {
+    id: number;
+    offerName: string;
+    offerSlug: string;
+    discountType: string;
+    discountValue: number;
+  } | null;
+  stock: number | null;
+  sku: string | null;
+  images: string[];
+  variantAttributes: VariantAttributeView[];
+  offerPrices: Array<{
+    offerId: number;
+    offerName: string;
+    offerSlug: string;
+    discountType: string;
+    discountValue: number;
+    originalPrice: number | null;
+    finalPrice: number | null;
+    discountAmount: number;
+    discountPercentage: number;
+    sources: string[];
+  }>;
+};
+
 export type ProductPageData = {
   id: number;
   productName: string;
@@ -8,12 +46,12 @@ export type ProductPageData = {
   selectedVariantId?: number | null;
   shortDescription: string;
   description: string;
-  productType?: string;
   brand?: { brandName?: string | null } | null;
   category?: { categoryName?: string | null } | null;
   images?: Array<{ id: number; url: string; sortOrder: number }>;
   variants?: Array<Record<string, unknown>>;
   attributes?: Array<Record<string, unknown>>;
+  productAttributes?: Array<Record<string, unknown>>;
   faqs?: Array<{ id: number; question: string; answer: string; sortOrder?: number }>;
   reviews?: Array<{
     id: number;
@@ -71,15 +109,29 @@ export async function fetchProductBySlug(
 }
 
 export function normalizeAttributes(
-  attributes: Array<{ id: number; name: string; value: string }> = []
+  attributes: Array<Record<string, unknown>> = [],
+  productAttributes: Array<Record<string, unknown>> = []
 ) {
-  return attributes
-    .filter((attribute) => attribute.name && attribute.value)
+  const fromAttributes = attributes
     .map((attribute) => ({
-      id: attribute.id,
-      name: attribute.name,
-      value: attribute.value,
-    }));
+      id: Number(attribute.id ?? attribute.attributeId),
+      name: String(attribute.name ?? (attribute.attribute as { name?: string })?.name ?? ""),
+      value: String(attribute.value ?? ""),
+    }))
+    .filter((attribute) => attribute.id && attribute.name && attribute.value);
+
+  if (fromAttributes.length > 0) return fromAttributes;
+
+  return productAttributes
+    .map((item) => {
+      const attribute = item.attribute as { id?: number; name?: string } | undefined;
+      return {
+        id: Number(attribute?.id ?? item.id),
+        name: String(attribute?.name ?? ""),
+        value: String(item.value ?? attribute?.name ?? "").trim(),
+      };
+    })
+    .filter((attribute) => attribute.id && attribute.name);
 }
 
 export function normalizeVariants(
@@ -97,6 +149,7 @@ export function normalizeVariants(
     stock?: string | number | null;
     sku?: string | null;
     images?: Array<{ id: number; url: string; sortOrder: number }>;
+    variantAttributes?: Array<Record<string, unknown>>;
   }> = []
 ) {
   return variants.map((variant) => ({
@@ -136,6 +189,7 @@ export function normalizeVariants(
       .slice()
       .sort((a, b) => a.sortOrder - b.sortOrder)
       .map((image) => image.url),
+    variantAttributes: normalizeVariantAttributes(variant.variantAttributes || []),
   }));
 }
 

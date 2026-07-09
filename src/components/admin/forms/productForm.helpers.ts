@@ -239,7 +239,6 @@ export type ProductFormValues = {
   productSlug: string;
   shortDescription: string;
   description: string;
-  productType: "simple" | "variable";
   publishStatus: string;
   brandId: string;
   category: string;
@@ -277,7 +276,6 @@ export const productFormInitialValues: ProductFormValues = {
   productSlug: "",
   shortDescription: "",
   description: "",
-  productType: "simple",
   publishStatus: "draft",
   brandId: "",
   category: "",
@@ -398,14 +396,13 @@ export { resolveImageUrl } from "./shared/resolveImageUrl";
 
 export function mapProductImagesFromRecord(
   record: Record<string, unknown>,
-  productType: string,
   variants: ProductVariant[]
 ): string[] {
   const fromProduct = normalizeImageArray(record.images);
   if (fromProduct.length > 0) return fromProduct;
   const fromAlternate = normalizeImageArray(record.productImages ?? record.productImage);
   if (fromAlternate.length > 0) return fromAlternate;
-  if (productType === "simple" && variants.length > 0) return normalizeImageArray(variants[0].images);
+  if (variants.length > 0) return normalizeImageArray(variants[0].images);
   return [];
 }
 
@@ -421,16 +418,16 @@ export function buildProductPayload(
   values: ProductFormValues,
   attributeMetaById: Record<number, AttributeMeta> = {}
 ): Record<string, unknown> {
-  const isVariableProduct = values.productType === "variable";
-  const productImages = isVariableProduct
-    ? []
-    : normalizeImageArray(values.images).map((url, index) => ({ url, sortOrder: index + 1 }));
+  const productImages = normalizeImageArray(values.images).map((url, index) => ({
+    url,
+    sortOrder: index + 1,
+  }));
+
   return {
     productName: values.productName,
     productSlug: values.productSlug,
     shortDescription: values.shortDescription,
     description: values.description,
-    productType: values.productType,
     publishStatus: values.publishStatus,
     isActive: values.isActive,
     brandId: Number(values.brandId),
@@ -441,21 +438,23 @@ export function buildProductPayload(
     images: productImages,
     attributes: values.attributeIds.map((attributeId) => ({ attributeId })),
     variants: values.variants.map((variant) => {
-      const variantName = isVariableProduct
-        ? variant.name.trim()
-        : variant.name.trim() || values.productName.trim();
+      const variantName = variant.name.trim();
       const variantPayload: Record<string, unknown> = {
         ...(variant.id ? { id: variant.id } : {}),
         name: variantName,
-        slug: variant.slug.trim() || values.productSlug.trim(),
+        slug: variant.slug.trim() || buildVariantSlug(values.productSlug, variantName),
         price: Number(variant.price),
         stock: Number(variant.stock),
         ...(variant.sku ? { sku: variant.sku } : {}),
       };
-      const variantImages = normalizeImageArray(variant.images).map((url, idx) => ({ url, sortOrder: idx + 1 }));
-      if (values.productType === "simple") variantPayload.images = [];
-      else if (variantImages.length > 0) variantPayload.images = variantImages;
-      if (variant.productVariantOffers.length > 0) variantPayload.productVariantOffers = variant.productVariantOffers;
+      const variantImages = normalizeImageArray(variant.images).map((url, idx) => ({
+        url,
+        sortOrder: idx + 1,
+      }));
+      if (variantImages.length > 0) variantPayload.images = variantImages;
+      if (variant.productVariantOffers.length > 0) {
+        variantPayload.productVariantOffers = variant.productVariantOffers;
+      }
       const variantAttributes = variant.variantAttributes
         .filter((item) => item.value.trim())
         .map((item) => {
@@ -532,37 +531,35 @@ export function isProductStepValid(
       const displayValid = getImageEnabledAttributeIds(values.attributeIds, attributeMetaById).every(
         (attributeId) => Boolean(values.attributeCustomerDisplay[attributeId])
       );
+      const hasProductImages = normalizeImageArray(values.images).length > 0;
       return (
         Boolean(values.productName?.trim()) &&
         Boolean(values.productSlug?.trim()) &&
         Boolean(values.shortDescription?.trim()) &&
         Boolean(descriptionText) &&
-        Boolean(values.productType) &&
         Boolean(values.publishStatus) &&
         Boolean(values.brandId) &&
         categorySelected &&
+        hasProductImages &&
         displayValid &&
         !hasFieldError(errors, "productName") &&
         !hasFieldError(errors, "productSlug") &&
         !hasFieldError(errors, "shortDescription") &&
         !hasFieldError(errors, "description") &&
         !hasFieldError(errors, "brandId") &&
-        !hasFieldError(errors, "category")
+        !hasFieldError(errors, "category") &&
+        !hasFieldError(errors, "images")
       );
     }
     case 2: {
       if (values.variants.length === 0) return false;
-      const requiresVariantName = values.productType === "variable";
       return (
         values.variants.every((variant, index) => {
-          const hasValidName = requiresVariantName
-            ? Boolean(variant.name?.trim())
-            : Boolean(variant.name?.trim() || values.productName?.trim());
-          const slugValid = requiresVariantName
-            ? Boolean(variant.slug?.trim()) &&
-              VARIANT_SLUG_PATTERN.test(variant.slug.trim()) &&
-              !hasFieldError(errors, `variants.${index}.slug`)
-            : true;
+          const hasValidName = Boolean(variant.name?.trim());
+          const slugValid =
+            Boolean(variant.slug?.trim()) &&
+            VARIANT_SLUG_PATTERN.test(variant.slug.trim()) &&
+            !hasFieldError(errors, `variants.${index}.slug`);
           return (
             hasValidName &&
             slugValid &&
@@ -591,7 +588,7 @@ export function isProductStepValid(
 }
 
 export const STEP_TOUCH_FIELDS: Record<number, string[]> = {
-  1: ["productName", "productSlug", "shortDescription", "description", "productType", "publishStatus", "brandId", "category", "childCategories", "attributeIds", "attributeCustomerDisplay"],
+  1: ["productName", "productSlug", "shortDescription", "description", "publishStatus", "brandId", "category", "childCategories", "attributeIds", "attributeCustomerDisplay", "images"],
   2: ["variants"],
   3: ["seo.metaTitle", "seo.metaDescription", "seo.metaKeywords", "seo.canonicalUrl", "seo.ogImage"],
 };

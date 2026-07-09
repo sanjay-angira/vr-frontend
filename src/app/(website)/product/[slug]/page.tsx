@@ -63,14 +63,14 @@ export default async function ProductDetailPage({ params }: PageProps) {
     slug: product.productSlug,
     selectedVariantId: product.selectedVariantId ?? null,
     shortDescription: product.shortDescription || "",
-    descriptionHtml: (product.description || product.shortDescription || "").trim(),
     brandName: product.brand?.brandName || null,
     categoryName: product.category?.categoryName || null,
-    productType: product.productType || null,
     baseImages,
     attributes: normalizeAttributes(
-      product.attributes as Parameters<typeof normalizeAttributes>[0]
+      (product.attributes as Parameters<typeof normalizeAttributes>[0]) ?? [],
+      (product.productAttributes as Parameters<typeof normalizeAttributes>[1]) ?? []
     ),
+    
     variants: normalizedVariants,
     activeOffers: (product.activeOffers || []).map((offer) => ({
       id: Number(offer.id),
@@ -179,7 +179,9 @@ export default async function ProductDetailPage({ params }: PageProps) {
         <h2 className="product-section-heading">Product Description</h2>
         <div
           className="product-copy-content"
-          dangerouslySetInnerHTML={{ __html: detailProduct.descriptionHtml }}
+          dangerouslySetInnerHTML={{
+            __html: (product.description || product.shortDescription || "").trim(),
+          }}
         />
       </section>
 

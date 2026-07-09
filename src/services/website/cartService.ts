@@ -14,7 +14,6 @@ export interface CartItemData {
   attributesSnapshot?: Record<string, any>;
   subtotal?: number;
   productName?: string;
-  productType?: 'simple' | 'variable';
   image?: string;
   variantName?: string;
 }

@@ -27,7 +27,6 @@ type ProductRecord = {
   id: number;
   productName?: string;
   productSlug?: string;
-  productType?: string;
   publishStatus?: string;
   shortDescription?: string;
   description?: string;
@@ -208,7 +207,6 @@ export function ProductView({ module, recordId }: AdminViewProps) {
 
   const variants = product.variants ?? [];
   const storefrontSlug = variants[0]?.slug || product.productSlug;
-  const isVariableProduct = String(product.productType ?? "").toLowerCase() === "variable";
 
   return (
     <div className="max-w-full space-y-6 overflow-x-hidden pb-2">
@@ -251,8 +249,7 @@ export function ProductView({ module, recordId }: AdminViewProps) {
         <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-zinc-500">
           Product details
         </h2>
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          <InfoItem label="Type" value={product.productType || "—"} />
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           <InfoItem label="Brand" value={product.brand?.brandName || "—"} />
           <InfoItem label="Category" value={product.category?.categoryName || "—"} />
           <InfoItem label="Variants" value={variants.length} />
@@ -264,7 +261,7 @@ export function ProductView({ module, recordId }: AdminViewProps) {
 
       <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
         <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-zinc-500">
-          {isVariableProduct ? "Variant images" : "Product images"}
+          Images
         </h2>
         {imageUrls.length > 0 ? (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
