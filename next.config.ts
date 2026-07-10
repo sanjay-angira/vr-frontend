@@ -13,10 +13,6 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname: "the-india-decor-data.s3.amazonaws.com",
-      },
-      {
-        protocol: "https",
         hostname: "vrindavan-rasa.s3.ap-south-1.amazonaws.com",
       },
       {
