@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import { Suspense } from "react";
 import { Accordion } from "@/components/website/shared/Accordion";
 import ReviewSection from "@/components/website/product/ReviewSection";
 import ProductDetail from "@/components/website/product/ProductDetail";
@@ -12,17 +13,39 @@ import {
   normalizeVariants,
   toNumber,
 } from "@/components/website/product/productApi";
+import {
+  buildProductVariantUrl,
+  findVariantBySlug,
+} from "@/components/website/product/productVariantUtils";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ variant?: string }>;
 };
 
-export default async function ProductDetailPage({ params }: PageProps) {
+export default async function ProductDetailPage({ params, searchParams }: PageProps) {
   const { slug } = await params;
+  const { variant: variantQuery } = await searchParams;
   const product = await fetchProductBySlug(slug);
 
   if (!product) {
     notFound();
+  }
+
+  const normalizedVariants = normalizeVariants(
+    product.variants as Parameters<typeof normalizeVariants>[0]
+  );
+
+  const initialVariantSlug =
+    variantQuery ||
+    (slug !== product.productSlug
+      ? findVariantBySlug(normalizedVariants, slug)?.slug || slug
+      : null);
+
+  if (slug !== product.productSlug) {
+    redirect(
+      buildProductVariantUrl(product.productSlug, initialVariantSlug || undefined)
+    );
   }
 
   const baseImages =
@@ -30,10 +53,6 @@ export default async function ProductDetailPage({ params }: PageProps) {
       ?.slice()
       .sort((a, b) => a.sortOrder - b.sortOrder)
       .map((image) => image.url) ?? [];
-
-  const normalizedVariants = normalizeVariants(
-    product.variants as Parameters<typeof normalizeVariants>[0]
-  );
 
   const reviewList = (product.reviews || []).map((review) => ({
     id: String(review.id),
@@ -166,14 +185,17 @@ export default async function ProductDetailPage({ params }: PageProps) {
         <span className="is-current">{product.productName}</span>
       </div>
 
-      <ProductDetail
-        product={detailProduct}
-        fallbackImages={
-          baseImages.length > 0
-            ? baseImages
-            : [WEBSITE_IMAGES.hero, WEBSITE_IMAGES.rudraksha]
-        }
-      />
+      <Suspense fallback={<div className="container product-page-shell">Loading product...</div>}>
+        <ProductDetail
+          product={detailProduct}
+          initialVariantSlug={initialVariantSlug}
+          fallbackImages={
+            baseImages.length > 0
+              ? baseImages
+              : [WEBSITE_IMAGES.hero, WEBSITE_IMAGES.rudraksha]
+          }
+        />
+      </Suspense>
 
       <section className="product-section-block product-copy-block">
         <h2 className="product-section-heading">Product Description</h2>

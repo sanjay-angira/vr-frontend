@@ -87,7 +87,17 @@ export function buildAttributeGroups(
     }
   }
 
-  return Array.from(groupMap.values());
+  const groups = Array.from(groupMap.values());
+
+  return groups.sort((left, right) => {
+    const leftIsColor = left.name.toLowerCase().includes("color");
+    const rightIsColor = right.name.toLowerCase().includes("color");
+
+    if (leftIsColor && !rightIsColor) return -1;
+    if (!leftIsColor && rightIsColor) return 1;
+
+    return left.attributeId - right.attributeId;
+  });
 }
 
 export function getCompatibleVariantIds(
@@ -172,6 +182,187 @@ export function selectionsFromVariant(
     map[item.attributeId] = item.value;
     return map;
   }, {});
+}
+
+export function getVariantEffectivePrice(variant: ProductVariantView): number {
+  const price = variant.finalPrice ?? variant.price;
+  return typeof price === "number" && Number.isFinite(price)
+    ? price
+    : Number.POSITIVE_INFINITY;
+}
+
+export function getCheapestVariant(
+  variants: ProductVariantView[]
+): ProductVariantView | null {
+  if (!variants.length) return null;
+
+  return variants.reduce((cheapest, current) =>
+    getVariantEffectivePrice(current) < getVariantEffectivePrice(cheapest)
+      ? current
+      : cheapest
+  );
+}
+
+export function findVariantBySlug(
+  variants: ProductVariantView[],
+  slug: string | null | undefined
+): ProductVariantView | null {
+  if (!slug) return null;
+
+  const normalized = slug.trim().toLowerCase();
+  return (
+    variants.find((variant) => variant.slug?.toLowerCase() === normalized) ?? null
+  );
+}
+
+export function resolveInitialVariant(
+  variants: ProductVariantView[],
+  options: {
+    variantSlug?: string | null;
+  } = {}
+): ProductVariantView | null {
+  if (!variants.length) return null;
+
+  const fromUrl = findVariantBySlug(variants, options.variantSlug);
+  if (fromUrl) return fromUrl;
+
+  return getCheapestVariant(variants);
+}
+
+export type VariantDisplayGroup = {
+  attributeId: number;
+  attributeName: string;
+  value: string;
+  label: string;
+  code?: string | null;
+  image?: string | null;
+  viewOption: "value" | "code" | "image";
+  variants: ProductVariantView[];
+  cheapestInGroup: ProductVariantView | null;
+};
+
+function inferPrimaryValueFromName(variant: ProductVariantView): string {
+  const parts = variant.name.split("-").map((part) => part.trim()).filter(Boolean);
+  return parts[0] || variant.name;
+}
+
+function inferSecondaryLabel(
+  variant: ProductVariantView,
+  primaryAttributeId: number | null
+): string {
+  const secondaryAttributes = primaryAttributeId
+    ? variant.variantAttributes.filter((item) => item.attributeId !== primaryAttributeId)
+    : variant.variantAttributes;
+
+  if (secondaryAttributes.length > 0) {
+    return secondaryAttributes.map((item) => item.value).join(" · ");
+  }
+
+  const parts = variant.name.split("-").map((part) => part.trim()).filter(Boolean);
+  if (parts.length > 1) {
+    return parts.slice(1).join(" · ");
+  }
+
+  return variant.name;
+}
+
+export function buildGroupedVariantDisplay(
+  variants: ProductVariantView[],
+  attributeGroups: AttributeSelectionGroup[] = []
+): {
+  primaryAttributeName: string;
+  groups: VariantDisplayGroup[];
+  secondaryAttributeNames: string[];
+} {
+  if (!variants.length) {
+    return { primaryAttributeName: "Variant", groups: [], secondaryAttributeNames: [] };
+  }
+
+  const primaryGroup = attributeGroups[0] ?? null;
+  const secondaryGroups = attributeGroups.slice(1);
+  const secondaryAttributeNames = secondaryGroups.map((group) => group.name);
+
+  if (primaryGroup) {
+    const groups = primaryGroup.options.map((option) => {
+      const groupVariants = variants
+        .filter((variant) =>
+          variant.variantAttributes.some(
+            (attribute) =>
+              attribute.attributeId === primaryGroup.attributeId &&
+              attribute.value === option.value
+          )
+        )
+        .sort((left, right) => getVariantEffectivePrice(left) - getVariantEffectivePrice(right));
+
+      return {
+        attributeId: primaryGroup.attributeId,
+        attributeName: primaryGroup.name,
+        value: option.value,
+        label: option.label,
+        code: option.code,
+        image: option.image,
+        viewOption: option.viewOption,
+        variants: groupVariants,
+        cheapestInGroup: getCheapestVariant(groupVariants),
+      };
+    });
+
+    return {
+      primaryAttributeName: primaryGroup.name,
+      groups: groups.filter((group) => group.variants.length > 0),
+      secondaryAttributeNames,
+    };
+  }
+
+  const groupedByName = new Map<string, ProductVariantView[]>();
+  for (const variant of variants) {
+    const primaryValue = inferPrimaryValueFromName(variant);
+    const bucket = groupedByName.get(primaryValue) ?? [];
+    bucket.push(variant);
+    groupedByName.set(primaryValue, bucket);
+  }
+
+  const groups = Array.from(groupedByName.entries()).map(([value, groupVariants]) => {
+    const sortedVariants = [...groupVariants].sort(
+      (left, right) => getVariantEffectivePrice(left) - getVariantEffectivePrice(right)
+    );
+
+    return {
+      attributeId: 0,
+      attributeName: "Variant",
+      value,
+      label: value,
+      code: null,
+      image: null,
+      viewOption: "value" as const,
+      variants: sortedVariants,
+      cheapestInGroup: getCheapestVariant(sortedVariants),
+    };
+  });
+
+  return {
+    primaryAttributeName: "Variant",
+    groups,
+    secondaryAttributeNames: [],
+  };
+}
+
+export function getSecondaryVariantLabel(
+  variant: ProductVariantView,
+  primaryAttributeId: number | null
+): string {
+  return inferSecondaryLabel(variant, primaryAttributeId);
+}
+
+export function buildProductVariantUrl(
+  productSlug: string,
+  variantSlug?: string | null
+): string {
+  const base = `/product/${productSlug}`;
+  if (!variantSlug) return base;
+
+  const params = new URLSearchParams({ variant: variantSlug });
+  return `${base}?${params.toString()}`;
 }
 
 export function buildSpecRows(

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import Image from "next/image";
 
 type ProductImage = string;
@@ -8,9 +8,10 @@ type ProductImage = string;
 type Props = {
   images: ProductImage[];
   alt: string;
+  topRightSlot?: ReactNode;
 };
 
-export default function ProductImageGallery({ images, alt }: Props) {
+export default function ProductImageGallery({ images, alt, topRightSlot }: Props) {
   const [current, setCurrent] = useState<number>(0);
   const [isZoomed, setIsZoomed] = useState<boolean>(false);
 
@@ -70,21 +71,23 @@ export default function ProductImageGallery({ images, alt }: Props) {
       )}
 
       <div className="product-gallery__main">
+        {topRightSlot && (
+          <div className="product-gallery__top-right">{topRightSlot}</div>
+        )}
+
         {hasMultiple && (
           <>
             <button
               aria-label="Previous image"
               onClick={goPrev}
-              className="btn btn-outline btn-sm"
-              style={{ position: "absolute", top: 12, left: 12, zIndex: 2 }}
+              className="btn btn-outline btn-sm product-gallery__nav product-gallery__nav--prev"
             >
               ‹
             </button>
             <button
               aria-label="Next image"
               onClick={goNext}
-              className="btn btn-outline btn-sm"
-              style={{ position: "absolute", top: 12, right: 12, zIndex: 2 }}
+              className="btn btn-outline btn-sm product-gallery__nav product-gallery__nav--next"
             >
               ›
             </button>

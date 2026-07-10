@@ -1,26 +1,24 @@
 "use client";
 
-import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Heart, PackageCheck, ShoppingCart, Sparkles, Star } from "lucide-react";
+import { Heart, PackageCheck, ShoppingCart, Star } from "lucide-react";
 import ProductImageGallery from "@/components/website/product/ProductImageGallery";
+import GroupedVariantPicker from "@/components/website/product/GroupedVariantPicker";
+import ProductOfferSelector from "@/components/website/product/ProductOfferSelector";
 import type { ProductVariantView } from "@/components/website/product/productApi";
 import {
   buildAttributeGroups,
+  buildProductVariantUrl,
   buildSpecRows,
-  findVariantBySelections,
-  getCompatibleVariantIds,
-  resolveAttributeSelections,
-  selectionsFromVariant,
-  type AttributeSelectionGroup,
-  type VariantAttributeOption,
+  getCheapestVariant,
+  resolveInitialVariant,
 } from "@/components/website/product/productVariantUtils";
 import { fetchWebsiteCart } from "@/services/redux/slices/websiteSlices/cartSlice";
 import { addOrUpdateCartItem } from "@/services/website/cartService";
 import type { RootState } from "@/services/redux";
 import { setAuthModalOpen } from "@/services/redux/slices/websiteSlices/modalSlice";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { isAuthPagePath } from "@/utils/authRoutes";
 
 export type ProductAttributeView = {
@@ -56,167 +54,99 @@ export type ProductDetailView = {
 
 type Props = {
   product: ProductDetailView;
+  initialVariantSlug?: string | null;
   fallbackImages?: string[];
 };
 
-function getPreferredVariant(
-  variants: ProductVariantView[],
-  preferredVariantId?: number | null
-): ProductVariantView | null {
-  if (!variants.length) return null;
-
-  if (preferredVariantId) {
-    const matched = variants.find((variant) => variant.id === preferredVariantId);
-    if (matched) return matched;
-  }
-
-  return variants[0] || null;
-}
-
-function toCurrency(value: number | null | undefined): string | null {
-  if (typeof value !== "number" || Number.isNaN(value)) {
-    return null;
-  }
-
-  return `Rs. ${value.toFixed(2)}`;
-}
-
-function getOfferSummary(offer: {
-  offerName: string;
-  discountType: string;
-  discountValue: number;
-  discountAmount?: number;
-  discountPercentage?: number;
-}): string {
-  if (typeof offer.discountAmount === "number" && offer.discountAmount > 0) {
-    return `${offer.offerName}: Save ${toCurrency(offer.discountAmount)} (${offer.discountPercentage?.toFixed(0) || 0}% off)`;
-  }
-
-  if (offer.discountType === "fixed") {
-    return `${offer.offerName}: Save ${toCurrency(offer.discountValue)}`;
-  }
-
-  return `${offer.offerName}: ${offer.discountValue}% off`;
-}
-
-function AttributeOptionButton({
-  option,
-  isSelected,
-  isDisabled,
-  onSelect,
-}: {
-  option: VariantAttributeOption;
-  isSelected: boolean;
-  isDisabled: boolean;
-  onSelect: () => void;
-}) {
-  const isVisual = option.viewOption === "code" || option.viewOption === "image";
-
-  return (
-    <button
-      type="button"
-      onClick={onSelect}
-      disabled={isDisabled}
-      aria-pressed={isSelected}
-      aria-label={option.label}
-      title={option.label}
-      className={[
-        "product-variation-option",
-        isSelected ? "is-selected" : "",
-        isDisabled ? "is-disabled" : "",
-        isVisual ? "product-variation-option--visual" : "",
-      ]
-        .filter(Boolean)
-        .join(" ")}
-    >
-      {option.viewOption === "code" && option.code ? (
-        <span
-          className="product-variation-option__swatch"
-          style={{ backgroundColor: option.code }}
-          aria-hidden="true"
-        />
-      ) : option.viewOption === "image" && option.image ? (
-        <span className="product-variation-option__image-wrap">
-          <Image
-            src={option.image}
-            alt=""
-            width={44}
-            height={44}
-            className="product-variation-option__image"
-          />
-        </span>
-      ) : (
-        <span className="product-variation-option__label">{option.label}</span>
-      )}
-    </button>
-  );
-}
-
-export default function ProductDetail({ product, fallbackImages = [] }: Props) {
+export default function ProductDetail({
+  product,
+  initialVariantSlug = null,
+  fallbackImages = [],
+}: Props) {
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const dispatch = useDispatch();
   const isAuthenticated = useSelector((state: RootState) => state.userAuth.isAuthenticated);
+
+  const cheapestVariant = useMemo(
+    () => getCheapestVariant(product.variants),
+    [product.variants]
+  );
 
   const attributeGroups = useMemo(
     () => buildAttributeGroups(product.variants),
     [product.variants]
   );
-  const useAttributePicker = attributeGroups.length > 0;
 
-  const preferredVariant = getPreferredVariant(product.variants, product.selectedVariantId);
+  const variantFromUrl = searchParams.get("variant");
 
-  const [attributeSelections, setAttributeSelections] = useState<Record<number, string>>(() =>
-    selectionsFromVariant(preferredVariant)
+  const resolvedInitialVariant = useMemo(
+    () =>
+      resolveInitialVariant(product.variants, {
+        variantSlug: initialVariantSlug ?? variantFromUrl,
+      }),
+    [product.variants, initialVariantSlug, variantFromUrl]
   );
+
   const [selectedVariantId, setSelectedVariantId] = useState<number | null>(
-    preferredVariant?.id ?? null
+    resolvedInitialVariant?.id ?? null
   );
   const [selectedOfferId, setSelectedOfferId] = useState<number | null>(
-    preferredVariant?.appliedOffer?.id ?? null
+    resolvedInitialVariant?.appliedOffer?.id ?? null
   );
   const [quantity, setQuantity] = useState<number>(1);
-  const [hasUserSelectedVariant, setHasUserSelectedVariant] = useState(false);
+
+  const selectVariant = useCallback(
+    (variant: ProductVariantView, updateUrl = true) => {
+      setSelectedVariantId(variant.id);
+      setSelectedOfferId(variant.appliedOffer?.id ?? null);
+      setQuantity(1);
+
+      if (updateUrl && variant.slug) {
+        const nextUrl = buildProductVariantUrl(product.slug, variant.slug);
+        if (variantFromUrl !== variant.slug) {
+          router.replace(nextUrl, { scroll: false });
+        }
+      }
+    },
+    [product.slug, router, variantFromUrl]
+  );
 
   useEffect(() => {
-    const nextPreferred = getPreferredVariant(product.variants, product.selectedVariantId);
-    setAttributeSelections(selectionsFromVariant(nextPreferred));
-    setSelectedVariantId(nextPreferred?.id ?? null);
-    setSelectedOfferId(nextPreferred?.appliedOffer?.id ?? null);
-    setHasUserSelectedVariant(false);
-    setQuantity(1);
-  }, [product.id, product.selectedVariantId, product.variants]);
+    const nextVariant = resolveInitialVariant(product.variants, {
+      variantSlug: variantFromUrl ?? initialVariantSlug,
+    });
+
+    if (!nextVariant) return;
+
+    setSelectedVariantId(nextVariant.id);
+    setSelectedOfferId(nextVariant.appliedOffer?.id ?? null);
+
+    if (nextVariant.slug) {
+      const shouldSyncUrl = !variantFromUrl || variantFromUrl !== nextVariant.slug;
+
+      if (shouldSyncUrl) {
+        router.replace(buildProductVariantUrl(product.slug, nextVariant.slug), {
+          scroll: false,
+        });
+      }
+    }
+  }, [product.id, product.slug, product.variants, initialVariantSlug, variantFromUrl, router]);
 
   const selectedVariant = useMemo(() => {
-    if (useAttributePicker) {
-      return (
-        findVariantBySelections(product.variants, attributeSelections, attributeGroups) ??
-        product.variants.find((variant) => variant.id === selectedVariantId) ??
-        getPreferredVariant(product.variants, product.selectedVariantId)
-      );
+    if (selectedVariantId) {
+      const matched = product.variants.find((variant) => variant.id === selectedVariantId);
+      if (matched) return matched;
     }
 
-    return (
-      product.variants.find((variant) => variant.id === selectedVariantId) ??
-      getPreferredVariant(product.variants, product.selectedVariantId)
-    );
-  }, [
-    attributeGroups,
-    attributeSelections,
-    product.selectedVariantId,
-    product.variants,
-    selectedVariantId,
-    useAttributePicker,
-  ]);
+    return resolvedInitialVariant;
+  }, [product.variants, resolvedInitialVariant, selectedVariantId]);
 
   useEffect(() => {
     if (!selectedVariant) {
       setSelectedOfferId(null);
       return;
-    }
-
-    if (selectedVariant.id !== selectedVariantId) {
-      setSelectedVariantId(selectedVariant.id);
     }
 
     const hasSelectedOffer = selectedOfferId
@@ -226,18 +156,7 @@ export default function ProductDetail({ product, fallbackImages = [] }: Props) {
     if (!hasSelectedOffer) {
       setSelectedOfferId(selectedVariant.appliedOffer?.id ?? null);
     }
-  }, [selectedVariant, selectedOfferId, selectedVariantId]);
-
-  useEffect(() => {
-    if (!hasUserSelectedVariant || !selectedVariant?.slug) {
-      return;
-    }
-
-    const currentSlug = pathname?.split("/").filter(Boolean).pop();
-    if (currentSlug && currentSlug !== selectedVariant.slug) {
-      router.replace(`/product/${selectedVariant.slug}`, { scroll: false });
-    }
-  }, [hasUserSelectedVariant, pathname, router, selectedVariant]);
+  }, [selectedVariant, selectedOfferId]);
 
   const handleWishlist = () => {
     if (!isAuthenticated) {
@@ -258,43 +177,10 @@ export default function ProductDetail({ product, fallbackImages = [] }: Props) {
     }
   };
 
-  const handleAttributeSelect = (group: AttributeSelectionGroup, value: string) => {
-    setHasUserSelectedVariant(true);
-    const nextSelections = resolveAttributeSelections(product.variants, attributeGroups, {
-      ...attributeSelections,
-      [group.attributeId]: value,
-    });
-    setAttributeSelections(nextSelections);
-
-    const matchedVariant = findVariantBySelections(
-      product.variants,
-      nextSelections,
-      attributeGroups
-    );
-    if (matchedVariant) {
-      setSelectedVariantId(matchedVariant.id);
-    }
+  const handleVariantSelect = (variant: ProductVariantView) => {
+    selectVariant(variant);
   };
 
-  const handleSimpleVariantSelect = (variantId: number) => {
-    setHasUserSelectedVariant(true);
-    setSelectedVariantId(variantId);
-    const variant = product.variants.find((item) => item.id === variantId);
-    setAttributeSelections(selectionsFromVariant(variant));
-  };
-
-  const selectedOfferPricing =
-    selectedOfferId && selectedVariant
-      ? selectedVariant.offerPrices.find((offerPrice) => offerPrice.offerId === selectedOfferId) ||
-        null
-      : null;
-  const selectedPrice =
-    selectedOfferPricing?.finalPrice ?? selectedVariant?.finalPrice ?? selectedVariant?.price ?? null;
-  const selectedOriginalPrice =
-    selectedOfferPricing?.originalPrice ??
-    selectedVariant?.originalPrice ??
-    selectedVariant?.price ??
-    null;
   const selectedImages =
     (selectedVariant?.images?.length ? selectedVariant.images : product.baseImages).length > 0
       ? selectedVariant?.images?.length
@@ -305,14 +191,42 @@ export default function ProductDetail({ product, fallbackImages = [] }: Props) {
   const selectedStock = selectedVariant?.stock ?? null;
   const inStock =
     typeof selectedStock === "number" ? selectedStock > 0 : product.variants.length === 0;
-  const showSimpleVariantPicker = !useAttributePicker && product.variants.length > 1;
   const specRows = buildSpecRows(selectedVariant, product.attributes);
-  const compatibleVariantIds = getCompatibleVariantIds(product.variants, attributeSelections);
+
+  const displayTitle = useMemo(() => {
+    const productName = product.title.trim();
+    const variantName = selectedVariant?.name?.trim();
+
+    if (!variantName) {
+      return productName;
+    }
+
+    if (variantName.toLowerCase() === productName.toLowerCase()) {
+      return productName;
+    }
+
+    return `${productName} ${variantName}`;
+  }, [product.title, selectedVariant?.name]);
+
+  const wishlistButton = (
+    <button
+      type="button"
+      className="product-gallery__wishlist"
+      onClick={handleWishlist}
+      aria-label="Add to wishlist"
+    >
+      <Heart size={20} />
+    </button>
+  );
 
   return (
     <div className="product-detail-grid">
       <div className="product-detail-image">
-        <ProductImageGallery images={displayImages} alt={product.title} />
+        <ProductImageGallery
+          images={displayImages}
+          alt={displayTitle}
+          topRightSlot={wishlistButton}
+        />
       </div>
 
       <div className="product-detail-content product-detail-panel">
@@ -329,7 +243,7 @@ export default function ProductDetail({ product, fallbackImages = [] }: Props) {
           )}
         </div>
 
-        <h1 className="section-title product-detail-title">{product.title}</h1>
+        <h1 className="section-title product-detail-title">{displayTitle}</h1>
 
         {(product.rating > 0 || product.reviewCount > 0) && (
           <div className="product-detail-rating-row">
@@ -356,121 +270,22 @@ export default function ProductDetail({ product, fallbackImages = [] }: Props) {
           </div>
         )}
 
-        {product.shortDescription && (
-          <p className="product-detail-subtitle">{product.shortDescription}</p>
-        )}
-
-        <div className="product-price-panel">
-          <div className="product-price-stack">
-            <span className="product-price-main">
-              {toCurrency(selectedPrice) || "Price on request"}
-            </span>
-            {selectedOriginalPrice !== null &&
-              selectedPrice !== null &&
-              selectedOriginalPrice > selectedPrice && (
-                <span className="product-price-strike">{toCurrency(selectedOriginalPrice)}</span>
-              )}
-          </div>
-
-          <div className={`product-stock-pill ${inStock ? "is-in-stock" : "is-out-of-stock"}`}>
-            {inStock ? `In Stock${selectedStock ? ` • ${selectedStock} left` : ""}` : "Out of stock"}
-          </div>
-        </div>
-
-        {selectedVariant?.sku && (
-          <p className="product-detail-sku">SKU: {selectedVariant.sku}</p>
-        )}
-
         {selectedVariant?.offerPrices && selectedVariant.offerPrices.length > 0 && (
-          <div className="product-offer-list">
-            {selectedVariant.offerPrices.map((offer) => (
-              <button
-                key={offer.offerId}
-                type="button"
-                onClick={() => setSelectedOfferId(offer.offerId)}
-                className={`product-offer-pill ${
-                  selectedOfferId === offer.offerId ? "is-selected" : ""
-                }`}
-              >
-                <Sparkles size={14} />
-                <span>
-                  {getOfferSummary(offer)}
-                  {offer.sources.length > 0 ? ` • ${offer.sources.join(", ")}` : ""}
-                </span>
-              </button>
-            ))}
-          </div>
+          <ProductOfferSelector
+            offers={selectedVariant.offerPrices}
+            selectedOfferId={selectedOfferId}
+            onSelectOffer={setSelectedOfferId}
+          />
         )}
 
-        {useAttributePicker && (
-          <div className="product-variation-panel">
-            <div className="product-variation-head">
-              <Sparkles size={15} color="var(--text-saffron)" />
-              <h3 className="product-variation-title">Select Options</h3>
-            </div>
-
-            <div className="product-variation-groups">
-              {attributeGroups.map((group) => {
-                const selectedValue = attributeSelections[group.attributeId];
-
-                return (
-                  <div key={group.attributeId} className="product-variation-group">
-                    <div className="product-variation-group-head">
-                      <span className="product-variation-label">{group.name}</span>
-                      {selectedValue && (
-                        <span className="product-variation-selected">{selectedValue}</span>
-                      )}
-                    </div>
-
-                    <div className="product-variation-options">
-                      {group.options.map((option) => {
-                        const isSelected = selectedValue === option.value;
-                        const isDisabled = !option.variantIds.some((id) =>
-                          compatibleVariantIds.has(id)
-                        );
-
-                        return (
-                          <AttributeOptionButton
-                            key={`${group.attributeId}-${option.value}`}
-                            option={option}
-                            isSelected={isSelected}
-                            isDisabled={isDisabled}
-                            onSelect={() => handleAttributeSelect(group, option.value)}
-                          />
-                        );
-                      })}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {showSimpleVariantPicker && (
-          <div className="product-variation-panel">
-            <div className="product-variation-head">
-              <Sparkles size={15} color="var(--text-saffron)" />
-              <h3 className="product-variation-title">Choose Variant</h3>
-            </div>
-
-            <div className="product-variation-options">
-              {product.variants.map((variant) => {
-                const isSelected = selectedVariantId === variant.id;
-
-                return (
-                  <button
-                    key={variant.id}
-                    type="button"
-                    onClick={() => handleSimpleVariantSelect(variant.id)}
-                    className={`product-variation-option ${isSelected ? "is-selected" : ""}`}
-                  >
-                    <span className="product-variation-option__label">{variant.name}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+        {product.variants.length > 1 && (
+          <GroupedVariantPicker
+            variants={product.variants}
+            attributeGroups={attributeGroups}
+            selectedVariantId={selectedVariantId}
+            cheapestVariant={cheapestVariant}
+            onSelectVariant={handleVariantSelect}
+          />
         )}
 
         <div className="product-quantity-block">
@@ -525,13 +340,6 @@ export default function ProductDetail({ product, fallbackImages = [] }: Props) {
           >
             <PackageCheck size={18} style={{ marginRight: 8 }} />
             Buy Now
-          </button>
-          <button
-            className="btn btn-outline btn-lg product-cta-button"
-            onClick={handleWishlist}
-            aria-label="Add to wishlist"
-          >
-            <Heart size={20} />
           </button>
         </div>
 
