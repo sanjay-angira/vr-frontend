@@ -41,7 +41,7 @@ import {
 } from "./shared/fetchOptions";
 import { useAdminCrudForm } from "./shared/useAdminCrudForm";
 import { useSlugSync } from "./shared/useSlugSync";
-import { buildVariantSlug } from "./shared/generateSlug";
+import { generateSlug } from "./shared/generateSlug";
 import { activeField, htmlMinLength, requiredString, slugField } from "./shared/validation";
 import {
   ATTRIBUTE_CUSTOMER_DISPLAY_OPTIONS,
@@ -54,7 +54,6 @@ import {
   createEmptyVariantAttribute,
   emptyVariant,
   getImageEnabledAttributeIds,
-  getVariantSlugPrefix,
   inferAttributeCustomerDisplay,
   isProductStepValid,
   mapAttributeIdsFromRecord,
@@ -79,6 +78,7 @@ import { FormQuillEditor } from "./shared/FormQuillEditor";
 const variantSchema = Yup.object({
   name: requiredString("Variant name", 1),
   slug: Yup.string(),
+  description: Yup.string(),
   sku: Yup.string(),
   price: Yup.number().min(0.01, "Price must be at least 0.01").required("Price is required"),
   stock: Yup.number().min(0, "Stock must be 0 or more").required("Stock is required"),
@@ -157,7 +157,6 @@ function VariantPanel({
   expanded,
   onToggle,
   offers,
-  productSlug,
   onRemove,
   canRemove,
   formik,
@@ -170,7 +169,6 @@ function VariantPanel({
   expanded: boolean;
   onToggle: () => void;
   offers: Array<{ label: string; value: string | number }>;
-  productSlug: string;
   onRemove: () => void;
   canRemove: boolean;
   formik: FormikProps<ProductFormValues>;
@@ -184,22 +182,18 @@ function VariantPanel({
   useEffect(() => {
     if (slugManuallyEdited.current) return;
 
-    const nextSlug = variant.name.trim()
-      ? buildVariantSlug(productSlug, variant.name)
-      : getVariantSlugPrefix(productSlug);
+    const nextSlug = variant.name.trim() ? generateSlug(variant.name) : "";
 
     if (variant.slug !== nextSlug) {
       void formik.setFieldValue(`${prefix}.slug`, nextSlug, false);
     }
-  }, [formik, prefix, productSlug, variant.name, variant.slug]);
+  }, [formik, prefix, variant.name, variant.slug]);
 
   function handleVariantNameChange(value: string) {
     void formik.setFieldValue(`${prefix}.name`, value, false);
 
     if (!slugManuallyEdited.current) {
-      const nextSlug = value.trim()
-        ? buildVariantSlug(productSlug, value)
-        : getVariantSlugPrefix(productSlug);
+      const nextSlug = value.trim() ? generateSlug(value) : "";
       void formik.setFieldValue(`${prefix}.slug`, nextSlug, false);
     }
   }
@@ -240,7 +234,6 @@ function VariantPanel({
               onChange={(event) => handleVariantNameChange(event.target.value)}
               onBlur={formik.handleBlur}
               error={getNestedError(formik.touched, formik.errors, `${prefix}.name`)}
-              hint="Required. Slug auto-fills from this name."
             />
             <Input
               label="Variant Slug"
@@ -250,7 +243,6 @@ function VariantPanel({
               onChange={(event) => handleVariantSlugChange(event.target.value)}
               onBlur={formik.handleBlur}
               error={getNestedError(formik.touched, formik.errors, `${prefix}.slug`)}
-              hint={`Starts with product slug: ${getVariantSlugPrefix(productSlug) || "{product-slug}-"}`}
             />
             <Input
               label="SKU"
@@ -284,15 +276,24 @@ function VariantPanel({
               error={getNestedError(formik.touched, formik.errors, `${prefix}.stock`)}
             />
 
+            <FormMultiDropdown
+              label="Variant Offers"
+              value={variant.productVariantOffers}
+              onChange={(values) => formik.setFieldValue(`${prefix}.productVariantOffers`, values)}
+              options={offers}
+            />
+
             <div className="md:col-span-2">
-              <FormMultiDropdown
-                label="Variant Offers"
-                value={variant.productVariantOffers}
-                onChange={(values) => formik.setFieldValue(`${prefix}.productVariantOffers`, values)}
-                options={offers}
-                hint={`Total offers: ${offers.length}`}
+              <FormQuillEditor
+                label="Variant Description"
+                value={variant.description}
+                onChange={(content) => formik.setFieldValue(`${prefix}.description`, content)}
+                onBlur={() => formik.setFieldTouched(`${prefix}.description`, true)}
+                error={getNestedError(formik.touched, formik.errors, `${prefix}.description`)}
+                placeholder="Variant Description"
               />
             </div>
+
 
             <MultiImageUploadField
               label="Variant Images"
@@ -350,9 +351,8 @@ function VariantPanel({
                     return (
                       <div key={attribute.id}>
                         <div
-                          className={`grid grid-cols-1 gap-4 ${
-                            customerDisplay === "value" ? "md:grid-cols-1" : "md:grid-cols-2"
-                          }`}
+                          className={`grid grid-cols-1 gap-4 ${customerDisplay === "value" ? "md:grid-cols-1" : "md:grid-cols-2"
+                            }`}
                         >
                           <Input
                             label={`${attribute.name} value`}
@@ -484,6 +484,7 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
           id: variant.id ? Number(variant.id) : undefined,
           name: String(variant.name ?? ""),
           slug: String(variant.slug ?? ""),
+          description: String(variant.description ?? ""),
           sku: String(variant.sku ?? ""),
           price: variant.price != null ? Number(variant.price) : ("" as const),
           stock: variant.stock != null ? Number(variant.stock) : (1 as const),
@@ -645,15 +646,6 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
       return;
     }
 
-    if (currentStep === 1) {
-      const slugPrefix = getVariantSlugPrefix(formik.values.productSlug);
-      formik.values.variants.forEach((variant, index) => {
-        if (!variant.slug.trim()) {
-          void formik.setFieldValue(`variants.${index}.slug`, slugPrefix, false);
-        }
-      });
-    }
-
     // Defer step change so the same click cannot land on the submit button
     // when Next is replaced after advancing to the final step.
     window.setTimeout(() => {
@@ -718,50 +710,6 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
               <FormInput formik={formik} name="productName" label="Product Name" required />
               <FormInput formik={formik} name="productSlug" label="Product Slug" required />
 
-              <FormFullWidth>
-                <FormInput
-                  formik={formik}
-                  name="shortDescription"
-                  label="Short Description"
-                  required
-                />
-              </FormFullWidth>
-
-              <FormFullWidth>
-                <FormQuillEditor
-                  label="Description"
-                  required
-                  value={formik.values.description}
-                  onChange={(content) => formik.setFieldValue("description", content)}
-                  onBlur={() => formik.setFieldTouched("description", true)}
-                  error={getNestedError(formik.touched, formik.errors, "description")}
-                />
-              </FormFullWidth>
-
-              <FormFullWidth>
-                <FormMultiDropdown
-                  label="Apply Offers"
-                  value={formik.values.productOffers}
-                  onChange={(values) => formik.setFieldValue("productOffers", values)}
-                  onBlur={() => formik.setFieldTouched("productOffers", true)}
-                  options={offers}
-                />
-              </FormFullWidth>
-
-              <FormDropdown
-                label="Publish Status"
-                required
-                value={formik.values.publishStatus}
-                onChange={(value) => formik.setFieldValue("publishStatus", value)}
-                onBlur={() => formik.setFieldTouched("publishStatus", true)}
-                error={getNestedError(formik.touched, formik.errors, "publishStatus")}
-                options={[
-                  { label: "Draft", value: "draft" },
-                  { label: "Published", value: "published" },
-                  { label: "Scheduled", value: "scheduled" },
-                ]}
-              />
-
               <FormDropdown
                 label="Brand"
                 required
@@ -798,13 +746,26 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
               )}
 
               <FormFullWidth>
-                <FormMultiDropdown
-                  label="Frequently Bought Together"
-                  value={formik.values.frequentlyBoughtTogether}
-                  onChange={(values) => formik.setFieldValue("frequentlyBoughtTogether", values)}
-                  options={products}
+                <FormInput
+                  formik={formik}
+                  name="shortDescription"
+                  label="Short Description"
+                  required
                 />
               </FormFullWidth>
+
+              <FormFullWidth>
+                <FormQuillEditor
+                  label="Description"
+                  required
+                  value={formik.values.description}
+                  onChange={(content) => formik.setFieldValue("description", content)}
+                  onBlur={() => formik.setFieldTouched("description", true)}
+                  error={getNestedError(formik.touched, formik.errors, "description")}
+                />
+              </FormFullWidth>
+
+
 
               <FormFullWidth>
                 <FormMultiDropdown
@@ -821,6 +782,7 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
                   onDeleteOption={handleDeleteTag}
                 />
               </FormFullWidth>
+
 
               <FormFullWidth>
                 <FormMultiDropdown
@@ -889,7 +851,6 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
                 )}
               </FormFullWidth>
 
-
               <FormFullWidth>
                 <MultiImageUploadField
                   label="Product Images"
@@ -901,8 +862,24 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
                 />
               </FormFullWidth>
 
+
               <FormFullWidth>
-                <FormToggle formik={formik} name="isActive" label="Active Status" />
+                <FormMultiDropdown
+                  label="Apply Offers"
+                  value={formik.values.productOffers}
+                  onChange={(values) => formik.setFieldValue("productOffers", values)}
+                  onBlur={() => formik.setFieldTouched("productOffers", true)}
+                  options={offers}
+                />
+              </FormFullWidth>
+
+              <FormFullWidth>
+                <FormMultiDropdown
+                  label="Frequently Bought Together"
+                  value={formik.values.frequentlyBoughtTogether}
+                  onChange={(values) => formik.setFieldValue("frequentlyBoughtTogether", values)}
+                  options={products}
+                />
               </FormFullWidth>
             </div>
           )}
@@ -929,7 +906,6 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
                               setExpandedVariant((current) => (current === index ? null : index))
                             }
                             offers={offers}
-                            productSlug={formik.values.productSlug}
                             onRemove={() => remove(index)}
                             canRemove={formik.values.variants.length > 1}
                             formik={formik}
@@ -953,7 +929,7 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
                         type="button"
                         onClick={() => {
                           push({
-                            ...emptyVariant(formik.values.productSlug),
+                            ...emptyVariant(),
                             variantAttributes: formik.values.attributeIds.map((attributeId) =>
                               createEmptyVariantAttribute(attributeId, attributeMetaById)
                             ),
@@ -1001,6 +977,25 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
             </div>
           )}
 
+          {currentStep === 4 && (
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+              <FormDropdown
+                label="Publish Status"
+                required
+                value={formik.values.publishStatus}
+                onChange={(value) => formik.setFieldValue("publishStatus", value)}
+                onBlur={() => formik.setFieldTouched("publishStatus", true)}
+                error={getNestedError(formik.touched, formik.errors, "publishStatus")}
+                options={[
+                  { label: "Draft", value: "draft" },
+                  { label: "Published", value: "published" },
+                  { label: "Scheduled", value: "scheduled" },
+                ]}
+              />
+              <FormToggle formik={formik} name="isActive" label="Active Status" />
+            </div>
+          )}
+
           <div
             className={`flex pt-6 ${currentStep === 1 ? "justify-end" : "justify-between"}`}
           >
@@ -1011,7 +1006,7 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
               </Button>
             )}
 
-            {currentStep < 3 ? (
+            {currentStep < PRODUCT_FORM_STEPS.length ? (
               <Button
                 type="button"
                 onClick={handleNextStep}

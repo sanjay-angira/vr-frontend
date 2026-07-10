@@ -1,15 +1,10 @@
 import type { FormikErrors } from "formik";
 import { getIn } from "formik";
-import { buildVariantSlug } from "./shared/generateSlug";
+import { generateSlug } from "./shared/generateSlug";
 
-export { buildVariantSlug };
+export { buildVariantSlug } from "./shared/generateSlug";
 
-export function getVariantSlugPrefix(productSlug: string): string {
-  const prefix = productSlug.trim();
-  return prefix ? `${prefix}-` : "";
-}
-
-export const VARIANT_SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)+$/;
+export const VARIANT_SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 export type AttributeViewOption = "value" | "code" | "image";
 
@@ -218,6 +213,7 @@ export type ProductVariant = {
   id?: number;
   name: string;
   slug: string;
+  description: string;
   sku: string;
   price: number | "";
   stock: number | "";
@@ -258,11 +254,13 @@ export const PRODUCT_FORM_STEPS = [
   { id: 1, label: "Product Information" },
   { id: 2, label: "Product Variations" },
   { id: 3, label: "Product SEO Settings" },
+  { id: 4, label: "Product Settings" },
 ] as const;
 
-export const emptyVariant = (productSlug = ""): ProductVariant => ({
+export const emptyVariant = (): ProductVariant => ({
   name: "",
-  slug: getVariantSlugPrefix(productSlug),
+  slug: "",
+  description: "",
   sku: "",
   price: "",
   stock: 1,
@@ -442,7 +440,8 @@ export function buildProductPayload(
       const variantPayload: Record<string, unknown> = {
         ...(variant.id ? { id: variant.id } : {}),
         name: variantName,
-        slug: variant.slug.trim() || buildVariantSlug(values.productSlug, variantName),
+        slug: variant.slug.trim() || generateSlug(variantName),
+        description: variant.description || undefined,
         price: Number(variant.price),
         stock: Number(variant.stock),
         ...(variant.sku ? { sku: variant.sku } : {}),
@@ -537,7 +536,6 @@ export function isProductStepValid(
         Boolean(values.productSlug?.trim()) &&
         Boolean(values.shortDescription?.trim()) &&
         Boolean(descriptionText) &&
-        Boolean(values.publishStatus) &&
         Boolean(values.brandId) &&
         categorySelected &&
         hasProductImages &&
@@ -582,13 +580,19 @@ export function isProductStepValid(
         !hasFieldError(errors, "seo.metaTitle") &&
         !hasFieldError(errors, "seo.metaDescription")
       );
+    case 4:
+      return (
+        Boolean(values.publishStatus) &&
+        !hasFieldError(errors, "publishStatus")
+      );
     default:
       return false;
   }
 }
 
 export const STEP_TOUCH_FIELDS: Record<number, string[]> = {
-  1: ["productName", "productSlug", "shortDescription", "description", "publishStatus", "brandId", "category", "childCategories", "attributeIds", "attributeCustomerDisplay", "images"],
+  1: ["productName", "productSlug", "shortDescription", "description", "brandId", "category", "childCategories", "attributeIds", "attributeCustomerDisplay", "images"],
   2: ["variants"],
   3: ["seo.metaTitle", "seo.metaDescription", "seo.metaKeywords", "seo.canonicalUrl", "seo.ogImage"],
+  4: ["publishStatus", "isActive"],
 };
