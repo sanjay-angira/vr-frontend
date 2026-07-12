@@ -3315,6 +3315,70 @@ body {
   }
 }
 
+.store-page {
+  padding-top: 1.5rem;
+  padding-bottom: 3.5rem;
+}
+
+.store-page__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.store-page__search {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex: 1 1 280px;
+  max-width: 420px;
+  padding: 0.55rem 0.85rem;
+  border: 1px solid var(--vr-border, #e8e1d8);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--vr-muted, #6b4e36);
+}
+
+.store-page__search input {
+  flex: 1;
+  border: 0;
+  outline: none;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  min-width: 0;
+}
+
+.store-page__message {
+  margin: 0 0 1rem;
+  color: var(--vr-muted, #6b4e36);
+}
+
+.store-page__message--error {
+  color: #dc2626;
+}
+
+.store-page__pagination {
+  margin-top: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.store-page__pagination-meta {
+  margin: 0;
+  color: var(--vr-muted, #6b4e36);
+}
+
+.store-page__pagination-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
 .store-skeleton-card {
   border: 1px solid #ede3d6;
   border-radius: 16px;
