@@ -5,45 +5,49 @@ import { normalizeVariantAttributes, type VariantAttributeView } from "./product
 
 export type { VariantAttributeView };
 
-export type ProductVariantView = {
-  id: number;
-  slug?: string | null;
-  name: string;
-  price: number | null;
-  originalPrice: number | null;
+export type VariantPricingView = {
+  sellingPrice: number | null;
   finalPrice: number | null;
-  discountAmount: number;
-  discountPercentage: number;
-  appliedOffer?: {
+  totalDiscount: number;
+  appliedOffer: {
     id: number;
     offerName: string;
     offerSlug: string;
     discountType: string;
     discountValue: number;
+    sources: string[];
   } | null;
-  stock: number | null;
-  sku: string | null;
-  images: string[];
-  variantAttributes: VariantAttributeView[];
-  offerPrices: Array<{
-    offerId: number;
+  availableOffers: Array<{
+    id: number;
     offerName: string;
     offerSlug: string;
     discountType: string;
     discountValue: number;
-    originalPrice: number | null;
-    finalPrice: number | null;
-    discountAmount: number;
-    discountPercentage: number;
     sources: string[];
+    sellingPrice: number | null;
+    finalPrice: number | null;
+    totalDiscount: number;
+    isApplied: boolean;
   }>;
+};
+
+export type ProductVariantView = {
+  id: number;
+  slug?: string | null;
+  name: string;
+  price: number | null;
+  stock: number | null;
+  sku: string | null;
+  description?: string | null;
+  images: string[];
+  variantAttributes: VariantAttributeView[];
+  pricing: VariantPricingView;
 };
 
 export type ProductPageData = {
   id: number;
   productName: string;
   productSlug: string;
-  selectedVariantId?: number | null;
   shortDescription: string;
   description: string;
   brand?: { brandName?: string | null } | null;
@@ -68,7 +72,6 @@ export type ProductPageData = {
     price?: number | null;
     inStock?: boolean;
   }>;
-  activeOffers?: Array<Record<string, unknown>>;
 };
 
 function toNumber(value: string | number | null | undefined): number | null {
@@ -140,57 +143,64 @@ export function normalizeVariants(
     slug?: string | null;
     name: string;
     price?: string | number | null;
-    originalPrice?: string | number | null;
-    finalPrice?: string | number | null;
-    discountAmount?: string | number | null;
-    discountPercentage?: string | number | null;
-    appliedOffer?: Record<string, unknown> | null;
-    offerPrices?: Array<Record<string, unknown>>;
     stock?: string | number | null;
     sku?: string | null;
+    description?: string | null;
     images?: Array<{ id: number; url: string; sortOrder: number }>;
     variantAttributes?: Array<Record<string, unknown>>;
+    pricing?: Record<string, unknown>;
   }> = []
 ) {
-  return variants.map((variant) => ({
-    id: variant.id,
-    slug: variant.slug || null,
-    name: variant.name,
-    price: toNumber(variant.price),
-    originalPrice: toNumber(variant.originalPrice ?? variant.price),
-    finalPrice: toNumber(variant.finalPrice ?? variant.price),
-    discountAmount: toNumber(variant.discountAmount) ?? 0,
-    discountPercentage: toNumber(variant.discountPercentage) ?? 0,
-    appliedOffer: variant.appliedOffer
-      ? {
-          id: Number(variant.appliedOffer.id),
-          offerName: String(variant.appliedOffer.offerName),
-          offerSlug: String(variant.appliedOffer.offerSlug),
-          discountType: String(variant.appliedOffer.discountType ?? variant.appliedOffer.type),
-          discountValue: Number(variant.appliedOffer.discountValue),
-        }
-      : null,
-    offerPrices: (variant.offerPrices || []).map((offerPrice) => ({
-      offerId: Number(offerPrice.offerId),
-      offerName: String(offerPrice.offerName),
-      offerSlug: String(offerPrice.offerSlug),
-      discountType: String(offerPrice.discountType ?? offerPrice.type),
-      discountValue: Number(offerPrice.discountValue),
-      originalPrice: toNumber(offerPrice.originalPrice as string | number | null),
-      finalPrice: toNumber(offerPrice.finalPrice as string | number | null),
-      discountAmount: toNumber(offerPrice.discountAmount as string | number | null) ?? 0,
-      discountPercentage:
-        toNumber(offerPrice.discountPercentage as string | number | null) ?? 0,
-      sources: (offerPrice.sources as string[]) || [],
-    })),
-    stock: toNumber(variant.stock),
-    sku: variant.sku || null,
-    images: (variant.images || [])
-      .slice()
-      .sort((a, b) => a.sortOrder - b.sortOrder)
-      .map((image) => image.url),
-    variantAttributes: normalizeVariantAttributes(variant.variantAttributes || []),
-  }));
+  return variants.map((variant) => {
+    const pricingRaw = (variant.pricing || {}) as Record<string, unknown>;
+    const appliedOfferRaw = pricingRaw.appliedOffer as Record<string, unknown> | null | undefined;
+
+    const pricing: VariantPricingView = {
+      sellingPrice: toNumber(pricingRaw.sellingPrice as string | number | null),
+      finalPrice: toNumber(pricingRaw.finalPrice as string | number | null),
+      totalDiscount: toNumber(pricingRaw.totalDiscount as string | number | null) ?? 0,
+      appliedOffer: appliedOfferRaw
+        ? {
+            id: Number(appliedOfferRaw.id),
+            offerName: String(appliedOfferRaw.offerName),
+            offerSlug: String(appliedOfferRaw.offerSlug),
+            discountType: String(appliedOfferRaw.discountType),
+            discountValue: Number(appliedOfferRaw.discountValue),
+            sources: (appliedOfferRaw.sources as string[]) || [],
+          }
+        : null,
+      availableOffers: ((pricingRaw.availableOffers as Array<Record<string, unknown>>) || []).map(
+        (offer) => ({
+          id: Number(offer.id),
+          offerName: String(offer.offerName),
+          offerSlug: String(offer.offerSlug),
+          discountType: String(offer.discountType),
+          discountValue: Number(offer.discountValue),
+          sources: (offer.sources as string[]) || [],
+          sellingPrice: toNumber(offer.sellingPrice as string | number | null),
+          finalPrice: toNumber(offer.finalPrice as string | number | null),
+          totalDiscount: toNumber(offer.totalDiscount as string | number | null) ?? 0,
+          isApplied: Boolean(offer.isApplied),
+        })
+      ),
+    };
+
+    return {
+      id: variant.id,
+      slug: variant.slug || null,
+      name: variant.name,
+      price: toNumber(variant.price),
+      stock: toNumber(variant.stock),
+      sku: variant.sku || null,
+      description: variant.description ? String(variant.description).trim() || null : null,
+      images: (variant.images || [])
+        .slice()
+        .sort((a, b) => a.sortOrder - b.sortOrder)
+        .map((image) => image.url),
+      variantAttributes: normalizeVariantAttributes(variant.variantAttributes || []),
+      pricing,
+    };
+  });
 }
 
 export { toNumber };

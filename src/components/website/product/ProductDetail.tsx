@@ -5,20 +5,20 @@ import { useDispatch, useSelector } from "react-redux";
 import { Heart, PackageCheck, ShoppingCart, Star } from "lucide-react";
 import ProductImageGallery from "@/components/website/product/ProductImageGallery";
 import GroupedVariantPicker from "@/components/website/product/GroupedVariantPicker";
-import ProductOfferSelector from "@/components/website/product/ProductOfferSelector";
+import ProductPriceBlock from "@/components/website/product/ProductPriceBlock";
 import type { ProductVariantView } from "@/components/website/product/productApi";
 import {
   buildAttributeGroups,
-  buildProductVariantUrl,
-  buildSpecRows,
-  getCheapestVariant,
+  findVariantBySlug,
+  hasVariantOptionGroups,
+  replaceProductVariantInUrl,
   resolveInitialVariant,
 } from "@/components/website/product/productVariantUtils";
 import { fetchWebsiteCart } from "@/services/redux/slices/websiteSlices/cartSlice";
 import { addOrUpdateCartItem } from "@/services/website/cartService";
 import type { RootState } from "@/services/redux";
 import { setAuthModalOpen } from "@/services/redux/slices/websiteSlices/modalSlice";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { isAuthPagePath } from "@/utils/authRoutes";
 
 export type ProductAttributeView = {
@@ -27,112 +27,99 @@ export type ProductAttributeView = {
   value: string;
 };
 
-export type ProductOfferView = {
-  id: number;
-  offerName: string;
-  offerSlug: string;
-  discountType: string;
-  discountValue: number;
-  sources: string[];
-};
-
 export type ProductDetailView = {
   id: number;
   title: string;
   slug: string;
-  selectedVariantId?: number | null;
   shortDescription: string;
   brandName?: string | null;
   categoryName?: string | null;
   baseImages: string[];
   attributes: ProductAttributeView[];
   variants: ProductVariantView[];
-  activeOffers: ProductOfferView[];
   rating: number;
   reviewCount: number;
 };
 
 type Props = {
   product: ProductDetailView;
-  initialVariantSlug?: string | null;
   fallbackImages?: string[];
+  initialVariantSlug?: string | null;
 };
+
+function getVariantSlugFromWindow(): string | null {
+  if (typeof window === "undefined") return null;
+  return new URLSearchParams(window.location.search).get("variant");
+}
 
 export default function ProductDetail({
   product,
-  initialVariantSlug = null,
   fallbackImages = [],
+  initialVariantSlug = null,
 }: Props) {
-  const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const dispatch = useDispatch();
   const isAuthenticated = useSelector((state: RootState) => state.userAuth.isAuthenticated);
-
-  const cheapestVariant = useMemo(
-    () => getCheapestVariant(product.variants),
-    [product.variants]
-  );
 
   const attributeGroups = useMemo(
     () => buildAttributeGroups(product.variants),
     [product.variants]
   );
 
-  const variantFromUrl = searchParams.get("variant");
-
-  const resolvedInitialVariant = useMemo(
-    () =>
-      resolveInitialVariant(product.variants, {
-        variantSlug: initialVariantSlug ?? variantFromUrl,
-      }),
-    [product.variants, initialVariantSlug, variantFromUrl]
+  const showVariantPicker = useMemo(
+    () => hasVariantOptionGroups(product.variants),
+    [product.variants]
   );
 
-  const [selectedVariantId, setSelectedVariantId] = useState<number | null>(
-    resolvedInitialVariant?.id ?? null
-  );
-  const [selectedOfferId, setSelectedOfferId] = useState<number | null>(
-    resolvedInitialVariant?.appliedOffer?.id ?? null
-  );
+  const [selectedVariantId, setSelectedVariantId] = useState<number | null>(() => {
+    const initial = resolveInitialVariant(product.variants, {
+      variantSlug: getVariantSlugFromWindow() ?? initialVariantSlug,
+    });
+    return initial?.id ?? product.variants[0]?.id ?? null;
+  });
   const [quantity, setQuantity] = useState<number>(1);
 
   const selectVariant = useCallback(
-    (variant: ProductVariantView, updateUrl = true) => {
+    (variant: ProductVariantView) => {
       setSelectedVariantId(variant.id);
-      setSelectedOfferId(variant.appliedOffer?.id ?? null);
       setQuantity(1);
 
-      if (updateUrl && variant.slug) {
-        const nextUrl = buildProductVariantUrl(product.slug, variant.slug);
-        if (variantFromUrl !== variant.slug) {
-          router.replace(nextUrl, { scroll: false });
-        }
+      if (variant.slug) {
+        replaceProductVariantInUrl(product.slug, variant.slug);
       }
     },
-    [product.slug, router, variantFromUrl]
+    [product.slug]
   );
 
   useEffect(() => {
-    const nextVariant = resolveInitialVariant(product.variants, {
-      variantSlug: variantFromUrl ?? initialVariantSlug,
-    });
+    const variant =
+      product.variants.find((item) => item.id === selectedVariantId) ??
+      product.variants[0] ??
+      null;
 
-    if (!nextVariant) return;
+    if (!variant?.slug) return;
 
-    setSelectedVariantId(nextVariant.id);
-    setSelectedOfferId(nextVariant.appliedOffer?.id ?? null);
-
-    if (nextVariant.slug) {
-      const shouldSyncUrl = !variantFromUrl || variantFromUrl !== nextVariant.slug;
-
-      if (shouldSyncUrl) {
-        router.replace(buildProductVariantUrl(product.slug, nextVariant.slug), {
-          scroll: false,
-        });
-      }
+    const currentSlug = getVariantSlugFromWindow();
+    if (currentSlug !== variant.slug) {
+      replaceProductVariantInUrl(product.slug, variant.slug);
     }
-  }, [product.id, product.slug, product.variants, initialVariantSlug, variantFromUrl, router]);
+  }, [product.slug, product.variants, selectedVariantId]);
+
+  useEffect(() => {
+    const syncFromUrl = () => {
+      const slug = getVariantSlugFromWindow();
+      const matched = slug
+        ? findVariantBySlug(product.variants, slug)
+        : product.variants[0] ?? null;
+
+      if (matched) {
+        setSelectedVariantId(matched.id);
+      }
+    };
+
+    window.addEventListener("popstate", syncFromUrl);
+    return () => window.removeEventListener("popstate", syncFromUrl);
+  }, [product.variants]);
 
   const selectedVariant = useMemo(() => {
     if (selectedVariantId) {
@@ -140,23 +127,8 @@ export default function ProductDetail({
       if (matched) return matched;
     }
 
-    return resolvedInitialVariant;
-  }, [product.variants, resolvedInitialVariant, selectedVariantId]);
-
-  useEffect(() => {
-    if (!selectedVariant) {
-      setSelectedOfferId(null);
-      return;
-    }
-
-    const hasSelectedOffer = selectedOfferId
-      ? selectedVariant.offerPrices.some((offerPrice) => offerPrice.offerId === selectedOfferId)
-      : false;
-
-    if (!hasSelectedOffer) {
-      setSelectedOfferId(selectedVariant.appliedOffer?.id ?? null);
-    }
-  }, [selectedVariant, selectedOfferId]);
+    return product.variants[0] ?? null;
+  }, [product.variants, selectedVariantId]);
 
   const handleWishlist = () => {
     if (!isAuthenticated) {
@@ -191,7 +163,10 @@ export default function ProductDetail({
   const selectedStock = selectedVariant?.stock ?? null;
   const inStock =
     typeof selectedStock === "number" ? selectedStock > 0 : product.variants.length === 0;
-  const specRows = buildSpecRows(selectedVariant, product.attributes);
+
+  const variantDescription = useMemo(() => {
+    return selectedVariant?.description?.trim() || "";
+  }, [selectedVariant?.description]);
 
   const displayTitle = useMemo(() => {
     const productName = product.title.trim();
@@ -270,20 +245,15 @@ export default function ProductDetail({
           </div>
         )}
 
-        {selectedVariant?.offerPrices && selectedVariant.offerPrices.length > 0 && (
-          <ProductOfferSelector
-            offers={selectedVariant.offerPrices}
-            selectedOfferId={selectedOfferId}
-            onSelectOffer={setSelectedOfferId}
-          />
+        {selectedVariant && (
+          <ProductPriceBlock pricing={selectedVariant.pricing} inStock={inStock} />
         )}
 
-        {product.variants.length > 1 && (
+        {showVariantPicker && (
           <GroupedVariantPicker
             variants={product.variants}
             attributeGroups={attributeGroups}
             selectedVariantId={selectedVariantId}
-            cheapestVariant={cheapestVariant}
             onSelectVariant={handleVariantSelect}
           />
         )}
@@ -327,33 +297,31 @@ export default function ProductDetail({
 
         <div className="product-action-row">
           <button
+            type="button"
             className="btn btn-primary btn-lg product-cta-button"
             disabled={!inStock || !selectedVariant}
             onClick={handleAddToCart}
           >
-            <ShoppingCart size={18} style={{ marginRight: 8 }} />
+            <ShoppingCart size={18} aria-hidden="true" />
             {inStock ? "Add to Cart" : "Unavailable"}
           </button>
           <button
+            type="button"
             className="btn btn-outline btn-lg product-cta-button product-cta-button--secondary"
             disabled={!inStock || !selectedVariant}
           >
-            <PackageCheck size={18} style={{ marginRight: 8 }} />
+            <PackageCheck size={18} aria-hidden="true" />
             Buy Now
           </button>
         </div>
 
-        {specRows.length > 0 && (
-          <div className="product-specs-card">
-            <div className="product-specs-card__header">Product Details</div>
-            <div className="product-specs-card__body">
-              {specRows.map((attribute, index) => (
-                <div key={`${attribute.id}-${index}`} className="product-specs-row">
-                  <div className="product-specs-row__label">{attribute.name}</div>
-                  <div className="product-specs-row__value">{attribute.value}</div>
-                </div>
-              ))}
-            </div>
+        {variantDescription && (
+          <div className="product-specs-card product-description-card">
+            <div className="product-specs-card__header">Variant Description</div>
+            <div
+              className="product-copy-content product-description-card__body"
+              dangerouslySetInnerHTML={{ __html: variantDescription }}
+            />
           </div>
         )}
       </div>

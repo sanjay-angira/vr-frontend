@@ -30,6 +30,12 @@ function normalizeViewOption(value: unknown): "value" | "code" | "image" {
   return "value";
 }
 
+export function hasVariantOptionGroups(
+  variants: Array<{ id: number; variantAttributes: VariantAttributeView[] }>
+): boolean {
+  return buildAttributeGroups(variants).length > 0;
+}
+
 export function normalizeVariantAttributes(
   rawAttributes: Array<Record<string, unknown>> = []
 ): VariantAttributeView[] {
@@ -90,6 +96,12 @@ export function buildAttributeGroups(
   const groups = Array.from(groupMap.values());
 
   return groups.sort((left, right) => {
+    const leftPrimary = isPrimaryAttributeGroup(left);
+    const rightPrimary = isPrimaryAttributeGroup(right);
+
+    if (leftPrimary && !rightPrimary) return -1;
+    if (!leftPrimary && rightPrimary) return 1;
+
     const leftIsColor = left.name.toLowerCase().includes("color");
     const rightIsColor = right.name.toLowerCase().includes("color");
 
@@ -98,6 +110,61 @@ export function buildAttributeGroups(
 
     return left.attributeId - right.attributeId;
   });
+}
+
+export function isPrimaryAttributeGroup(group: AttributeSelectionGroup): boolean {
+  return group.options.some(
+    (option) => option.viewOption === "code" || option.viewOption === "image"
+  );
+}
+
+export function splitAttributeGroups(groups: AttributeSelectionGroup[]): {
+  primaryGroups: AttributeSelectionGroup[];
+  secondaryGroups: AttributeSelectionGroup[];
+} {
+  const primaryGroups = groups.filter(isPrimaryAttributeGroup);
+  const secondaryGroups = groups.filter((group) => !isPrimaryAttributeGroup(group));
+  return { primaryGroups, secondaryGroups };
+}
+
+export function findVariantsMatchingSelections(
+  variants: ProductVariantView[],
+  selections: Record<number, string>
+): ProductVariantView[] {
+  const entries = Object.entries(selections).filter(([, value]) => Boolean(value));
+  if (!entries.length) return variants;
+
+  return variants.filter((variant) =>
+    entries.every(([attributeId, value]) =>
+      variant.variantAttributes.some(
+        (item) => item.attributeId === Number(attributeId) && item.value === value
+      )
+    )
+  );
+}
+
+export function pickBestVariantFromMatches(matches: ProductVariantView[]): ProductVariantView | null {
+  if (!matches.length) return null;
+
+  return [...matches].sort((left, right) => {
+    const leftInStock = Number(left.stock) > 0;
+    const rightInStock = Number(right.stock) > 0;
+    if (leftInStock && !rightInStock) return -1;
+    if (!leftInStock && rightInStock) return 1;
+    return getVariantEffectivePrice(left) - getVariantEffectivePrice(right);
+  })[0];
+}
+
+export function resolveVariantForSelection(
+  variants: ProductVariantView[],
+  groups: AttributeSelectionGroup[],
+  selections: Record<number, string>
+): ProductVariantView | null {
+  const completeMatch = findVariantBySelections(variants, selections, groups);
+  if (completeMatch) return completeMatch;
+
+  const partialMatches = findVariantsMatchingSelections(variants, selections);
+  return pickBestVariantFromMatches(partialMatches);
 }
 
 export function getCompatibleVariantIds(
@@ -121,11 +188,16 @@ export function getCompatibleVariantIds(
 export function resolveAttributeSelections(
   variants: ProductVariantView[],
   groups: AttributeSelectionGroup[],
-  nextSelections: Record<number, string>
+  nextSelections: Record<number, string>,
+  pinnedAttributeId?: number
 ): Record<number, string> {
   const resolved = { ...nextSelections };
 
   for (const group of groups) {
+    if (group.attributeId === pinnedAttributeId) {
+      continue;
+    }
+
     const compatibleIds = getCompatibleVariantIds(variants, resolved, group.attributeId);
     const currentValue = resolved[group.attributeId];
     const currentOption = group.options.find((item) => item.value === currentValue);
@@ -144,6 +216,26 @@ export function resolveAttributeSelections(
   }
 
   return resolved;
+}
+
+export function canSelectAttributeOption(
+  variants: ProductVariantView[],
+  groups: AttributeSelectionGroup[],
+  selections: Record<number, string>,
+  group: AttributeSelectionGroup,
+  option: VariantAttributeOption
+): boolean {
+  const resolved = resolveAttributeSelections(
+    variants,
+    groups,
+    {
+      ...selections,
+      [group.attributeId]: option.value,
+    },
+    group.attributeId
+  );
+
+  return findVariantBySelections(variants, resolved, groups) !== null;
 }
 
 export function findVariantBySelections(
@@ -185,7 +277,7 @@ export function selectionsFromVariant(
 }
 
 export function getVariantEffectivePrice(variant: ProductVariantView): number {
-  const price = variant.finalPrice ?? variant.price;
+  const price = variant.pricing.finalPrice ?? variant.pricing.sellingPrice ?? variant.price;
   return typeof price === "number" && Number.isFinite(price)
     ? price
     : Number.POSITIVE_INFINITY;
@@ -226,7 +318,7 @@ export function resolveInitialVariant(
   const fromUrl = findVariantBySlug(variants, options.variantSlug);
   if (fromUrl) return fromUrl;
 
-  return getCheapestVariant(variants);
+  return variants[0];
 }
 
 export type VariantDisplayGroup = {
@@ -363,6 +455,17 @@ export function buildProductVariantUrl(
 
   const params = new URLSearchParams({ variant: variantSlug });
   return `${base}?${params.toString()}`;
+}
+
+/** Update variant query in the URL without triggering a Next.js navigation / server refetch. */
+export function replaceProductVariantInUrl(
+  productSlug: string,
+  variantSlug?: string | null
+): void {
+  if (typeof window === "undefined") return;
+
+  const nextUrl = buildProductVariantUrl(productSlug, variantSlug);
+  window.history.replaceState(window.history.state, "", nextUrl);
 }
 
 export function buildSpecRows(

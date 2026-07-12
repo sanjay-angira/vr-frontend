@@ -1,12 +1,26 @@
 /* Website footer — single source of truth for live site + admin preview */
 
 .footer {
+  position: relative;
+  overflow: hidden;
   background: linear-gradient(180deg, var(--footer-bg) 0%, var(--vr-forest-dark) 100%);
   padding: 3.5rem 0 2rem;
   color: var(--footer-text);
 }
 
+.footer::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("/svg/file.svg") no-repeat center bottom / cover;
+  opacity: 0.12;
+  pointer-events: none;
+  z-index: 0;
+}
+
 .footer .container {
+  position: relative;
+  z-index: 1;
   max-width: 1440px;
   margin: 0 auto;
   padding: 0 1rem;

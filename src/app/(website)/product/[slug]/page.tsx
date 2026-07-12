@@ -1,31 +1,24 @@
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
-import { Suspense } from "react";
+import { notFound } from "next/navigation";
 import { Accordion } from "@/components/website/shared/Accordion";
 import ReviewSection from "@/components/website/product/ReviewSection";
 import ProductDetail from "@/components/website/product/ProductDetail";
 import { ProductComboSection } from "@/components/website/sections/ProductComboSection";
 import type { ComboProduct } from "@/components/website/cards/ComboProductCard";
-import { WEBSITE_IMAGES } from "@/components/website/data/products";
 import {
   fetchProductBySlug,
   normalizeAttributes,
   normalizeVariants,
   toNumber,
 } from "@/components/website/product/productApi";
-import {
-  buildProductVariantUrl,
-  findVariantBySlug,
-} from "@/components/website/product/productVariantUtils";
+import { ScrollToTopOnMount } from "@/components/website/shared/ScrollToTopOnMount";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ variant?: string }>;
 };
 
-export default async function ProductDetailPage({ params, searchParams }: PageProps) {
+export default async function ProductDetailPage({ params }: PageProps) {
   const { slug } = await params;
-  const { variant: variantQuery } = await searchParams;
   const product = await fetchProductBySlug(slug);
 
   if (!product) {
@@ -36,17 +29,10 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
     product.variants as Parameters<typeof normalizeVariants>[0]
   );
 
-  const initialVariantSlug =
-    variantQuery ||
-    (slug !== product.productSlug
-      ? findVariantBySlug(normalizedVariants, slug)?.slug || slug
-      : null);
-
-  if (slug !== product.productSlug) {
-    redirect(
-      buildProductVariantUrl(product.productSlug, initialVariantSlug || undefined)
-    );
-  }
+  const requestedVariantSlug =
+    slug !== product.productSlug
+      ? slug
+      : null;
 
   const baseImages =
     product.images
@@ -80,7 +66,6 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
     id: product.id,
     title: product.productName,
     slug: product.productSlug,
-    selectedVariantId: product.selectedVariantId ?? null,
     shortDescription: product.shortDescription || "",
     brandName: product.brand?.brandName || null,
     categoryName: product.category?.categoryName || null,
@@ -89,16 +74,7 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
       (product.attributes as Parameters<typeof normalizeAttributes>[0]) ?? [],
       (product.productAttributes as Parameters<typeof normalizeAttributes>[1]) ?? []
     ),
-    
     variants: normalizedVariants,
-    activeOffers: (product.activeOffers || []).map((offer) => ({
-      id: Number(offer.id),
-      offerName: String(offer.offerName),
-      offerSlug: String(offer.offerSlug),
-      discountType: String(offer.discountType ?? offer.type),
-      discountValue: Number(offer.discountValue),
-      sources: (offer.sources as string[]) || [],
-    })),
     rating: averageRating,
     reviewCount: reviewList.length,
   };
@@ -113,70 +89,30 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
             question: faq.question,
             answer: faq.answer,
           }))
-      : [
-          {
-            id: "shipping",
-            question: "How soon will my order arrive?",
-            answer:
-              "Orders are typically dispatched within 24-48 hours and delivered in 3-7 business days depending on your location.",
-          },
-          {
-            id: "storage",
-            question: "How should I store this product?",
-            answer:
-              "Store it in a cool, dry place away from direct sunlight to preserve freshness, aroma, and quality.",
-          },
-          {
-            id: "returns",
-            question: "Can I return this item?",
-            answer:
-              "Unused items in original condition can be returned within 7 days of delivery unless the product is marked non-returnable.",
-          },
-        ];
-
-  const comboFallbackImages = [
-    WEBSITE_IMAGES.books,
-    WEBSITE_IMAGES.rudraksha,
-    WEBSITE_IMAGES.hero,
-  ];
+      : [];
 
   const comboProducts: ComboProduct[] =
-    product.frequentlyBoughtTogether &&
-    product.frequentlyBoughtTogether.length > 0
-      ? product.frequentlyBoughtTogether.map((item, index) => ({
+    product.frequentlyBoughtTogether && product.frequentlyBoughtTogether.length > 0
+      ? product.frequentlyBoughtTogether.map((item) => ({
           id: String(item.id),
           name: item.productName,
-          description:
-            item.shortDescription ||
-            "A complementary product often chosen together with this item.",
+          description: item.shortDescription || "",
           price: item.price || 0,
-          image:
-            item.image || comboFallbackImages[index % comboFallbackImages.length],
+          image: item.image || "",
           category: "Recommended",
           rating: 5,
           reviewCount: 0,
           inStock: item.inStock ?? true,
         }))
-      : [
-          {
-            id: "combo-fallback-1",
-            name: `${product.productName} Pairing Pack`,
-            description:
-              "A carefully matched add-on bundle that complements this product.",
-            price: 199,
-            image: comboFallbackImages[0],
-            category: "Recommended",
-            rating: 5,
-            reviewCount: 0,
-            inStock: true,
-          },
-        ];
+      : [];
 
   return (
     <div
       className="container product-page-shell"
       style={{ paddingTop: "1.25rem", paddingBottom: "3rem" }}
     >
+      <ScrollToTopOnMount />
+
       <div className="product-breadcrumbs">
         <Link href="/">Home</Link>
         <span>›</span>
@@ -185,52 +121,52 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
         <span className="is-current">{product.productName}</span>
       </div>
 
-      <Suspense fallback={<div className="container product-page-shell">Loading product...</div>}>
-        <ProductDetail
-          product={detailProduct}
-          initialVariantSlug={initialVariantSlug}
-          fallbackImages={
-            baseImages.length > 0
-              ? baseImages
-              : [WEBSITE_IMAGES.hero, WEBSITE_IMAGES.rudraksha]
-          }
-        />
-      </Suspense>
+      <ProductDetail
+        product={detailProduct}
+        fallbackImages={baseImages}
+        initialVariantSlug={requestedVariantSlug}
+      />
 
-      <section className="product-section-block product-copy-block">
-        <h2 className="product-section-heading">Product Description</h2>
-        <div
-          className="product-copy-content"
-          dangerouslySetInnerHTML={{
-            __html: (product.description || product.shortDescription || "").trim(),
-          }}
-        />
-      </section>
+      {(product.description || product.shortDescription) && (
+        <section className="product-section-block product-copy-block">
+          <h2 className="product-section-heading">Product Description</h2>
+          <div
+            className="product-copy-content"
+            dangerouslySetInnerHTML={{
+              __html: (product.description || product.shortDescription || "").trim(),
+            }}
+          />
+        </section>
+      )}
 
-      <section
-        className="product-section-block faq-section product-faq-block"
-        style={{ marginTop: "2.25rem" }}
-      >
-        <h2
-          className="section-title product-faq-heading"
-          style={{ marginBottom: "1rem" }}
+      {faqItems.length > 0 && (
+        <section
+          className="product-section-block faq-section product-faq-block"
+          style={{ marginTop: "2.25rem" }}
         >
-          Frequently Asked Questions
-        </h2>
-        <Accordion items={faqItems} className="product-faq-accordion" />
-      </section>
+          <h2
+            className="section-title product-faq-heading"
+            style={{ marginBottom: "1rem" }}
+          >
+            Frequently Asked Questions
+          </h2>
+          <Accordion items={faqItems} className="product-faq-accordion" />
+        </section>
+      )}
 
       <div style={{ marginTop: "3rem" }}>
         <ReviewSection productId={product.productSlug} reviews={reviewList} />
       </div>
 
-      <div className="product-related-wrap" style={{ marginTop: "3.5rem" }}>
-        <ProductComboSection
-          title="You May Also Like"
-          comboProducts={comboProducts}
-          viewAllLink="/shop"
-        />
-      </div>
+      {comboProducts.length > 0 && (
+        <div className="product-related-wrap" style={{ marginTop: "3.5rem" }}>
+          <ProductComboSection
+            title="You May Also Like"
+            comboProducts={comboProducts}
+            viewAllLink="/shop"
+          />
+        </div>
+      )}
     </div>
   );
 }
