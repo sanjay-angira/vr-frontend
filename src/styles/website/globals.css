@@ -106,73 +106,6 @@ body {
   z-index: 1;
 }
 
-.hero-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.4);
-  z-index: 2;
-}
-
-.hero-content {
-  position: relative;
-  z-index: 3;
-  text-align: center;
-  color: white;
-  max-width: 800px;
-  padding: 0 1rem;
-}
-
-.hero-icon {
-  font-size: 4rem;
-  margin-bottom: 1rem;
-}
-
-.hero-title {
-  font-size: 3rem;
-  font-weight: bold;
-  margin-bottom: 1rem;
-}
-
-.hero-subtitle {
-  font-size: 1.25rem;
-  margin-bottom: 2rem;
-  opacity: 0.9;
-}
-
-.hero-actions {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-.hero-features {
-  margin-top: 4rem;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 2rem;
-}
-
-.hero-feature {
-  text-align: center;
-}
-
-.hero-feature-icon {
-  font-size: 2rem;
-  margin-bottom: 0.5rem;
-}
-
-.hero-feature h3 {
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-}
-
-.hero-feature p {
-  opacity: 0.8;
-}
 
 
 /* Product Cards */
@@ -3191,10 +3124,6 @@ body {
     font-size: 2rem;
   }
   
-  .hero-actions {
-    flex-direction: column;
-    align-items: center;
-  }
   
   .hero-features {
     grid-template-columns: 1fr;

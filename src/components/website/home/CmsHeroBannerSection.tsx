@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { resolveImageUrl } from "@/components/admin/forms/shared/resolveImageUrl";
 import type { HomepageBanner } from "@/types/homepage";
+import Image from "next/image";
 
 type CmsHeroBannerSectionProps = {
   title?: string;
@@ -26,22 +27,8 @@ export function CmsHeroBannerSection({
   return (
     <section className="hero cms-hero-banner">
       {imageUrl ? (
-        <img src={imageUrl} alt={heading} className="hero-bg object-cover" />
+        <Image src={imageUrl} alt={heading} className="hero-bg object-cover" fill />
       ) : null}
-      <div className="hero-overlay" />
-
-      <div className="hero-content">
-        <h1 className="hero-title">{heading}</h1>
-        {subHeading ? <p className="hero-subtitle">{subHeading}</p> : null}
-
-        {activeBanner.link ? (
-          <div className="hero-actions">
-            <Link href={activeBanner.link} className="btn btn-primary btn-lg">
-              Shop Now
-            </Link>
-          </div>
-        ) : null}
-      </div>
     </section>
   );
 }
