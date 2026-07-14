@@ -46,12 +46,10 @@ function AccordionRow({
       <div
         id={`acc-${item.id}`}
         className="accordion-panel"
-        style={{ maxHeight, opacity: isOpen ? 1 : 0 }}
+        style={{ maxHeight: isOpen ? maxHeight : "0px", opacity: isOpen ? 1 : 0 }}
         aria-hidden={!isOpen}
       >
-        <div ref={contentRef} className="accordion-answer">
-          {item.answer}
-        </div>
+        <div dangerouslySetInnerHTML={{ __html: item.answer }} />
       </div>
     </div>
   );

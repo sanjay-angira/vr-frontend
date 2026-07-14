@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Heart, Search } from "lucide-react";
+import { Heart, Search, ShoppingCart, User } from "lucide-react";
 import type { HeaderSettingsData } from "@/types/header";
 
 type HeaderStaticActionsProps = {
@@ -22,6 +22,26 @@ export function HeaderStaticActions({ settings }: HeaderStaticActionsProps) {
           aria-label="Wishlist"
         >
           <Heart size={20} />
+        </Link>
+      ) : null}
+
+      {settings.showCart ? (
+        <Link
+          href="/cart"
+          className="icon-button"
+          aria-label="Cart"
+        >
+          <ShoppingCart size={20} />
+        </Link>
+      ) : null}
+
+      {settings.showAccount ? (
+        <Link
+          href="/account"
+          className="icon-button"
+          aria-label="Account"
+        >
+          <User size={20} />
         </Link>
       ) : null}
     </>

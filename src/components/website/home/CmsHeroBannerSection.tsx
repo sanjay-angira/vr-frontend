@@ -27,7 +27,16 @@ export function CmsHeroBannerSection({
   return (
     <section className="hero cms-hero-banner">
       {imageUrl ? (
-        <Image src={imageUrl} alt={heading} className="hero-bg object-cover" fill />
+        // <div className="relative w-full h-[250px] sm:h-[350px] md:h-[450px] lg:h-[550px] xl:h-[650px]">
+          <Image
+            src={imageUrl}
+            alt={heading}
+            fill
+            priority
+            className="object-cover"
+            sizes="100vw"
+          />
+        // </div>
       ) : null}
     </section>
   );
