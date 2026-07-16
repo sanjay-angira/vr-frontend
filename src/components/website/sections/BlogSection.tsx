@@ -34,10 +34,12 @@ export function BlogSection({
   posts,
   title,
   subtitle,
+  viewAllLink = "/blogs",
 }: {
   posts: BlogPost[];
   title: string;
   subtitle?: string;
+  viewAllLink?: string;
 }) {
   return (
     <section className="section blog-section">
@@ -50,6 +52,13 @@ export function BlogSection({
             </div>
           ))}
         </div>
+        {viewAllLink && (
+          <div className="blog-section__view-all">
+            <Link href={viewAllLink} className="btn btn-outline btn-lg">
+              View All Articles
+            </Link>
+          </div>
+        )}
       </div>
     </section>
   );
