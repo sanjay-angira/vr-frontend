@@ -60,6 +60,7 @@ export type HomepageReview = {
 
 export type HomepageSection = {
   id: number;
+  slug?: string | null;
   title: string;
   type: string;
   position: number;

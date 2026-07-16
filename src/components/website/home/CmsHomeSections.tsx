@@ -86,7 +86,11 @@ export function CmsHomeSections({ sections }: CmsHomeSectionsProps) {
                 title={getSectionTitle(section)}
                 subtitle={getSectionSubtitle(section)}
                 products={mapProducts(section.products)}
-                viewAllLink="/products"
+                viewAllLink={
+                  section.slug
+                    ? `/products?section=${encodeURIComponent(section.slug)}`
+                    : "/products"
+                }
               />
             );
 
@@ -145,7 +149,11 @@ export function CmsHomeSections({ sections }: CmsHomeSectionsProps) {
                     title={getSectionTitle(section)}
                     subtitle={getSectionSubtitle(section)}
                     products={mapProducts(section.products)}
-                    viewAllLink="/products"
+                    viewAllLink={
+                      section.slug
+                        ? `/products?section=${encodeURIComponent(section.slug)}`
+                        : "/products"
+                    }
                   />
                 )}
                 {section.blogs.length > 0 && (

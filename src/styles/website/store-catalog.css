@@ -130,6 +130,42 @@
   align-items: start;
 }
 
+/* Stick below the site header after the promo banner scrolls away.
+   Releases naturally when the product column ends (end of layout). */
+.store-filters__desktop {
+  position: sticky;
+  top: calc(64px + 0.75rem);
+  align-self: start;
+  z-index: 5;
+  max-height: calc(100vh - 64px - 1.5rem);
+}
+
+.store-filters__desktop .store-filters {
+  max-height: calc(100vh - 64px - 1.5rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(197, 157, 95, 0.55) transparent;
+}
+
+.store-filters__desktop .store-filters::-webkit-scrollbar {
+  width: 4px;
+}
+
+.store-filters__desktop .store-filters::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 0.5rem 0;
+}
+
+.store-filters__desktop .store-filters::-webkit-scrollbar-thumb {
+  background: rgba(197, 157, 95, 0.55);
+  border-radius: 999px;
+}
+
+.store-filters__desktop .store-filters::-webkit-scrollbar-thumb:hover {
+  background: rgba(10, 42, 27, 0.45);
+}
+
 .store-filters {
   background: #fff;
   border: 1px solid rgba(197, 157, 95, 0.22);
@@ -292,9 +328,7 @@
 }
 
 .store-filters__categories {
-  max-height: 260px;
-  overflow: auto;
-  padding-right: 0.25rem;
+  padding-right: 0;
 }
 
 .store-filters__empty {
@@ -577,6 +611,21 @@
     border-radius: 0 16px 16px 0;
     overflow: auto;
     z-index: 1;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(197, 157, 95, 0.55) transparent;
+  }
+
+  .store-filters__drawer .store-filters::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .store-filters__drawer .store-filters::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .store-filters__drawer .store-filters::-webkit-scrollbar-thumb {
+    background: rgba(197, 157, 95, 0.55);
+    border-radius: 999px;
   }
 
   .store-filters__close {

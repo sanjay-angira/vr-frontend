@@ -1,6 +1,6 @@
 "use client";
 
-import { Form, Formik } from "formik";
+import { Form, Formik, useFormikContext } from "formik";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -10,6 +10,8 @@ import { FormMultiDropdown } from "@/components/admin/forms/shared/FormMultiDrop
 import { FormDropdown } from "@/components/admin/forms/shared/FormDropdown";
 import { FormLabel } from "@/components/admin/forms/shared/FormLabel";
 import { Input } from "@/components/common/Input";
+import { generateSlug } from "@/components/admin/forms/shared/generateSlug";
+import { useSlugSync } from "@/components/admin/forms/shared/useSlugSync";
 import {
   fetchBannersOptions,
   fetchBlogsOptions,
@@ -31,6 +33,7 @@ function unwrap<T>(response: { data?: T } | T): T {
 
 type CmsSectionPayload = {
   title: string;
+  slug: string;
   type: string;
   position?: number;
   status?: boolean;
@@ -64,6 +67,7 @@ const DISPLAY_STYLES = [
 
 type SectionFormValues = {
   title: string;
+  slug: string;
   type: string;
   visible: boolean;
   displayStyle: string;
@@ -82,10 +86,21 @@ type SectionFormValues = {
 
 const schema = Yup.object({
   title: Yup.string().min(2).max(100).required("Title is required"),
+  slug: Yup.string()
+    .min(2)
+    .max(160)
+    .matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Use lowercase letters, numbers, and hyphens")
+    .required("Slug is required"),
   type: Yup.string().required("Section type is required"),
   displayStyle: Yup.string().required(),
   maxProducts: Yup.number().min(1).max(100).required(),
 });
+
+function SectionSlugSync({ enabled }: { enabled: boolean }) {
+  const formik = useFormikContext<SectionFormValues>();
+  useSlugSync(formik, "title", "slug", enabled);
+  return null;
+}
 
 type SectionSettingsPageProps = {
   sectionId?: string;
@@ -107,6 +122,7 @@ export function SectionSettingsPage({ sectionId }: SectionSettingsPageProps) {
 
   const [initialValues, setInitialValues] = useState<SectionFormValues>({
     title: "",
+    slug: "",
     type: "product_slider",
     visible: true,
     displayStyle: "grid",
@@ -152,6 +168,7 @@ export function SectionSettingsPage({ sectionId }: SectionSettingsPageProps) {
         const res = await getData(API_ENDPOINTS.CMS_SECTIONS.DETAILS(sectionId!));
         const section = unwrap<{
           title: string;
+          slug?: string | null;
           type: string;
           status: boolean;
           position?: number;
@@ -167,6 +184,7 @@ export function SectionSettingsPage({ sectionId }: SectionSettingsPageProps) {
         const data = (section.data ?? {}) as Record<string, unknown>;
         setInitialValues({
           title: section.title,
+          slug: section.slug || generateSlug(section.title),
           type: section.type,
           visible: Boolean(section.status),
           displayStyle: String(data.displayStyle ?? "grid"),
@@ -195,6 +213,7 @@ export function SectionSettingsPage({ sectionId }: SectionSettingsPageProps) {
   async function handleSubmit(values: SectionFormValues) {
     const payload: CmsSectionPayload = {
       title: values.title,
+      slug: values.slug.trim() || generateSlug(values.title),
       type: values.type,
       position: values.position,
       status: values.visible,
@@ -259,6 +278,7 @@ export function SectionSettingsPage({ sectionId }: SectionSettingsPageProps) {
       >
         {({ values, errors, touched, setFieldValue, isSubmitting, handleChange, handleBlur }) => (
           <Form className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
+            <SectionSlugSync enabled={!isEdit} />
             <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
               <Input
                 label="Section Title"
@@ -268,6 +288,16 @@ export function SectionSettingsPage({ sectionId }: SectionSettingsPageProps) {
                 onChange={handleChange}
                 onBlur={handleBlur}
                 error={touched.title && errors.title ? String(errors.title) : undefined}
+              />
+
+              <Input
+                label="Section Slug"
+                required
+                name="slug"
+                value={values.slug}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                error={touched.slug && errors.slug ? String(errors.slug) : undefined}
               />
 
               <FormDropdown

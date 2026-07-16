@@ -16,18 +16,23 @@ export type StoreCategoryOption = {
   slug: string;
 };
 
+export type StoreProductSectionOption = {
+  slug: string;
+  title: string;
+  type?: string;
+};
+
 export type StoreFilterState = {
   minPrice: number;
   maxPrice: number;
   sortBy: string;
-  newArrivals: boolean;
-  featured: boolean;
-  bestDeals: boolean;
   categoryIds: number[];
+  sectionSlugs: string[];
 };
 
 type StoreFiltersSidebarProps = {
   categories: StoreCategoryOption[];
+  productSections: StoreProductSectionOption[];
   priceBounds: { min: number; max: number };
   sortOptions: Array<{ value: string; label: string }>;
   value: StoreFilterState;
@@ -39,6 +44,7 @@ type StoreFiltersSidebarProps = {
 
 export function StoreFiltersSidebar({
   categories,
+  productSections,
   priceBounds,
   sortOptions,
   value,
@@ -59,9 +65,7 @@ export function StoreFiltersSidebar({
   const activeCount = useMemo(() => {
     let count = 0;
     if (value.categoryIds.length) count += value.categoryIds.length;
-    if (value.newArrivals) count += 1;
-    if (value.featured) count += 1;
-    if (value.bestDeals) count += 1;
+    if (value.sectionSlugs.length) count += value.sectionSlugs.length;
     if (value.minPrice > priceBounds.min || value.maxPrice < priceBounds.max) count += 1;
     if (value.sortBy && value.sortBy !== "newest") count += 1;
     return count;
@@ -84,6 +88,16 @@ export function StoreFiltersSidebar({
       categoryIds: exists
         ? value.categoryIds.filter((item) => item !== id)
         : [...value.categoryIds, id],
+    });
+  };
+
+  const toggleSection = (slug: string) => {
+    const exists = value.sectionSlugs.includes(slug);
+    onChange({
+      ...value,
+      sectionSlugs: exists
+        ? value.sectionSlugs.filter((item) => item !== slug)
+        : [...value.sectionSlugs, slug],
     });
   };
 
@@ -185,36 +199,19 @@ export function StoreFiltersSidebar({
           <ListFilter size={16} />
           Product Status
         </h3>
-        <label className="store-filters__check">
-          <input
-            type="checkbox"
-            checked={value.newArrivals}
-            onChange={(event) =>
-              onChange({ ...value, newArrivals: event.target.checked })
-            }
-          />
-          <span>New Arrivals</span>
-        </label>
-        <label className="store-filters__check">
-          <input
-            type="checkbox"
-            checked={value.featured}
-            onChange={(event) =>
-              onChange({ ...value, featured: event.target.checked })
-            }
-          />
-          <span>Featured Products</span>
-        </label>
-        <label className="store-filters__check">
-          <input
-            type="checkbox"
-            checked={value.bestDeals}
-            onChange={(event) =>
-              onChange({ ...value, bestDeals: event.target.checked })
-            }
-          />
-          <span>Best Deals</span>
-        </label>
+        {productSections.length === 0 && (
+          <p className="store-filters__empty">No product sections available.</p>
+        )}
+        {productSections.map((section) => (
+          <label key={section.slug} className="store-filters__check">
+            <input
+              type="checkbox"
+              checked={value.sectionSlugs.includes(section.slug)}
+              onChange={() => toggleSection(section.slug)}
+            />
+            <span>{section.title}</span>
+          </label>
+        ))}
       </section>
 
       <section className="store-filters__section">

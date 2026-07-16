@@ -14,6 +14,7 @@ import {
   StoreFiltersSidebar,
   type StoreCategoryOption,
   type StoreFilterState,
+  type StoreProductSectionOption,
 } from "@/components/website/shop/StoreFiltersSidebar";
 import {
   StoreProductCard,
@@ -23,6 +24,7 @@ import {
   StorePromoBanner,
   type StoreBanner,
 } from "@/components/website/shop/StorePromoBanner";
+import { useSearchParams } from "next/navigation";
 
 const STORE_GRID_STYLES = `
 .store-catalog__grid {
@@ -62,6 +64,7 @@ type StoreFiltersApiResponse = {
     categories: StoreCategoryOption[];
     priceRange: { min: number; max: number };
     sortOptions: Array<{ value: string; label: string }>;
+    productSections?: StoreProductSectionOption[];
     banners: StoreBanner[];
   };
 };
@@ -74,19 +77,38 @@ const DEFAULT_SORT_OPTIONS = [
   { value: "discount_desc", label: "Best Discount" },
 ];
 
-function buildDefaultFilters(bounds: { min: number; max: number }): StoreFilterState {
+function parseSectionSlugsFromSearch(searchParams: URLSearchParams): string[] {
+  const multi = searchParams.get("sectionSlugs");
+  const single =
+    searchParams.get("section") || searchParams.get("sectionSlug") || "";
+  const raw = multi || single || "";
+  if (!raw.trim()) return [];
+  return raw
+    .split(",")
+    .map((slug) => slug.trim().toLowerCase())
+    .filter(Boolean);
+}
+
+function buildDefaultFilters(
+  bounds: { min: number; max: number },
+  sectionSlugs: string[] = []
+): StoreFilterState {
   return {
     minPrice: bounds.min,
     maxPrice: bounds.max,
     sortBy: "newest",
-    newArrivals: false,
-    featured: false,
-    bestDeals: false,
     categoryIds: [],
+    sectionSlugs,
   };
 }
 
 export function ShopPageContent() {
+  const searchParams = useSearchParams();
+  const initialSectionSlugs = useMemo(
+    () => parseSectionSlugsFromSearch(searchParams),
+    [searchParams]
+  );
+
   const [products, setProducts] = useState<StoreListProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [filtersLoading, setFiltersLoading] = useState(true);
@@ -99,11 +121,14 @@ export function ShopPageContent() {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   const [categories, setCategories] = useState<StoreCategoryOption[]>([]);
+  const [productSections, setProductSections] = useState<
+    StoreProductSectionOption[]
+  >([]);
   const [banners, setBanners] = useState<StoreBanner[]>([]);
   const [sortOptions, setSortOptions] = useState(DEFAULT_SORT_OPTIONS);
   const [priceBounds, setPriceBounds] = useState({ min: 0, max: 100000 });
-  const [filters, setFilters] = useState<StoreFilterState>(
-    buildDefaultFilters({ min: 0, max: 100000 })
+  const [filters, setFilters] = useState<StoreFilterState>(() =>
+    buildDefaultFilters({ min: 0, max: 100000 }, initialSectionSlugs)
   );
 
   const totalPages = useMemo(
@@ -134,6 +159,7 @@ export function ShopPageContent() {
         };
 
         setCategories(response.data.categories || []);
+        setProductSections(response.data.productSections || []);
         setBanners(response.data.banners || []);
         setSortOptions(
           response.data.sortOptions?.length
@@ -141,7 +167,7 @@ export function ShopPageContent() {
             : DEFAULT_SORT_OPTIONS
         );
         setPriceBounds(bounds);
-        setFilters(buildDefaultFilters(bounds));
+        setFilters(buildDefaultFilters(bounds, initialSectionSlugs));
       } catch {
         // Keep defaults if filters fail
       } finally {
@@ -153,7 +179,7 @@ export function ShopPageContent() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [initialSectionSlugs]);
 
   const fetchStoreProducts = useCallback(async () => {
     try {
@@ -178,9 +204,9 @@ export function ShopPageContent() {
       if (filters.categoryIds.length) {
         query.set("categoryIds", filters.categoryIds.join(","));
       }
-      if (filters.newArrivals) query.set("newArrivals", "true");
-      if (filters.featured) query.set("featured", "true");
-      if (filters.bestDeals) query.set("bestDeals", "true");
+      if (filters.sectionSlugs.length) {
+        query.set("sectionSlugs", filters.sectionSlugs.join(","));
+      }
 
       const response = (await getData(
         `${API_ENDPOINTS.CUSTOMER.STORE_PRODUCTS}?${query.toString()}`,
@@ -242,6 +268,7 @@ export function ShopPageContent() {
         <div className="store-catalog__layout">
           <StoreFiltersSidebar
             categories={categories}
+            productSections={productSections}
             priceBounds={priceBounds}
             sortOptions={sortOptions}
             value={filters}

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { ShopPageContent } from "@/components/website/shop/ShopPageContent";
 
 export const metadata: Metadata = {
@@ -7,5 +8,9 @@ export const metadata: Metadata = {
 };
 
 export default function ShopPage() {
-  return <ShopPageContent />;
+  return (
+    <Suspense fallback={<section className="store-catalog" aria-busy="true" />}>
+      <ShopPageContent />
+    </Suspense>
+  );
 }
