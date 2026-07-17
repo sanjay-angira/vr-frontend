@@ -23,7 +23,7 @@ export function ProductReviewsShowcase({
     <section className="section">
       <div className="container">
         <SectionHeading title={title} subtitle={subtitle} />
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
           {reviews.map((review) => (
             <article key={review.id} className="product-review-card">
               <div className="product-review-quote-mark" aria-hidden>

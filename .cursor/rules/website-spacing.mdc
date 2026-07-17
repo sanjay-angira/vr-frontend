@@ -1,0 +1,38 @@
+---
+description: Website spacing — always use gap-3 / 0.75rem for gaps
+globs: vr-web/src/{components/website,styles/website,styles/website.css,app/(website)}/**/*.{css,tsx,ts}
+alwaysApply: false
+---
+
+# Website gap spacing
+
+When adding or changing `gap` on the storefront, always use **gap-3**.
+
+| Context | Value |
+|---------|--------|
+| Tailwind | `gap-3` |
+| CSS | `gap: 0.75rem` or `gap: var(--gap)` |
+
+```tsx
+// ✅ GOOD
+<div className="flex gap-3">
+<div className="grid grid-cols-4 gap-3">
+
+// ❌ BAD
+<div className="flex gap-2">
+<div className="grid gap-6">
+<div className="grid gap-8">
+```
+
+```css
+/* ✅ GOOD */
+.combo-grid { gap: var(--gap); }
+
+/* ❌ BAD */
+.combo-grid { gap: 1.5rem; }
+```
+
+## Exceptions
+
+- `gap: 0` only when items must sit flush (no spacing).
+- Do not invent other gap scales (`gap-1`, `gap-4`, `1rem`, `2rem`, etc.) for website layout.

@@ -10,7 +10,7 @@
 .categories-page__inner {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: var(--gap);
 }
 
 .categories-page__hero {

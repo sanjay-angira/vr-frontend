@@ -55,6 +55,10 @@
   --footer-heading: var(--vr-gold);
   --footer-border: rgba(197, 157, 95, 0.22);
 
+  /* Layout */
+  --container-max: 1920px;
+  --gap: 0.75rem; /* Tailwind gap-3 */
+
   /* Typography — see .cursor/rules/website-typography.mdc */
   --font-body: var(--font-inter, "Inter"), "Inter", sans-serif;
   --font-ui: var(--font-inter, "Inter"), "Inter", sans-serif;
