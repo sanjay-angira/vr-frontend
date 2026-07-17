@@ -10,15 +10,10 @@ export interface Category {
   href?: string;
 }
 
-const categoryLinks: Record<number, string> = {
-  1: "/rudraksha",
-  2: "/sweets",
-  3: "/books",
-  4: "/rashi",
-};
-
 export function CategoryCard({ category }: { category: Category }) {
-  const href = category.href || categoryLinks[category.id] || "/shop";
+  const href =
+    category.href ||
+    (category.id ? `/products?categoryIds=${category.id}` : "/products");
 
   return (
     <Link href={href} className="category-card">

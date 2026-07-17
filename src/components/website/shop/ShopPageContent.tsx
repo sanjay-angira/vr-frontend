@@ -89,15 +89,25 @@ function parseSectionSlugsFromSearch(searchParams: URLSearchParams): string[] {
     .filter(Boolean);
 }
 
+function parseCategoryIdsFromSearch(searchParams: URLSearchParams): number[] {
+  const raw = searchParams.get("categoryIds") || "";
+  if (!raw.trim()) return [];
+  return raw
+    .split(",")
+    .map((id) => Number(id.trim()))
+    .filter((id) => Number.isFinite(id) && id > 0);
+}
+
 function buildDefaultFilters(
   bounds: { min: number; max: number },
-  sectionSlugs: string[] = []
+  sectionSlugs: string[] = [],
+  categoryIds: number[] = []
 ): StoreFilterState {
   return {
     minPrice: bounds.min,
     maxPrice: bounds.max,
     sortBy: "newest",
-    categoryIds: [],
+    categoryIds,
     sectionSlugs,
   };
 }
@@ -106,6 +116,10 @@ export function ShopPageContent() {
   const searchParams = useSearchParams();
   const initialSectionSlugs = useMemo(
     () => parseSectionSlugsFromSearch(searchParams),
+    [searchParams]
+  );
+  const initialCategoryIds = useMemo(
+    () => parseCategoryIdsFromSearch(searchParams),
     [searchParams]
   );
 
@@ -128,7 +142,11 @@ export function ShopPageContent() {
   const [sortOptions, setSortOptions] = useState(DEFAULT_SORT_OPTIONS);
   const [priceBounds, setPriceBounds] = useState({ min: 0, max: 100000 });
   const [filters, setFilters] = useState<StoreFilterState>(() =>
-    buildDefaultFilters({ min: 0, max: 100000 }, initialSectionSlugs)
+    buildDefaultFilters(
+      { min: 0, max: 100000 },
+      initialSectionSlugs,
+      initialCategoryIds
+    )
   );
 
   const totalPages = useMemo(
@@ -167,7 +185,9 @@ export function ShopPageContent() {
             : DEFAULT_SORT_OPTIONS
         );
         setPriceBounds(bounds);
-        setFilters(buildDefaultFilters(bounds, initialSectionSlugs));
+        setFilters(
+          buildDefaultFilters(bounds, initialSectionSlugs, initialCategoryIds)
+        );
       } catch {
         // Keep defaults if filters fail
       } finally {
@@ -179,7 +199,7 @@ export function ShopPageContent() {
     return () => {
       cancelled = true;
     };
-  }, [initialSectionSlugs]);
+  }, [initialSectionSlugs, initialCategoryIds]);
 
   const fetchStoreProducts = useCallback(async () => {
     try {

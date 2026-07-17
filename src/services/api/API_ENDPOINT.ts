@@ -209,6 +209,7 @@ export const API_ENDPOINTS = {
     STORE_PRODUCTS: "customer/all-products",
     PRODUCT_DETAILS: (slug: string) => `customer/product/${slug}`,
     STORE_FILTERS: "customer/store-filters",
+    CATEGORIES: "customer/categories",
     BLOGS: "customer/blogs",
     BLOG_FILTERS: "customer/blog-filters",
     BLOG_DETAILS: (slug: string) => `customer/blog/${slug}`,
