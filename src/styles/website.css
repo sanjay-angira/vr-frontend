@@ -3,6 +3,7 @@
   min-height: 100vh;
   flex-direction: column;
   background: var(--cream-background, var(--vr-cream));
+  font-family: var(--font-body);
 }
 
 .auth-page-shell {

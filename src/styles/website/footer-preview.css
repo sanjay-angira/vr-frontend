@@ -39,6 +39,7 @@
 }
 
 .footer-section-title {
+  font-family: var(--font-ui);
   font-weight: 600;
   color: var(--footer-heading);
   margin-bottom: 1rem;

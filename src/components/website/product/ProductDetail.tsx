@@ -319,7 +319,7 @@ export default function ProductDetail({
           <div className="product-specs-card product-description-card">
             <div className="product-specs-card__header">Variant Description</div>
             <div
-              className="product-copy-content product-description-card__body"
+              className="product-copy-content product-description-card__body rich-html"
               dangerouslySetInnerHTML={{ __html: variantDescription }}
             />
           </div>

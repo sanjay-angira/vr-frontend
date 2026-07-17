@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useState } from "react";
 
 export type AccordionItem = {
   id: string;
@@ -23,14 +23,8 @@ function AccordionRow({
   isOpen: boolean;
   onToggle: () => void;
 }) {
-  const contentRef = useRef<HTMLDivElement | null>(null);
-  const maxHeight = useMemo(() => {
-    const height = contentRef.current?.scrollHeight ?? 0;
-    return isOpen ? `${height}px` : "0px";
-  }, [isOpen]);
-
   return (
-    <div className={`accordion-item ${isOpen ? "open" : ""}`}>
+    <div className={`accordion-item${isOpen ? " open" : ""}`}>
       <button
         type="button"
         className="accordion-header"
@@ -39,17 +33,24 @@ function AccordionRow({
         aria-controls={`acc-${item.id}`}
       >
         <span className="accordion-question">{item.question}</span>
-        <span className="accordion-icon" aria-hidden>
+        <span
+          className={`accordion-icon${isOpen ? " is-open" : ""}`}
+          aria-hidden
+        >
           {isOpen ? "−" : "+"}
         </span>
       </button>
       <div
         id={`acc-${item.id}`}
         className="accordion-panel"
-        style={{ maxHeight: isOpen ? maxHeight : "0px", opacity: isOpen ? 1 : 0 }}
         aria-hidden={!isOpen}
       >
-        <div dangerouslySetInnerHTML={{ __html: item.answer }} />
+        <div className="accordion-panel-inner">
+          <div
+            className="accordion-answer rich-html"
+            dangerouslySetInnerHTML={{ __html: item.answer }}
+          />
+        </div>
       </div>
     </div>
   );

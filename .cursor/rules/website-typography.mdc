@@ -1,0 +1,34 @@
+---
+description: Website typography — Inter, Poppins, Manrope roles for vr-web storefront
+globs: vr-web/src/**/*.{css,tsx,ts}
+alwaysApply: false
+---
+
+# Website typography
+
+Use only these fonts on the storefront. Load via `next/font` CSS variables in `(website)/layout.tsx`.
+
+| Role | Font | CSS token |
+|------|------|-----------|
+| Body, UI, nav, buttons, product copy, section labels | Inter | `var(--font-inter)` |
+| Hero, product titles, category titles | Poppins | `var(--font-poppins)` |
+| Premium section headings (FAQ, blog titles, catalog page titles) | Manrope | `var(--font-manrope)` |
+
+```css
+/* ✅ GOOD */
+body { font-family: var(--font-inter), "Inter", sans-serif; }
+.btn, .website-header, .product-copy-content { font-family: var(--font-inter), "Inter", sans-serif; }
+.product-detail-title, .category-card-title { font-family: var(--font-poppins), "Poppins", sans-serif; }
+.product-section-heading, .store-catalog__title { font-family: var(--font-manrope), "Manrope", sans-serif; }
+
+/* ❌ BAD — do not use */
+font-family: "Playfair Display", Georgia, serif;
+font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+```
+
+## Rules
+
+- Prefer `var(--font-*)` tokens from `theme.css`; never hardcode Google Font names alone without the CSS variable fallback chain.
+- Do not introduce new display/serif fonts for website UI.
+- Keep Inter for form fields, accordion questions/answers body, reviews, and buttons.
+- Product name / hero / category names → Poppins. Page/section premium headings → Manrope.

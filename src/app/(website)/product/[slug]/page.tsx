@@ -116,7 +116,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
       <div className="product-breadcrumbs">
         <Link href="/">Home</Link>
         <span>›</span>
-        <Link href="/shop">{product.category?.categoryName || "Shop"}</Link>
+        <Link href="/products">{product.category?.categoryName || "Shop"}</Link>
         <span>›</span>
         <span className="is-current">{product.productName}</span>
       </div>
@@ -129,9 +129,9 @@ export default async function ProductDetailPage({ params }: PageProps) {
 
       {(product.description || product.shortDescription) && (
         <section className="product-section-block product-copy-block">
-          <h2 className="product-section-heading">Product Description</h2>
+          <h2 className="section-title product-copy-heading">Product Description</h2>
           <div
-            className="product-copy-content"
+            className="product-copy-content rich-html"
             dangerouslySetInnerHTML={{
               __html: (product.description || product.shortDescription || "").trim(),
             }}
@@ -140,16 +140,15 @@ export default async function ProductDetailPage({ params }: PageProps) {
       )}
 
       {faqItems.length > 0 && (
-        <section
-          className="product-section-block faq-section product-faq-block"
-          style={{ marginTop: "2.25rem" }}
-        >
-          <h2
-            className="section-title product-faq-heading"
-            style={{ marginBottom: "1rem" }}
-          >
-            Frequently Asked Questions
-          </h2>
+        <section className="product-section-block product-faq-block">
+          <div className="product-faq-intro">
+            <h2 className="product-section-heading product-faq-heading">
+              Frequently Asked Questions
+            </h2>
+            <p className="product-faq-subcopy">
+              Quick answers about this product, ingredients, and usage.
+            </p>
+          </div>
           <Accordion items={faqItems} className="product-faq-accordion" />
         </section>
       )}
