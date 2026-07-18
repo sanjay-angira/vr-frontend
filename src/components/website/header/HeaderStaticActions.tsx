@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Heart, Search, ShoppingCart, User } from "lucide-react";
+import { Heart, Search, ShoppingCart } from "lucide-react";
 import type { HeaderSettingsData } from "@/types/header";
 import { useAppSelector } from "@/services/redux/hooks";
+import { HeaderUser } from "@/components/website/header/HeaderUser";
 
 type HeaderStaticActionsProps = {
   settings: HeaderSettingsData;
@@ -50,15 +51,7 @@ export function HeaderStaticActions({ settings }: HeaderStaticActionsProps) {
         </Link>
       ) : null}
 
-      {settings.showAccount ? (
-        <Link
-          href="/account"
-          className="icon-button"
-          aria-label="Account"
-        >
-          <User size={20} />
-        </Link>
-      ) : null}
+      {settings.showAccount ? <HeaderUser /> : null}
     </>
   );
 }

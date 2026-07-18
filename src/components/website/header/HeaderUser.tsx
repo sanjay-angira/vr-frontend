@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { User } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAppDispatch } from "@/services/redux/hooks";
@@ -10,6 +10,7 @@ import { useUserAuth } from "@/services/website/useUserAuth";
 import { isAuthPagePath } from "@/utils/authRoutes";
 
 export function HeaderUser() {
+  const [mounted, setMounted] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const dispatch = useAppDispatch();
@@ -17,13 +18,32 @@ export function HeaderUser() {
   const pathname = usePathname();
   const { user, isAuthenticated, logout } = useUserAuth();
 
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!showDropdown) return;
+
+    const handlePointerDown = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setShowDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    return () => document.removeEventListener("mousedown", handlePointerDown);
+  }, [showDropdown]);
+
   const handleLogout = () => {
     logout();
     setShowDropdown(false);
     router.push("/");
   };
 
-  
   const handleLoginClick = () => {
     if (isAuthPagePath(pathname)) {
       return;
@@ -31,20 +51,42 @@ export function HeaderUser() {
     dispatch(setAuthModalOpen(true));
   };
 
+  if (!mounted) {
+    return (
+      <button type="button" className="header-login-btn" aria-label="Login">
+        Login
+      </button>
+    );
+  }
+
   if (isAuthenticated && user) {
     return (
       <div className="profile-dropdown" ref={dropdownRef}>
         <button
           type="button"
-          className="main-nav-link profile-btn"
-          onClick={() => setShowDropdown(!showDropdown)}
+          className="icon-button"
+          onClick={() => setShowDropdown((open) => !open)}
+          aria-label="Account"
+          aria-expanded={showDropdown}
         >
-          {user.name}
+          <User size={20} />
         </button>
-        {showDropdown && (
-          <div className="dropdown-menu">
-            <Link href="/account/profile" className="dropdown-item">
+        {showDropdown ? (
+          <div className="dropdown-menu profile-dropdown-menu">
+            <div className="profile-dropdown-name">{user.name}</div>
+            <Link
+              href="/account/profile"
+              className="dropdown-item"
+              onClick={() => setShowDropdown(false)}
+            >
               My Profile
+            </Link>
+            <Link
+              href="/account/orders"
+              className="dropdown-item"
+              onClick={() => setShowDropdown(false)}
+            >
+              My Orders
             </Link>
             <button
               type="button"
@@ -54,7 +96,7 @@ export function HeaderUser() {
               Logout
             </button>
           </div>
-        )}
+        ) : null}
       </div>
     );
   }
@@ -62,11 +104,11 @@ export function HeaderUser() {
   return (
     <button
       type="button"
-      className="icon-button"
+      className="header-login-btn"
       onClick={handleLoginClick}
       aria-label="Login"
     >
-      <User size={20} />
+      Login
     </button>
   );
 }

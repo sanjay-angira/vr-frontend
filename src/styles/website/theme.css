@@ -66,6 +66,7 @@
   --font-ui: "Inter", "Segoe UI", sans-serif;
   --font-display: "Poppins", "Segoe UI", sans-serif;
   --font-heading: "Manrope", "Segoe UI", sans-serif;
+  --font-serif: "Cormorant Garamond", "Georgia", serif;
   --font-body: var(--font-inter);
   --font-geist-sans: "Segoe UI", system-ui, sans-serif;
   --font-geist-mono: ui-monospace, "Cascadia Code", monospace;

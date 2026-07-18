@@ -177,6 +177,79 @@
   background-color: var(--vr-gold-muted);
 }
 
+.header-login-btn {
+  background: none;
+  border: none;
+  padding: 0.4rem 0.75rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  color: var(--header-text);
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.header-login-btn:hover {
+  color: var(--header-accent);
+  background-color: var(--vr-gold-muted);
+}
+
+.profile-dropdown {
+  position: relative;
+}
+
+.profile-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  right: 0;
+  min-width: 11rem;
+  padding: 0.35rem 0;
+  background: var(--vr-surface, #fff);
+  border: 1px solid var(--header-border, rgba(0, 0, 0, 0.08));
+  border-radius: 0.5rem;
+  z-index: 40;
+}
+
+.profile-dropdown-name {
+  padding: 0.5rem 0.85rem 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--vr-text, #1a1a1a);
+  border-bottom: 1px solid var(--header-border, rgba(0, 0, 0, 0.08));
+  margin-bottom: 0.15rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.profile-dropdown-menu .dropdown-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.55rem 0.85rem;
+  border: none;
+  background: none;
+  color: var(--vr-text, #1a1a1a);
+  font: inherit;
+  font-size: 0.875rem;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.profile-dropdown-menu .dropdown-item:hover {
+  background-color: var(--vr-gold-muted, rgba(196, 154, 62, 0.12));
+  color: var(--header-accent, #c49a3e);
+}
+
+.profile-dropdown-menu .logout-btn {
+  color: #b42318;
+}
+
 .mobile-nav-panel {
   display: block;
   border-top: 1px solid var(--header-border);

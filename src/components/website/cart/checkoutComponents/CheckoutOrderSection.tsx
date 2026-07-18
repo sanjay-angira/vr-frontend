@@ -1,34 +1,30 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
-import { CommerceLayout } from "@/components/website/cart/CommerceLayout";
+import { Banknote, Check, CreditCard, Minus, Plus, Trash2 } from "lucide-react";
 import { usePlaceOrderContext } from "@/components/website/cart/PlaceOrderFlowWrapper";
 import {
   formatInr,
-  formatItemCountLabel,
-  getCartCounts,
   getCartItemPricing,
 } from "@/components/website/cart/commerceUtils";
 
-export function CartPageContent() {
+type CheckoutOrderSectionProps = {
+  enabled: boolean;
+};
+
+export function CheckoutOrderSection({ enabled }: CheckoutOrderSectionProps) {
   const {
     items,
     loading,
-    error,
+    paymentMethod,
+    setPaymentMethod,
+    confirmDeliveryAddress,
     updateQuantity,
     removeItem,
-    clearCart,
   } = usePlaceOrderContext();
   const [busyId, setBusyId] = useState<number | null>(null);
-
-  const { itemCount, unitCount } = useMemo(
-    () => getCartCounts(items),
-    [items],
-  );
-  const itemCountLabel = formatItemCountLabel(itemCount, unitCount);
 
   const handleQuantity = async (cartItemId: number, quantity: number) => {
     if (quantity < 1) return;
@@ -49,55 +45,33 @@ export function CartPageContent() {
     }
   };
 
-  if (loading && items.length === 0) {
+  if (!enabled) {
     return (
-      <CommerceLayout
-        eyebrow="Shopping bag"
-        title="Your Cart"
-        loadingMessage="Loading your cart…"
-      />
-    );
-  }
-
-  if (!loading && items.length === 0) {
-    return (
-      <CommerceLayout
-        eyebrow="Shopping bag"
-        title="Your Cart"
-        empty={{
-          icon: <ShoppingBag size={36} />,
-          title: "Your cart is empty",
-          description:
-            "Browse the store and add something sacred to your basket.",
-          action: (
-            <Link href="/products" className="cart-btn cart-btn-primary">
-              Continue shopping
-            </Link>
-          ),
-        }}
-      />
+      <div className="checkout-step checkout-step--locked">
+        <div className="checkout-step-head">
+          <span className="checkout-step-num">3</span>
+          <h3>Order &amp; payment</h3>
+        </div>
+        <p className="checkout-step-copy">
+          Confirm your delivery address to review items and pay.
+        </p>
+      </div>
     );
   }
 
   return (
-    <CommerceLayout
-      eyebrow="Shopping bag"
-      title="Your Cart"
-      subtitle={itemCountLabel}
-      error={error}
-      headerAction={
-        <button
-          type="button"
-          className="cart-clear-btn"
-          onClick={() => void clearCart()}
-          disabled={loading}
-        >
-          <Trash2 size={15} strokeWidth={2} />
-          Clear cart
-        </button>
-      }
-    >
-      <div className="commerce-list cart-list">
+    <div className="checkout-step checkout-step--open">
+      <div className="checkout-step-head">
+        <span className="checkout-step-num">3</span>
+        <div className="checkout-step-title-row">
+          <h3>Order &amp; payment</h3>
+          {confirmDeliveryAddress ? (
+            <Check size={18} className="checkout-step-check" aria-hidden />
+          ) : null}
+        </div>
+      </div>
+
+      <ul className="checkout-order-list">
         {items.map((item) => {
           const { unit, listUnit, line, listLine, hasDiscount, offerName } =
             getCartItemPricing(item);
@@ -106,14 +80,14 @@ export function CartPageContent() {
           const busy = busyId === item.id || loading;
 
           return (
-            <article key={item.id} className="commerce-line cart-line">
-              <Link href={href} className="commerce-line-media cart-line-media">
+            <li key={item.id} className="checkout-order-item">
+              <Link href={href} className="checkout-order-thumb">
                 {item.image ? (
                   <Image
                     src={item.image}
                     alt={item.productName || "Product"}
-                    width={112}
-                    height={112}
+                    width={64}
+                    height={64}
                     unoptimized
                   />
                 ) : (
@@ -121,8 +95,8 @@ export function CartPageContent() {
                 )}
               </Link>
 
-              <div className="commerce-line-body">
-                <div className="commerce-line-top">
+              <div className="checkout-order-body">
+                <div className="checkout-order-top">
                   <div>
                     <Link href={href} className="commerce-line-title">
                       {item.productName || "Product"}
@@ -134,15 +108,17 @@ export function CartPageContent() {
                       <p className="cart-line-offer">{offerName}</p>
                     ) : null}
                   </div>
-                  <div className="commerce-line-price-wrap">
-                    <p className="commerce-line-price">{formatInr(line)}</p>
+                  <div className="commerce-line-price-wrap checkout-order-price">
+                    <strong>{formatInr(line)}</strong>
                     {hasDiscount ? (
-                      <p className="commerce-line-mrp">{formatInr(listLine)}</p>
+                      <span className="commerce-line-mrp">
+                        {formatInr(listLine)}
+                      </span>
                     ) : null}
                   </div>
                 </div>
 
-                <div className="commerce-line-actions cart-line-actions">
+                <div className="checkout-order-actions">
                   <div className="commerce-qty cart-qty">
                     <button
                       type="button"
@@ -188,10 +164,42 @@ export function CartPageContent() {
                   </button>
                 </div>
               </div>
-            </article>
+            </li>
           );
         })}
+      </ul>
+
+      <div className="commerce-payment-options checkout-payment-block">
+        <label
+          className={`commerce-payment-option checkout-payment${
+            paymentMethod === "cod" ? " is-selected" : ""
+          }`}
+        >
+          <input
+            type="radio"
+            name="paymentMethod"
+            checked={paymentMethod === "cod"}
+            onChange={() => setPaymentMethod("cod")}
+          />
+          <span className="checkout-payment-icon" aria-hidden>
+            <Banknote size={18} strokeWidth={1.75} />
+          </span>
+          <span>
+            <strong>Cash on delivery</strong>
+            <em>Pay when your order arrives</em>
+          </span>
+        </label>
+        <label className="commerce-payment-option checkout-payment disabled">
+          <input type="radio" name="paymentMethod" disabled />
+          <span className="checkout-payment-icon" aria-hidden>
+            <CreditCard size={18} strokeWidth={1.75} />
+          </span>
+          <span>
+            <strong>Online payment</strong>
+            <em>Coming soon</em>
+          </span>
+        </label>
       </div>
-    </CommerceLayout>
+    </div>
   );
 }
