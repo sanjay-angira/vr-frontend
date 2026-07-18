@@ -26,7 +26,7 @@ import { fetchWebsiteCart } from "@/services/redux/slices/websiteSlices/cartSlic
 import { addOrUpdateCartItem } from "@/services/website/cartService";
 import type { RootState } from "@/services/redux";
 import { setAuthModalOpen } from "@/services/redux/slices/websiteSlices/modalSlice";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { isAuthPagePath } from "@/utils/authRoutes";
 
 export type ProductAttributeView = {
@@ -66,6 +66,7 @@ export default function ProductDetail({
   initialVariantSlug = null,
 }: Props) {
   const pathname = usePathname();
+  const router = useRouter();
   const dispatch = useDispatch();
   const isAuthenticated = useSelector((state: RootState) => state.userAuth.isAuthenticated);
 
@@ -159,6 +160,22 @@ export default function ProductDetail({
       window.setTimeout(() => setAddedFlash(false), 1600);
     } catch (error) {
       console.error("Unable to add product to cart", error);
+    } finally {
+      setIsAdding(false);
+    }
+  };
+
+  const handleBuyNow = async () => {
+    if (!selectedVariant || isAdding) return;
+
+    try {
+      setIsAdding(true);
+      await addOrUpdateCartItem(selectedVariant.id, quantity);
+      // @ts-ignore
+      dispatch(fetchWebsiteCart());
+      router.push("/checkout");
+    } catch (error) {
+      console.error("Unable to start checkout", error);
     } finally {
       setIsAdding(false);
     }
@@ -339,7 +356,8 @@ export default function ProductDetail({
           <button
             type="button"
             className="btn btn-outline btn-lg product-cta-button product-cta-button--secondary"
-            disabled={!inStock || !selectedVariant}
+            disabled={!inStock || !selectedVariant || isAdding}
+            onClick={handleBuyNow}
           >
             <PackageCheck size={18} aria-hidden="true" />
             Buy Now

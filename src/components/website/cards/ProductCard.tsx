@@ -2,15 +2,14 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { Eye, Heart, ShoppingCart, Star } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/services/redux/hooks";
-import { API_ENDPOINTS } from "@/services/api/API_ENDPOINT";
-import { postData } from "@/services/api/apiService";
 import { setAuthModalOpen } from "@/services/redux/slices/websiteSlices/modalSlice";
-import { syncWebsiteCartItem } from "@/services/redux/slices/websiteSlices/cartSlice";
-import { getSessionId } from "@/utils/sessionId";
-import { tokenStorage } from "@/services/api/storage";
+import {
+  addWebsiteCartItem,
+  fetchWebsiteCart,
+} from "@/services/redux/slices/websiteSlices/cartSlice";
 import { isAuthPagePath } from "@/utils/authRoutes";
 
 export interface WebsiteProductCardData {
@@ -61,7 +60,6 @@ export function ProductCard({
   href,
 }: ProductCardProps) {
   const dispatch = useAppDispatch();
-  const router = useRouter();
   const pathname = usePathname();
   const isAuthenticated = useAppSelector((state) => state.userAuth.isAuthenticated);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
@@ -107,17 +105,10 @@ export function ProductCard({
 
     try {
       setIsAddingToCart(true);
-      const payload: Record<string, unknown> = {
-        variationId,
-        quantity: 1,
-      };
-
-      if (!tokenStorage.getUserAccessToken()) {
-        payload.sessionId = getSessionId();
-      }
-
-      await postData(API_ENDPOINTS.CUSTOMER.ADD_CART, payload);
-      dispatch(syncWebsiteCartItem({ id: String(variationId), quantity: 1 }));
+      await dispatch(
+        addWebsiteCartItem({ variationId, quantity: 1 })
+      ).unwrap();
+      void dispatch(fetchWebsiteCart());
     } catch (error) {
       console.error("Failed to add item to cart", error);
     } finally {

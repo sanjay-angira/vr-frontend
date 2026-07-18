@@ -1,7 +1,18 @@
-export default function Page() {
+import { Suspense } from "react";
+import { OrderSuccessContent } from "@/components/website/cart/OrderSuccessContent";
+
+export default function OrderSuccessPage() {
   return (
-    <div>
-      <h1>Order Success</h1>
-    </div>
+    <Suspense
+      fallback={
+        <div className="commerce-page">
+          <div className="commerce-container">
+            <p className="commerce-muted">Loading order…</p>
+          </div>
+        </div>
+      }
+    >
+      <OrderSuccessContent />
+    </Suspense>
   );
 }

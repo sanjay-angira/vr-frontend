@@ -219,6 +219,8 @@ export const API_ENDPOINTS = {
     CLEAR_CART: "customer/clear-cart",
     CART_COUNT: "customer/cart-count",
     REMOVE_CART: (id: number | string) => `customer/remove-cart-item/${id}`,
+    CHECKOUT: "customer/checkout",
+    ORDER_DETAILS: (orderNumber: string) => `customer/order/${orderNumber}`,
   },
 
   ORDERS: {

@@ -1,31 +1,32 @@
 import "@/styles/website/index.css";
-import { Inter, Manrope, Poppins } from "next/font/google";
 import { WebsiteShell } from "@/components/website/WebsiteShell";
 
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-  display: "swap",
-});
+/**
+ * Avoid next/font/google here — it fetches at build time and fails offline /
+ * when Google Fonts is unreachable. Runtime <link> keeps the same families.
+ */
+export const dynamic = "force-dynamic";
 
-const poppins = Poppins({
-  subsets: ["latin"],
-  variable: "--font-poppins",
-  weight: ["500", "600", "700"],
-  display: "swap",
-});
-
-const manrope = Manrope({
-  subsets: ["latin"],
-  variable: "--font-manrope",
-  weight: ["500", "600", "700"],
-  display: "swap",
-});
-
-export default function WebsiteLayout({ children }: { children: React.ReactNode }) {
+export default function WebsiteLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <div className={`${inter.variable} ${poppins.variable} ${manrope.variable}`}>
-      <WebsiteShell>{children}</WebsiteShell>
-    </div>
+    <>
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossOrigin="anonymous"
+      />
+      <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700&family=Poppins:wght@500;600;700&display=swap"
+        rel="stylesheet"
+      />
+      <div className="website-font-root">
+        <WebsiteShell>{children}</WebsiteShell>
+      </div>
+    </>
   );
 }

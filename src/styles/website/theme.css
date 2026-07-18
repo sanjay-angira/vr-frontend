@@ -61,9 +61,12 @@
   --container-max: 1920px;
   --gap: 0.75rem; /* Tailwind gap-3 */
 
-  /* Typography — see .cursor/rules/website-typography.mdc */
-  --font-body: var(--font-inter, "Inter"), "Inter", sans-serif;
-  --font-ui: var(--font-inter, "Inter"), "Inter", sans-serif;
-  --font-display: var(--font-poppins, "Poppins"), "Poppins", sans-serif;
-  --font-heading: var(--font-manrope, "Manrope"), "Manrope", sans-serif;
+  /* Typography — loaded at runtime via website layout <link>; CSS vars keep stacks stable at build */
+  --font-inter: "Inter", "Segoe UI", sans-serif;
+  --font-ui: "Inter", "Segoe UI", sans-serif;
+  --font-display: "Poppins", "Segoe UI", sans-serif;
+  --font-heading: "Manrope", "Segoe UI", sans-serif;
+  --font-body: var(--font-inter);
+  --font-geist-sans: "Segoe UI", system-ui, sans-serif;
+  --font-geist-mono: ui-monospace, "Cascadia Code", monospace;
 }

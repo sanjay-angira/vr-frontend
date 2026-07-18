@@ -29,21 +29,11 @@ const AuthModals = () => {
 
   return (
     <section id="reg_login">
-      <div className="scale-in" style={{ position: "relative" }}>
+      <div className="scale-in auth-modal-shell">
         <button
           type="button"
+          className="auth-modal-close"
           onClick={() => dispatch(toggleModal())}
-          style={{
-            position: "absolute",
-            top: 30,
-            right: 10,
-            background: "transparent",
-            border: "none",
-            fontSize: "2rem",
-            color: "oklch(0.281291 0.064316 44.611289)",
-            cursor: "pointer",
-            zIndex: 10,
-          }}
           aria-label="Close modal"
         >
           &times;

@@ -16,8 +16,8 @@
   --color-admin-muted: #fcf9f2;
   --color-admin-border: rgba(197, 157, 95, 0.35);
   --color-admin-accent: #d4b483;
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: "Segoe UI", system-ui, sans-serif;
+  --font-mono: ui-monospace, "Cascadia Code", monospace;
 }
 
 @media (prefers-color-scheme: dark) {

@@ -1,7 +1,5 @@
-export default function Page() {
-  return (
-    <div>
-      <h1>Checkout</h1>
-    </div>
-  );
+import { CheckoutPageContent } from "@/components/website/cart/CheckoutPageContent";
+
+export default function CheckoutPage() {
+  return <CheckoutPageContent />;
 }

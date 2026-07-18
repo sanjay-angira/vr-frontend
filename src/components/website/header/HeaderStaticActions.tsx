@@ -1,12 +1,23 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { Heart, Search, ShoppingCart, User } from "lucide-react";
 import type { HeaderSettingsData } from "@/types/header";
+import { useAppSelector } from "@/services/redux/hooks";
 
 type HeaderStaticActionsProps = {
   settings: HeaderSettingsData;
 };
 
 export function HeaderStaticActions({ settings }: HeaderStaticActionsProps) {
+  const [mounted, setMounted] = useState(false);
+  const cartCount = useAppSelector((state) => state.websiteCart.count);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   return (
     <>
       {settings.showSearch ? (
@@ -30,8 +41,12 @@ export function HeaderStaticActions({ settings }: HeaderStaticActionsProps) {
           href="/cart"
           className="icon-button"
           aria-label="Cart"
+          style={{ position: "relative" }}
         >
           <ShoppingCart size={20} />
+          {mounted && cartCount > 0 ? (
+            <span className="cart-count-badge">{cartCount}</span>
+          ) : null}
         </Link>
       ) : null}
 

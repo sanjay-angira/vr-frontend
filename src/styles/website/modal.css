@@ -31,6 +31,36 @@
      border-radius: 4px;
  }
 
+ .auth-modal-shell {
+     position: relative;
+ }
+
+ .auth-modal-close {
+     position: absolute;
+     top: 12px;
+     right: 12px;
+     z-index: 20;
+     display: flex;
+     align-items: center;
+     justify-content: center;
+     width: 36px;
+     height: 36px;
+     padding: 0;
+     border: none;
+     border-radius: 50%;
+     background: transparent;
+     color: #2b1a12;
+     font-size: 1.75rem;
+     line-height: 1;
+     cursor: pointer;
+     transition: background-color 0.15s ease, color 0.15s ease;
+ }
+
+ .auth-modal-close:hover {
+     background-color: rgba(0, 0, 0, 0.06);
+     color: #000;
+ }
+
  .auth_container .imgBx,
  .auth_container .formBx {
      position: relative;
@@ -40,7 +70,7 @@
  }
 
  .auth_container .formBx {
-     padding: 40px;
+     padding: 56px 52px 40px 40px;
  }
 
 
