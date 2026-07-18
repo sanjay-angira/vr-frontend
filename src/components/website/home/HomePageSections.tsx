@@ -74,7 +74,6 @@ export function getSectionHeadingProps(section: HomepageSection): SectionHeading
 }
 
 export function HomePageSections({ sections }: HomePageSectionsProps) {
-  console.dir(sections, { depth: null });
   return (
     <>
       {sections.map((section) => {
