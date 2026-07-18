@@ -392,7 +392,7 @@ export function SectionSettingsPage({ sectionId }: SectionSettingsPageProps) {
                       onChange={handleChange}
                       onBlur={handleBlur}
                       placeholder="e.g. Handpicked goodness for a healthier, happier you and your home."
-                      className="w-full rounded-lg border border-zinc-300 bg-white px-3.5 py-2.5 text-sm focus:border-admin-primary focus:outline-none focus:ring-2 focus:ring-admin-primary/15"
+                      className="w-full rounded-lg border border-zinc-300 bg-white px-3.5 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-admin-primary focus:outline-none focus:ring-2 focus:ring-admin-primary/15"
                     />
                   </div>
                 </div>
