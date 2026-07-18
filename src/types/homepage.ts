@@ -67,6 +67,8 @@ export type HomepageSection = {
   data: {
     heading: string;
     subHeading: string;
+    headingAccent?: string;
+    description?: string;
     displayStyle: string;
     maxProducts: number;
   };

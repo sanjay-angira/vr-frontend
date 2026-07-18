@@ -1,36 +1,37 @@
 import { CategoryCard, type Category } from "@/components/website/cards/CategoryCard";
-import { SectionHeading } from "@/components/website/shared/SectionHeading";
+import {
+  SectionHeading,
+  type SectionHeadingProps,
+} from "@/components/website/shared/SectionHeading";
 import Link from "next/link";
 
 interface CategorySectionProps {
-  title: string;
-  subtitle?: string;
+  heading: SectionHeadingProps;
   categories: Category[];
   viewAllLink?: string;
 }
 
 export function CategorySection({
-  title,
-  subtitle,
+  heading,
   categories,
   viewAllLink = "/categories",
 }: CategorySectionProps) {
   return (
-    <section className="section category-section">
+    <section className="section home-section category-section">
       <div className="container">
-        <SectionHeading title={title} subtitle={subtitle} />
+        <SectionHeading {...heading} />
         <div className="category-grid">
           {categories.map((category) => (
             <CategoryCard key={category.id} category={category} />
           ))}
         </div>
-        {viewAllLink && (
-          <div className="category-section__view-all">
+        {viewAllLink ? (
+          <div className="home-section__actions">
             <Link href={viewAllLink} className="btn btn-outline btn-lg">
               View All Categories
             </Link>
           </div>
-        )}
+        ) : null}
       </div>
     </section>
   );

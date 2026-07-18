@@ -2,13 +2,14 @@ import { resolveImageUrl } from "@/components/admin/forms/shared/resolveImageUrl
 import type { HomepageSection } from "@/types/homepage";
 import type { WebsiteProductCardData } from "@/components/website/cards/ProductCard";
 import type { Category } from "@/components/website/cards/CategoryCard";
-import { CmsHeroBannerSection } from "@/components/website/home/CmsHeroBannerSection";
+import type { SectionHeadingProps } from "@/components/website/shared/SectionHeading";
+import { HeroBannerSection } from "@/components/website/sections/HeroBannerSection";
 import { CategorySection } from "@/components/website/sections/CategorySection";
 import { ProductSection } from "@/components/website/sections/ProductSection";
 import { BlogSection } from "@/components/website/sections/BlogSection";
 import { ProductReviewsShowcase } from "@/components/website/sections/ProductReviewsShowcase";
 
-type CmsHomeSectionsProps = {
+type HomePageSectionsProps = {
   sections: HomepageSection[];
 };
 
@@ -53,27 +54,40 @@ function mapBlogPosts(blogs: HomepageSection["blogs"]) {
   }));
 }
 
-function getSectionTitle(section: HomepageSection) {
-  return section.data.heading || section.title;
+export function getSectionHeadingProps(section: HomepageSection): SectionHeadingProps {
+  const data = (section.data ?? {}) as HomepageSection["data"] &
+    Record<string, unknown>;
+
+  const title = String(data.heading || section.title || "").trim();
+  const accent = String(
+    data.headingAccent || data.accent || data.accentWord || "",
+  ).trim();
+  const eyebrow = String(data.subHeading || data.eyebrow || "").trim();
+  const description = String(data.description || "").trim();
+
+  return {
+    eyebrow: eyebrow || undefined,
+    title,
+    accent: accent || undefined,
+    description: description || undefined,
+  };
 }
 
-function getSectionSubtitle(section: HomepageSection) {
-  return section.data.subHeading || undefined;
-}
-
-export function CmsHomeSections({ sections }: CmsHomeSectionsProps) {
+export function HomePageSections({ sections }: HomePageSectionsProps) {
+  console.dir(sections, { depth: null });
   return (
     <>
       {sections.map((section) => {
         const key = `${section.type}-${section.id}`;
+        const heading = getSectionHeadingProps(section);
 
         switch (section.type) {
           case "hero_banner":
             return (
-              <CmsHeroBannerSection
+              <HeroBannerSection
                 key={key}
-                title={getSectionTitle(section)}
-                subtitle={getSectionSubtitle(section)}
+                title={heading.title}
+                subtitle={heading.eyebrow}
                 banners={section.banners}
               />
             );
@@ -83,8 +97,7 @@ export function CmsHomeSections({ sections }: CmsHomeSectionsProps) {
             return (
               <ProductSection
                 key={key}
-                title={getSectionTitle(section)}
-                subtitle={getSectionSubtitle(section)}
+                heading={heading}
                 products={mapProducts(section.products)}
                 viewAllLink={
                   section.slug
@@ -99,8 +112,7 @@ export function CmsHomeSections({ sections }: CmsHomeSectionsProps) {
             return (
               <CategorySection
                 key={key}
-                title={getSectionTitle(section)}
-                subtitle={getSectionSubtitle(section)}
+                heading={heading}
                 categories={mapCategories(section.categories)}
               />
             );
@@ -110,8 +122,7 @@ export function CmsHomeSections({ sections }: CmsHomeSectionsProps) {
             return (
               <BlogSection
                 key={key}
-                title={getSectionTitle(section)}
-                subtitle={getSectionSubtitle(section)}
+                heading={heading}
                 posts={mapBlogPosts(section.blogs)}
               />
             );
@@ -121,8 +132,7 @@ export function CmsHomeSections({ sections }: CmsHomeSectionsProps) {
             return (
               <ProductReviewsShowcase
                 key={key}
-                title={getSectionTitle(section)}
-                subtitle={getSectionSubtitle(section) || ""}
+                heading={heading}
                 reviews={section.reviews}
               />
             );
@@ -131,23 +141,21 @@ export function CmsHomeSections({ sections }: CmsHomeSectionsProps) {
             return (
               <div key={key}>
                 {section.banners.length > 0 && (
-                  <CmsHeroBannerSection
-                    title={getSectionTitle(section)}
-                    subtitle={getSectionSubtitle(section)}
+                  <HeroBannerSection
+                    title={heading.title}
+                    subtitle={heading.eyebrow}
                     banners={section.banners}
                   />
                 )}
                 {section.categories.length > 0 && (
                   <CategorySection
-                    title={getSectionTitle(section)}
-                    subtitle={getSectionSubtitle(section)}
+                    heading={heading}
                     categories={mapCategories(section.categories)}
                   />
                 )}
                 {section.products.length > 0 && (
                   <ProductSection
-                    title={getSectionTitle(section)}
-                    subtitle={getSectionSubtitle(section)}
+                    heading={heading}
                     products={mapProducts(section.products)}
                     viewAllLink={
                       section.slug
@@ -158,15 +166,13 @@ export function CmsHomeSections({ sections }: CmsHomeSectionsProps) {
                 )}
                 {section.blogs.length > 0 && (
                   <BlogSection
-                    title={getSectionTitle(section)}
-                    subtitle={getSectionSubtitle(section)}
+                    heading={heading}
                     posts={mapBlogPosts(section.blogs)}
                   />
                 )}
                 {section.reviews.length > 0 && (
                   <ProductReviewsShowcase
-                    title={getSectionTitle(section)}
-                    subtitle={getSectionSubtitle(section) || ""}
+                    heading={heading}
                     reviews={section.reviews}
                   />
                 )}

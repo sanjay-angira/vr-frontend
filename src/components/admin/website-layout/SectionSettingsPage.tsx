@@ -73,7 +73,9 @@ type SectionFormValues = {
   displayStyle: string;
   maxProducts: number;
   heading: string;
+  headingAccent: string;
   subHeading: string;
+  description: string;
   productIds: number[];
   categoryIds: number[];
   blogIds: number[];
@@ -128,7 +130,9 @@ export function SectionSettingsPage({ sectionId }: SectionSettingsPageProps) {
     displayStyle: "grid",
     maxProducts: 8,
     heading: "",
+    headingAccent: "",
     subHeading: "",
+    description: "",
     productIds: [],
     categoryIds: [],
     blogIds: [],
@@ -190,7 +194,9 @@ export function SectionSettingsPage({ sectionId }: SectionSettingsPageProps) {
           displayStyle: String(data.displayStyle ?? "grid"),
           maxProducts: Number(data.maxProducts ?? 8),
           heading: String(data.heading ?? ""),
+          headingAccent: String(data.headingAccent ?? ""),
           subHeading: String(data.subHeading ?? ""),
+          description: String(data.description ?? ""),
           productIds: section.products?.map((item) => item.id) ?? [],
           categoryIds: section.categories?.map((item) => item.id) ?? [],
           blogIds: section.blogs?.map((item) => item.id) ?? [],
@@ -221,7 +227,9 @@ export function SectionSettingsPage({ sectionId }: SectionSettingsPageProps) {
         displayStyle: values.displayStyle,
         maxProducts: values.maxProducts,
         heading: values.heading,
+        headingAccent: values.headingAccent,
         subHeading: values.subHeading,
+        description: values.description,
       },
       productIds: values.productIds,
       categoryIds: values.categoryIds,
@@ -331,26 +339,63 @@ export function SectionSettingsPage({ sectionId }: SectionSettingsPageProps) {
                 }
               />
 
-              <div className="md:col-span-2">
-                <Input
-                  label="Section Heading"
-                  name="heading"
-                  value={values.heading}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                />
-              </div>
+              <div className="md:col-span-2 rounded-xl border border-zinc-100 bg-zinc-50/70 p-4 md:p-5">
+                <h2 className="mb-1 text-sm font-semibold text-zinc-900">
+                  Section heading (storefront)
+                </h2>
+                <p className="mb-4 text-xs text-zinc-500">
+                  Matches the branded header: eyebrow label, two-tone title, and description.
+                </p>
 
-              <div className="md:col-span-2">
-                <FormLabel label="Section Sub Heading" />
-                <textarea
-                  name="subHeading"
-                  rows={3}
-                  value={values.subHeading}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className="w-full rounded-lg border border-zinc-300 bg-white px-3.5 py-2.5 text-sm focus:border-admin-primary focus:outline-none focus:ring-2 focus:ring-admin-primary/15"
-                />
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div className="md:col-span-2">
+                    <Input
+                      label="Eyebrow label"
+                      name="subHeading"
+                      value={values.subHeading}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      placeholder="e.g. Explore Our Range"
+                    />
+                    <p className="mt-1 text-xs text-zinc-500">
+                      Shown in uppercase above the title with leaf + lines.
+                    </p>
+                  </div>
+
+                  <Input
+                    label="Heading"
+                    name="heading"
+                    value={values.heading}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    placeholder="e.g. Our Best Categories"
+                  />
+
+                  <Input
+                    label="Accent word"
+                    name="headingAccent"
+                    value={values.headingAccent}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    placeholder="e.g. Categories"
+                  />
+                  <p className="md:col-span-2 -mt-2 text-xs text-zinc-500">
+                    Accent word is highlighted in terracotta. Use a word that appears in the heading.
+                  </p>
+
+                  <div className="md:col-span-2">
+                    <FormLabel label="Description" />
+                    <textarea
+                      name="description"
+                      rows={3}
+                      value={values.description}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      placeholder="e.g. Handpicked goodness for a healthier, happier you and your home."
+                      className="w-full rounded-lg border border-zinc-300 bg-white px-3.5 py-2.5 text-sm focus:border-admin-primary focus:outline-none focus:ring-2 focus:ring-admin-primary/15"
+                    />
+                  </div>
+                </div>
               </div>
 
               <FormMultiDropdown

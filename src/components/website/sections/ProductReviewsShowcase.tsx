@@ -1,5 +1,8 @@
 import { Quote, Star } from "lucide-react";
-import { SectionHeading } from "@/components/website/shared/SectionHeading";
+import {
+  SectionHeading,
+  type SectionHeadingProps,
+} from "@/components/website/shared/SectionHeading";
 
 type ReviewItem = {
   id: number;
@@ -11,26 +14,24 @@ type ReviewItem = {
 };
 
 export function ProductReviewsShowcase({
-  title,
-  subtitle,
+  heading,
   reviews,
 }: {
-  title: string;
-  subtitle: string;
+  heading: SectionHeadingProps;
   reviews: ReviewItem[];
 }) {
   return (
-    <section className="section">
+    <section className="section home-section product-reviews-showcase">
       <div className="container">
-        <SectionHeading title={title} subtitle={subtitle} />
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
+        <SectionHeading {...heading} />
+        <div className="product-reviews-grid">
           {reviews.map((review) => (
             <article key={review.id} className="product-review-card">
               <div className="product-review-quote-mark" aria-hidden>
-                <Quote className="w-8 h-8 text-primary/20 mb-3" />
+                <Quote size={28} />
               </div>
               <p className="product-review-quote">{review.quote}</p>
-              <div className="product-review-stars">
+              <div className="product-review-stars" aria-label={`Rated ${review.rating} out of 5`}>
                 {[...Array(5)].map((_, index) => (
                   <Star
                     key={index}
@@ -38,12 +39,17 @@ export function ProductReviewsShowcase({
                     className={
                       index < review.rating ? "review-star active" : "review-star"
                     }
+                    fill={index < review.rating ? "currentColor" : "none"}
                   />
                 ))}
               </div>
-              <p className="product-review-product">{review.product}</p>
+              {review.product ? (
+                <p className="product-review-product">{review.product}</p>
+              ) : null}
               <p className="product-review-name">{review.name}</p>
-              <p className="product-review-location">{review.location}</p>
+              {review.location ? (
+                <p className="product-review-location">{review.location}</p>
+              ) : null}
             </article>
           ))}
         </div>

@@ -18,6 +18,8 @@
   --vr-text: #2d2926;
   --vr-text-muted: #666666;
   --vr-text-light: #8a8278;
+  --vr-terracotta: #c45c26;
+  --vr-leaf: #4f772d;
 
   /* Semantic tokens */
   --primary-background: var(--vr-forest);

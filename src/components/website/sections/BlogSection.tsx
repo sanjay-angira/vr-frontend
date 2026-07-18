@@ -1,5 +1,8 @@
 import Link from "next/link";
-import { SectionHeading } from "@/components/website/shared/SectionHeading";
+import {
+  SectionHeading,
+  type SectionHeadingProps,
+} from "@/components/website/shared/SectionHeading";
 
 type BlogPost = {
   id: number;
@@ -14,16 +17,22 @@ type BlogPost = {
 function BlogCard({ post }: { post: BlogPost }) {
   return (
     <article className="blog-card">
-      <img src={post.image} alt={post.title} className="blog-card-image" />
+      <div className="blog-card-media">
+        {post.image ? (
+          <img src={post.image} alt={post.title} className="blog-card-image" />
+        ) : (
+          <div className="blog-card-image blog-card-image--placeholder" />
+        )}
+      </div>
       <div className="blog-card-content">
         <div className="blog-card-meta">
-          <span className="blog-card-category">{post.category}</span>
-          <span className="blog-card-date">{post.date}</span>
+          {post.category ? <span className="blog-card-category">{post.category}</span> : null}
+          {post.date ? <span className="blog-card-date">{post.date}</span> : null}
         </div>
         <h3 className="blog-card-title">{post.title}</h3>
-        <p className="blog-card-excerpt">{post.excerpt}</p>
+        {post.excerpt ? <p className="blog-card-excerpt">{post.excerpt}</p> : null}
         <Link href={post.href} className="blog-read-more">
-          Read More <span aria-hidden>-&gt;</span>
+          Read More <span aria-hidden>→</span>
         </Link>
       </div>
     </article>
@@ -32,33 +41,29 @@ function BlogCard({ post }: { post: BlogPost }) {
 
 export function BlogSection({
   posts,
-  title,
-  subtitle,
+  heading,
   viewAllLink = "/blogs",
 }: {
   posts: BlogPost[];
-  title: string;
-  subtitle?: string;
+  heading: SectionHeadingProps;
   viewAllLink?: string;
 }) {
   return (
-    <section className="section blog-section">
+    <section className="section home-section blog-section">
       <div className="container">
-        <SectionHeading title={title} subtitle={subtitle} />
+        <SectionHeading {...heading} />
         <div className="blog-grid">
           {posts.map((post) => (
-            <div key={post.id} className="blog-card-wrapper">
-              <BlogCard post={post} />
-            </div>
+            <BlogCard key={post.id} post={post} />
           ))}
         </div>
-        {viewAllLink && (
-          <div className="blog-section__view-all">
+        {viewAllLink ? (
+          <div className="home-section__actions">
             <Link href={viewAllLink} className="btn btn-outline btn-lg">
               View All Articles
             </Link>
           </div>
-        )}
+        ) : null}
       </div>
     </section>
   );
