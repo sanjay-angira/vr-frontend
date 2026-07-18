@@ -2,7 +2,15 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Heart, PackageCheck, ShoppingCart, Star } from "lucide-react";
+import {
+  Heart,
+  Leaf,
+  PackageCheck,
+  ShieldCheck,
+  ShoppingCart,
+  Star,
+  Truck,
+} from "lucide-react";
 import ProductImageGallery from "@/components/website/product/ProductImageGallery";
 import GroupedVariantPicker from "@/components/website/product/GroupedVariantPicker";
 import ProductPriceBlock from "@/components/website/product/ProductPriceBlock";
@@ -77,7 +85,9 @@ export default function ProductDetail({
     });
     return initial?.id ?? product.variants[0]?.id ?? null;
   });
-  const [quantity, setQuantity] = useState<number>(1);
+  const [quantity, setQuantity] = useState(1);
+  const [isAdding, setIsAdding] = useState(false);
+  const [addedFlash, setAddedFlash] = useState(false);
 
   const selectVariant = useCallback(
     (variant: ProductVariantView) => {
@@ -138,14 +148,19 @@ export default function ProductDetail({
   };
 
   const handleAddToCart = async () => {
-    if (!selectedVariant) return;
+    if (!selectedVariant || isAdding) return;
 
     try {
+      setIsAdding(true);
       await addOrUpdateCartItem(selectedVariant.id, quantity);
       // @ts-ignore
       dispatch(fetchWebsiteCart());
+      setAddedFlash(true);
+      window.setTimeout(() => setAddedFlash(false), 1600);
     } catch (error) {
       console.error("Unable to add product to cart", error);
+    } finally {
+      setIsAdding(false);
     }
   };
 
@@ -183,6 +198,11 @@ export default function ProductDetail({
     return `${productName} ${variantName}`;
   }, [product.title, selectedVariant?.name]);
 
+  const shortCopy = product.shortDescription
+    ?.replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim() || "";
+
   const wishlistButton = (
     <button
       type="button"
@@ -190,7 +210,7 @@ export default function ProductDetail({
       onClick={handleWishlist}
       aria-label="Add to wishlist"
     >
-      <Heart size={20} />
+      <Heart size={18} />
     </button>
   );
 
@@ -218,7 +238,7 @@ export default function ProductDetail({
           )}
         </div>
 
-        <h1 className="section-title product-detail-title">{displayTitle}</h1>
+        <h1 className="product-detail-title">{displayTitle}</h1>
 
         {(product.rating > 0 || product.reviewCount > 0) && (
           <div className="product-detail-rating-row">
@@ -245,6 +265,8 @@ export default function ProductDetail({
           </div>
         )}
 
+        {shortCopy && <p className="product-detail-subtitle">{shortCopy}</p>}
+
         {selectedVariant && (
           <ProductPriceBlock pricing={selectedVariant.pricing} inStock={inStock} />
         )}
@@ -261,34 +283,41 @@ export default function ProductDetail({
         <div className="product-quantity-block">
           <label className="product-quantity-label">Quantity</label>
           <div className="product-quantity-control">
-            <button
-              type="button"
-              onClick={() => setQuantity(Math.max(1, quantity - 1))}
-              disabled={quantity <= 1 || !inStock}
-              className="product-quantity-button"
-              aria-label="Decrease quantity"
-            >
-              −
-            </button>
-            <input
-              type="number"
-              min="1"
-              max={selectedVariant?.stock ?? 100}
-              value={quantity}
-              onChange={(event) => setQuantity(Math.max(1, parseInt(event.target.value, 10) || 1))}
-              disabled={!inStock}
-              className="product-quantity-input"
-              aria-label="Quantity"
-            />
-            <button
-              type="button"
-              onClick={() => setQuantity(quantity + 1)}
-              disabled={!inStock || (selectedVariant?.stock ? quantity >= selectedVariant.stock : false)}
-              className="product-quantity-button"
-              aria-label="Increase quantity"
-            >
-              +
-            </button>
+            <div className="product-quantity-stepper">
+              <button
+                type="button"
+                onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                disabled={quantity <= 1 || !inStock}
+                className="product-quantity-button"
+                aria-label="Decrease quantity"
+              >
+                −
+              </button>
+              <input
+                type="number"
+                min="1"
+                max={selectedVariant?.stock ?? 100}
+                value={quantity}
+                onChange={(event) =>
+                  setQuantity(Math.max(1, parseInt(event.target.value, 10) || 1))
+                }
+                disabled={!inStock}
+                className="product-quantity-input"
+                aria-label="Quantity"
+              />
+              <button
+                type="button"
+                onClick={() => setQuantity(quantity + 1)}
+                disabled={
+                  !inStock ||
+                  (selectedVariant?.stock ? quantity >= selectedVariant.stock : false)
+                }
+                className="product-quantity-button"
+                aria-label="Increase quantity"
+              >
+                +
+              </button>
+            </div>
             <span className="product-quantity-hint">
               {selectedVariant?.stock ? `${selectedVariant.stock} in stock` : "In stock"}
             </span>
@@ -298,12 +327,14 @@ export default function ProductDetail({
         <div className="product-action-row">
           <button
             type="button"
-            className="btn btn-primary btn-lg product-cta-button"
-            disabled={!inStock || !selectedVariant}
+            className={`btn btn-primary btn-lg product-cta-button${
+              addedFlash ? " is-added" : ""
+            }`}
+            disabled={!inStock || !selectedVariant || isAdding}
             onClick={handleAddToCart}
           >
             <ShoppingCart size={18} aria-hidden="true" />
-            {inStock ? "Add to Cart" : "Unavailable"}
+            {isAdding ? "Adding…" : addedFlash ? "Added to Cart" : inStock ? "Add to Cart" : "Unavailable"}
           </button>
           <button
             type="button"
@@ -315,9 +346,24 @@ export default function ProductDetail({
           </button>
         </div>
 
+        <ul className="product-trust-row" aria-label="Purchase benefits">
+          <li>
+            <Truck size={16} aria-hidden="true" />
+            <span>Fast dispatch</span>
+          </li>
+          <li>
+            <ShieldCheck size={16} aria-hidden="true" />
+            <span>Secure checkout</span>
+          </li>
+          <li>
+            <Leaf size={16} aria-hidden="true" />
+            <span>Curated quality</span>
+          </li>
+        </ul>
+
         {variantDescription && (
           <div className="product-specs-card product-description-card">
-            <div className="product-specs-card__header">Variant Description</div>
+            <div className="product-specs-card__header">Variant details</div>
             <div
               className="product-copy-content product-description-card__body rich-html"
               dangerouslySetInnerHTML={{ __html: variantDescription }}

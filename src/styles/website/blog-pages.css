@@ -203,7 +203,7 @@
 }
 
 .blog-detail__inner {
-  max-width: 820px;
+  max-width: 760px;
 }
 
 .blog-detail__breadcrumbs {
@@ -253,6 +253,7 @@
 
 .blog-detail__excerpt {
   margin: 0 0 1rem;
+  font-family: var(--font-body);
   font-size: 1.05rem;
   line-height: 1.6;
   color: var(--vr-text-muted);
@@ -295,40 +296,178 @@
   object-fit: cover;
 }
 
+/* Quill editor HTML body */
 .blog-detail__content {
+  max-width: 42rem;
+  width: 100%;
+  margin: 0 auto;
   color: var(--vr-text);
-  font-size: 1.02rem;
-  line-height: 1.75;
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .blog-detail__content h1,
 .blog-detail__content h2,
-.blog-detail__content h3 {
+.blog-detail__content h3,
+.blog-detail__content h4 {
   font-family: var(--font-heading);
   color: var(--vr-forest);
-  margin: 1.6rem 0 0.7rem;
-  line-height: 1.25;
+  margin: 1.75rem 0 0.75rem;
+  line-height: 1.3;
+  font-weight: 700;
 }
 
+.blog-detail__content h1 { font-size: 1.55rem; }
+.blog-detail__content h2 { font-size: 1.35rem; }
+.blog-detail__content h3 { font-size: 1.15rem; }
+.blog-detail__content h4 { font-size: 1.05rem; }
+
 .blog-detail__content p {
-  margin: 0 0 1rem;
+  margin: 0 0 1.05rem;
 }
 
 .blog-detail__content img {
+  display: block;
   max-width: 100%;
   height: auto;
   border-radius: 12px;
-  margin: 1rem 0;
-}
-
-.blog-detail__content ul,
-.blog-detail__content ol {
-  margin: 0 0 1rem;
-  padding-left: 1.25rem;
+  margin: 1.15rem 0;
 }
 
 .blog-detail__content a {
   color: var(--vr-gold-dark);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.blog-detail__content blockquote {
+  margin: 1.15rem 0;
+  padding: 0.85rem 1rem;
+  border-left: 3px solid var(--vr-gold);
+  background: rgba(252, 249, 242, 0.9);
+  color: var(--vr-text-muted);
+}
+
+.blog-detail__content pre,
+.blog-detail__content code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.92em;
+}
+
+.blog-detail__content pre {
+  overflow-x: auto;
+  padding: 0.9rem 1rem;
+  border-radius: 0.75rem;
+  background: rgba(10, 42, 27, 0.05);
+  margin: 1rem 0;
+}
+
+/* Classic lists + Quill 2 data-list lists */
+.blog-detail__content ul,
+.blog-detail__content ol,
+.blog-detail__content.rich-html ul,
+.blog-detail__content.rich-html ol {
+  margin: 0 0 1.15rem;
+  padding-left: 1.65rem;
+  list-style: revert;
+  list-style-position: outside;
+}
+
+.blog-detail__content ul,
+.blog-detail__content.rich-html ul {
+  list-style-type: disc;
+}
+
+.blog-detail__content ol,
+.blog-detail__content.rich-html ol {
+  list-style-type: decimal;
+}
+
+.blog-detail__content li,
+.blog-detail__content.rich-html li {
+  display: list-item;
+  margin: 0.4rem 0;
+  padding-left: 0.25rem;
+  line-height: 1.7;
+  list-style: inherit;
+}
+
+.blog-detail__content li + li,
+.blog-detail__content.rich-html li + li {
+  margin-top: 0.45rem;
+}
+
+/* Quill 2 uses <ol> for both bullets and numbers via data-list */
+.blog-detail__content li[data-list="bullet"],
+.blog-detail__content.rich-html li[data-list="bullet"] {
+  list-style-type: disc;
+}
+
+.blog-detail__content li[data-list="ordered"],
+.blog-detail__content.rich-html li[data-list="ordered"] {
+  list-style-type: decimal;
+}
+
+.blog-detail__content li[data-list="checked"],
+.blog-detail__content li[data-list="unchecked"],
+.blog-detail__content.rich-html li[data-list="checked"],
+.blog-detail__content.rich-html li[data-list="unchecked"] {
+  list-style-type: none;
+  position: relative;
+  padding-left: 0.15rem;
+}
+
+.blog-detail__content li[data-list="checked"]::before,
+.blog-detail__content.rich-html li[data-list="checked"]::before {
+  content: "☑";
+  margin-right: 0.45rem;
+  color: var(--vr-forest);
+}
+
+.blog-detail__content li[data-list="unchecked"]::before,
+.blog-detail__content.rich-html li[data-list="unchecked"]::before {
+  content: "☐";
+  margin-right: 0.45rem;
+  color: var(--vr-text-muted);
+}
+
+/* Avoid double markers when Quill's .ql-ui span is present */
+.blog-detail__content .ql-ui,
+.blog-detail__content.rich-html .ql-ui {
+  display: none !important;
+}
+
+.blog-detail__content .ql-indent-1,
+.rich-html .ql-indent-1 {
+  margin-left: 1.5rem;
+}
+
+.blog-detail__content .ql-indent-2,
+.rich-html .ql-indent-2 {
+  margin-left: 3rem;
+}
+
+.blog-detail__content .ql-indent-3,
+.rich-html .ql-indent-3 {
+  margin-left: 4.5rem;
+}
+
+.blog-detail__content .ql-align-center,
+.rich-html .ql-align-center {
+  text-align: center;
+}
+
+.blog-detail__content .ql-align-right,
+.rich-html .ql-align-right {
+  text-align: right;
+}
+
+.blog-detail__content .ql-align-justify,
+.rich-html .ql-align-justify {
+  text-align: justify;
 }
 
 .blog-detail__faqs,

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ChevronDown } from "lucide-react";
 
 export type AccordionItem = {
   id: string;
@@ -12,16 +13,21 @@ type AccordionProps = {
   items: AccordionItem[];
   allowMultipleOpen?: boolean;
   className?: string;
+  showIndex?: boolean;
 };
 
 function AccordionRow({
   item,
+  index,
   isOpen,
   onToggle,
+  showIndex,
 }: {
   item: AccordionItem;
+  index: number;
   isOpen: boolean;
   onToggle: () => void;
+  showIndex: boolean;
 }) {
   return (
     <div className={`accordion-item${isOpen ? " open" : ""}`}>
@@ -32,12 +38,17 @@ function AccordionRow({
         aria-expanded={isOpen}
         aria-controls={`acc-${item.id}`}
       >
+        {showIndex && (
+          <span className="accordion-index" aria-hidden="true">
+            {String(index + 1).padStart(2, "0")}
+          </span>
+        )}
         <span className="accordion-question">{item.question}</span>
         <span
           className={`accordion-icon${isOpen ? " is-open" : ""}`}
           aria-hidden
         >
-          {isOpen ? "−" : "+"}
+          <ChevronDown size={18} strokeWidth={2.25} />
         </span>
       </button>
       <div
@@ -60,6 +71,7 @@ export function Accordion({
   items,
   allowMultipleOpen = false,
   className,
+  showIndex = false,
 }: AccordionProps) {
   const [openIds, setOpenIds] = useState<string[]>([]);
 
@@ -75,10 +87,12 @@ export function Accordion({
 
   return (
     <div className={`accordion ${className ?? ""}`.trim()}>
-      {items.map((item) => (
+      {items.map((item, index) => (
         <AccordionRow
           key={item.id}
           item={item}
+          index={index}
+          showIndex={showIndex}
           isOpen={openIds.includes(item.id)}
           onToggle={() => toggle(item.id)}
         />

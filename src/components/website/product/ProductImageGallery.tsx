@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import Image from "next/image";
+import { ChevronLeft, ChevronRight, X, ZoomIn } from "lucide-react";
 
 type ProductImage = string;
 
@@ -12,60 +13,123 @@ type Props = {
 };
 
 export default function ProductImageGallery({ images, alt, topRightSlot }: Props) {
-  const [current, setCurrent] = useState<number>(0);
-  const [isZoomed, setIsZoomed] = useState<boolean>(false);
+  const [current, setCurrent] = useState(0);
+  const [isZoomed, setIsZoomed] = useState(false);
+  const [fadeKey, setFadeKey] = useState(0);
 
-  const hasMultiple = images.length > 1;
+  const safeImages = images.length > 0 ? images : [];
+  const hasMultiple = safeImages.length > 1;
+  const activeIndex = Math.min(current, Math.max(safeImages.length - 1, 0));
+  const activeImage = safeImages[activeIndex];
 
-  const goPrev = () => setCurrent((index) => (index === 0 ? images.length - 1 : index - 1));
-  const goNext = () => setCurrent((index) => (index === images.length - 1 ? 0 : index + 1));
+  useEffect(() => {
+    setCurrent(0);
+    setFadeKey((key) => key + 1);
+  }, [images]);
+
+  useEffect(() => {
+    if (!isZoomed) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setIsZoomed(false);
+      if (event.key === "ArrowLeft" && hasMultiple) {
+        setCurrent((index) => (index === 0 ? safeImages.length - 1 : index - 1));
+      }
+      if (event.key === "ArrowRight" && hasMultiple) {
+        setCurrent((index) => (index === safeImages.length - 1 ? 0 : index + 1));
+      }
+    };
+
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [hasMultiple, isZoomed, safeImages.length]);
+
+  const goPrev = () => {
+    setCurrent((index) => (index === 0 ? safeImages.length - 1 : index - 1));
+    setFadeKey((key) => key + 1);
+  };
+
+  const goNext = () => {
+    setCurrent((index) => (index === safeImages.length - 1 ? 0 : index + 1));
+    setFadeKey((key) => key + 1);
+  };
+
+  const selectThumb = (index: number) => {
+    setCurrent(index);
+    setFadeKey((key) => key + 1);
+  };
+
+  if (!activeImage) {
+    return (
+      <div className="product-gallery">
+        <div className="product-gallery__main product-gallery__main--empty">
+          <span>No image available</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="product-gallery">
       {isZoomed && (
         <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            backgroundColor: "rgba(0, 0, 0, 0.9)",
-            zIndex: 1000,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            cursor: "zoom-out",
-            padding: "2rem",
-          }}
+          className="product-gallery__lightbox"
           onClick={() => setIsZoomed(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Zoomed product image"
         >
-          <div
-            style={{
-              position: "relative",
-              width: "min(92vw, 900px)",
-              height: "min(88vh, 900px)",
-            }}
+          <button
+            type="button"
+            className="product-gallery__lightbox-close"
+            onClick={() => setIsZoomed(false)}
+            aria-label="Close zoom"
           >
-            <button
-              onClick={() => setIsZoomed(false)}
-              style={{
-                position: "absolute",
-                top: -40,
-                right: 0,
-                background: "white",
-                border: "none",
-                borderRadius: "50%",
-                width: 32,
-                height: 32,
-                cursor: "pointer",
-                fontSize: "18px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                zIndex: 2,
-              }}
-            >
-              ×
-            </button>
-            <Image src={images[current]} alt={alt} fill sizes="90vw" style={{ objectFit: "contain" }} />
+            <X size={18} />
+          </button>
+
+          {hasMultiple && (
+            <>
+              <button
+                type="button"
+                className="product-gallery__lightbox-nav product-gallery__lightbox-nav--prev"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  goPrev();
+                }}
+                aria-label="Previous image"
+              >
+                <ChevronLeft size={22} />
+              </button>
+              <button
+                type="button"
+                className="product-gallery__lightbox-nav product-gallery__lightbox-nav--next"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  goNext();
+                }}
+                aria-label="Next image"
+              >
+                <ChevronRight size={22} />
+              </button>
+            </>
+          )}
+
+          <div
+            className="product-gallery__lightbox-stage"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <Image
+              src={activeImage}
+              alt={alt}
+              fill
+              sizes="90vw"
+              className="product-gallery__lightbox-image"
+            />
           </div>
         </div>
       )}
@@ -75,57 +139,76 @@ export default function ProductImageGallery({ images, alt, topRightSlot }: Props
           <div className="product-gallery__top-right">{topRightSlot}</div>
         )}
 
+        <button
+          type="button"
+          className="product-gallery__zoom-hint"
+          onClick={() => setIsZoomed(true)}
+          aria-label="Zoom image"
+        >
+          <ZoomIn size={16} />
+          <span>Zoom</span>
+        </button>
+
         {hasMultiple && (
           <>
             <button
+              type="button"
               aria-label="Previous image"
               onClick={goPrev}
-              className="btn btn-outline btn-sm product-gallery__nav product-gallery__nav--prev"
+              className="product-gallery__nav product-gallery__nav--prev"
             >
-              ‹
+              <ChevronLeft size={20} />
             </button>
             <button
+              type="button"
               aria-label="Next image"
               onClick={goNext}
-              className="btn btn-outline btn-sm product-gallery__nav product-gallery__nav--next"
+              className="product-gallery__nav product-gallery__nav--next"
             >
-              ›
+              <ChevronRight size={20} />
             </button>
           </>
         )}
 
-        <Image
-          src={images[current]}
-          alt={alt}
-          fill
-          sizes="(max-width: 899px) 100vw, 50vw"
-          style={{
-            borderRadius: 12,
-            objectFit: "contain",
-            cursor: "zoom-in",
-          }}
-          onClick={() => setIsZoomed(true)}
-        />
+        <div key={fadeKey} className="product-gallery__image-frame">
+          <Image
+            src={activeImage}
+            alt={alt}
+            fill
+            sizes="(max-width: 899px) 100vw, 50vw"
+            className="product-gallery__image"
+            onClick={() => setIsZoomed(true)}
+            priority
+          />
+        </div>
+
+        {hasMultiple && (
+          <div className="product-gallery__counter" aria-hidden="true">
+            {activeIndex + 1} / {safeImages.length}
+          </div>
+        )}
       </div>
 
       {hasMultiple && (
-        <div className="product-gallery__thumbs">
-          {images.map((img, idx) => (
+        <div className="product-gallery__thumbs" role="listbox" aria-label="Product images">
+          {safeImages.map((img, idx) => (
             <button
               key={`${img}-${idx}`}
-              onClick={() => setCurrent(idx)}
-              className="product-gallery__thumb-button"
-              style={{
-                border: current === idx ? "2px solid var(--text-saffron)" : "1px solid #ddd",
-              }}
+              type="button"
+              onClick={() => selectThumb(idx)}
+              className={`product-gallery__thumb-button${
+                activeIndex === idx ? " is-active" : ""
+              }`}
               aria-label={`View image ${idx + 1}`}
+              aria-selected={activeIndex === idx}
+              role="option"
             >
               <Image
                 src={img}
                 alt={`${alt} thumbnail ${idx + 1}`}
                 fill
                 sizes="96px"
-                style={{ objectFit: "contain", borderRadius: 10 }}
+                className="product-gallery__thumb-image"
               />
             </button>
           ))}

@@ -86,7 +86,7 @@ export function BlogDetailContent({ blog }: { blog: BlogDetail }) {
         )}
 
         <div
-          className="blog-detail__content"
+          className="blog-detail__content rich-html"
           dangerouslySetInnerHTML={{ __html: blog.content }}
         />
 
