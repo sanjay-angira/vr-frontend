@@ -1,14 +1,5 @@
 "use client";
 
-/**
- * Place-order Context wrapper — mirrors tid-web `PlaceOrderFlowWrapper`.
- *
- * Stable shell (same on /cart and /checkout — no column reflow):
- *   .add-cart-sec
- *     .productcards   → {children} only swaps
- *     .price-details  → <OrderSummary /> always mounted
- */
-
 import React, {
   createContext,
   useCallback,
@@ -220,17 +211,13 @@ function PlaceOrderFlowWrapper({ children }: { children: ReactNode }) {
     <PlaceOrderContext.Provider value={value}>
       <div className="commerce-page commerce-surface place-order-flow chec-out-page">
         <div className="commerce-container checkout-inner-content">
-          {/*
-            tid-web: .add-cart-sec → [.productcards | .price-details]
-            Same structure on cart AND checkout — never change column template by route.
-          */}
           <div className="add-cart-sec place-order-grid">
             <div className="productcards place-order-main cart-main">
               {children}
             </div>
-            <div className="price-details cart-detail sticky-summary place-order-summary">
+            <aside className="price-details cart-detail sticky-summary place-order-summary">
               <OrderSummary />
-            </div>
+            </aside>
           </div>
         </div>
       </div>
