@@ -1,18 +1,11 @@
-import { Suspense } from "react";
-import { OrderSuccessContent } from "@/components/website/cart/OrderSuccessContent";
+import { redirect } from "next/navigation";
 
-export default function OrderSuccessPage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="commerce-page">
-          <div className="commerce-container">
-            <p className="commerce-muted">Loading order…</p>
-          </div>
-        </div>
-      }
-    >
-      <OrderSuccessContent />
-    </Suspense>
-  );
+type Props = {
+  searchParams?: Promise<{ order?: string }> | { order?: string };
+};
+
+export default async function OrderSuccessPage({ searchParams }: Props) {
+  const params = await Promise.resolve(searchParams);
+  const order = params?.order ? encodeURIComponent(params.order) : "";
+  redirect(order ? `/thank-you?order=${order}` : "/thank-you");
 }

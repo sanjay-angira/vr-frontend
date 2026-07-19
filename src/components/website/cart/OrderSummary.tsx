@@ -73,6 +73,7 @@ export function OrderSummary() {
     confirmDeliveryAddress,
     submitCheckout,
     checkoutError,
+    paymentMethod,
   } = usePlaceOrderContext();
   const { shippingMode, secureNote } = config;
 
@@ -215,8 +216,12 @@ export function OrderSummary() {
                 }}
               >
                 <Lock size={16} strokeWidth={2.25} aria-hidden />
-                {checkoutLoading
-                  ? "Placing order…"
+              {checkoutLoading
+                ? paymentMethod === "online"
+                  ? "Opening Razorpay…"
+                  : "Placing order…"
+                : paymentMethod === "online"
+                  ? `Pay now · ${formatInr(payableTotal)}`
                   : `Place order · ${formatInr(payableTotal)}`}
               </button>
               <Link href="/cart" className="cart-btn cart-btn-secondary">

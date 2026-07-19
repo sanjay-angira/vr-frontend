@@ -189,14 +189,23 @@ export function CheckoutOrderSection({ enabled }: CheckoutOrderSectionProps) {
             <em>Pay when your order arrives</em>
           </span>
         </label>
-        <label className="commerce-payment-option checkout-payment disabled">
-          <input type="radio" name="paymentMethod" disabled />
+        <label
+          className={`commerce-payment-option checkout-payment${
+            paymentMethod === "online" ? " is-selected" : ""
+          }`}
+        >
+          <input
+            type="radio"
+            name="paymentMethod"
+            checked={paymentMethod === "online"}
+            onChange={() => setPaymentMethod("online")}
+          />
           <span className="checkout-payment-icon" aria-hidden>
             <CreditCard size={18} strokeWidth={1.75} />
           </span>
           <span>
-            <strong>Online payment</strong>
-            <em>Coming soon</em>
+            <strong>Pay online</strong>
+            <em>UPI, cards &amp; netbanking via Razorpay</em>
           </span>
         </label>
       </div>

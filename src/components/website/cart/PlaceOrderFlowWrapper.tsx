@@ -15,8 +15,10 @@ import { useCart } from "@/components/website/hooks/useCart";
 import { OrderSummary } from "@/components/website/cart/OrderSummary";
 import {
   placeOrder,
+  verifyRazorpayPayment,
   type CheckoutPayload,
 } from "@/services/website/checkoutService";
+import { openRazorpayCheckout } from "@/utils/razorpayCheckout";
 
 export type OrderSummaryShippingMode = "threshold" | "free";
 
@@ -138,10 +140,24 @@ function PlaceOrderFlowWrapper({ children }: { children: ReactNode }) {
         paymentMethod,
       });
 
+      if (paymentMethod === "online") {
+        if (!order.razorpay?.orderId || !order.razorpay.keyId) {
+          throw new Error("Razorpay checkout details missing from server");
+        }
+
+        const payment = await openRazorpayCheckout(order.razorpay);
+        await verifyRazorpayPayment({
+          orderNumber: order.orderNumber,
+          razorpay_order_id: payment.razorpay_order_id,
+          razorpay_payment_id: payment.razorpay_payment_id,
+          razorpay_signature: payment.razorpay_signature,
+        });
+      }
+
       cart.setItems([]);
       setConfirmDeliveryAddress(null);
       router.push(
-        `/order-success?order=${encodeURIComponent(order.orderNumber)}`,
+        `/thank-you?order=${encodeURIComponent(order.orderNumber)}`,
       );
     } catch (err) {
       const message =
@@ -149,6 +165,8 @@ function PlaceOrderFlowWrapper({ children }: { children: ReactNode }) {
           ? String((err as { message?: string }).message)
           : "Unable to place order";
       setCheckoutError(message);
+      // Refresh cart in case online payment left items intact
+      void cart.fetchCart();
     } finally {
       setCheckoutLoading(false);
     }

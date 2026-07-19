@@ -1,5 +1,6 @@
 @import "./product-card.css";
 @import "./commerce.css";
+@import "./account.css";
 
 * {
   margin: 0;

@@ -1,7 +1,31 @@
-export default function Page() {
+"use client";
+
+import { AccountShell } from "@/components/website/account/AccountShell";
+import { useUserAuth } from "@/services/website/useUserAuth";
+
+export default function AccountProfilePage() {
+  const { user } = useUserAuth();
+
   return (
-    <div>
-      <h1>Profile</h1>
-    </div>
+    <AccountShell title="Profile">
+      <div className="thankyou-panel">
+        <h2>Account details</h2>
+        <p>
+          <strong>{user?.name}</strong>
+          {user?.phone ? (
+            <>
+              <br />
+              {user.phone}
+            </>
+          ) : null}
+          {user?.email ? (
+            <>
+              <br />
+              {user.email}
+            </>
+          ) : null}
+        </p>
+      </div>
+    </AccountShell>
   );
 }

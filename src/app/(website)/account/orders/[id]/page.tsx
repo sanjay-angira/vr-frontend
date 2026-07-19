@@ -1,8 +1,5 @@
-export default function Page() {
-  return (
-    <div>
-      <h1>Order Details</h1>
-      
-    </div>
-  );
+import { AccountOrderDetailContent } from "@/components/website/account/AccountOrderDetailContent";
+
+export default function AccountOrderDetailPage() {
+  return <AccountOrderDetailContent />;
 }
