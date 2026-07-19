@@ -146,17 +146,29 @@ function PlaceOrderFlowWrapper({ children }: { children: ReactNode }) {
         }
 
         const payment = await openRazorpayCheckout(order.razorpay);
-        await verifyRazorpayPayment({
-          orderNumber: order.orderNumber,
-          razorpay_order_id: payment.razorpay_order_id,
-          razorpay_payment_id: payment.razorpay_payment_id,
-          razorpay_signature: payment.razorpay_signature,
-        });
+
+        try {
+          await verifyRazorpayPayment({
+            orderNumber: order.orderNumber,
+            razorpay_order_id: payment.razorpay_order_id,
+            razorpay_payment_id: payment.razorpay_payment_id,
+            razorpay_signature: payment.razorpay_signature,
+          });
+        } catch (verifyErr) {
+          // Payment succeeded at Razorpay; don't block thank-you.
+          // Webhook / retry can still finalize the order.
+          console.error("Razorpay verify failed after payment:", verifyErr);
+        }
       }
 
-      cart.setItems([]);
+      try {
+        await cart.clearCart();
+      } catch {
+        cart.setItems([]);
+      }
+
       setConfirmDeliveryAddress(null);
-      router.push(
+      router.replace(
         `/thank-you?order=${encodeURIComponent(order.orderNumber)}`,
       );
     } catch (err) {
@@ -165,7 +177,6 @@ function PlaceOrderFlowWrapper({ children }: { children: ReactNode }) {
           ? String((err as { message?: string }).message)
           : "Unable to place order";
       setCheckoutError(message);
-      // Refresh cart in case online payment left items intact
       void cart.fetchCart();
     } finally {
       setCheckoutLoading(false);

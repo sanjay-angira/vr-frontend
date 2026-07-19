@@ -19,9 +19,19 @@ type RazorpayOptions = {
   modal?: { ondismiss?: () => void };
 };
 
+type RazorpayInstance = {
+  open: () => void;
+  on: (
+    event: "payment.failed",
+    handler: (response: {
+      error?: { description?: string; reason?: string };
+    }) => void,
+  ) => void;
+};
+
 declare global {
   interface Window {
-    Razorpay?: new (options: RazorpayOptions) => { open: () => void };
+    Razorpay?: new (options: RazorpayOptions) => RazorpayInstance;
   }
 }
 
@@ -36,6 +46,10 @@ function loadRazorpayScript(): Promise<void> {
       'script[src="https://checkout.razorpay.com/v1/checkout.js"]',
     );
     if (existing) {
+      if (window.Razorpay) {
+        resolve();
+        return;
+      }
       existing.addEventListener("load", () => resolve());
       existing.addEventListener("error", () =>
         reject(new Error("Failed to load Razorpay")),
@@ -62,6 +76,21 @@ export async function openRazorpayCheckout(
   }
 
   return new Promise((resolve, reject) => {
+    let settled = false;
+
+    const finish = (
+      type: "resolve" | "reject",
+      value: RazorpaySuccessResponse | Error,
+    ) => {
+      if (settled) return;
+      settled = true;
+      if (type === "resolve") {
+        resolve(value as RazorpaySuccessResponse);
+      } else {
+        reject(value);
+      }
+    };
+
     const rzp = new window.Razorpay!({
       key: payload.keyId,
       amount: payload.amount,
@@ -71,11 +100,29 @@ export async function openRazorpayCheckout(
       order_id: payload.orderId,
       prefill: payload.prefill,
       theme: { color: "#0A2A1B" },
-      handler: (response) => resolve(response),
+      handler: (response) => finish("resolve", response),
       modal: {
-        ondismiss: () => reject(new Error("Payment cancelled")),
+        // Razorpay often fires ondismiss after success when the modal closes.
+        // Delay so a successful `handler` can settle the promise first.
+        ondismiss: () => {
+          window.setTimeout(() => {
+            finish("reject", new Error("Payment cancelled"));
+          }, 400);
+        },
       },
     });
+
+    rzp.on("payment.failed", (response) => {
+      finish(
+        "reject",
+        new Error(
+          response.error?.description ||
+            response.error?.reason ||
+            "Payment failed",
+        ),
+      );
+    });
+
     rzp.open();
   });
 }
