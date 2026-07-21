@@ -92,7 +92,7 @@
   justify-content: center;
   width: 42px;
   height: 42px;
-  border-radius: 999px;
+  border-radius: 0;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid var(--footer-border);
   transition: all 0.25s ease;
@@ -120,7 +120,7 @@
   align-items: center;
   justify-content: center;
   padding: 1rem;
-  border-radius: 0.5rem;
+  border-radius: 0;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--footer-border);
 }
@@ -163,9 +163,9 @@
 
 .website-footer-preview {
   overflow: hidden;
-  border-radius: 0.5rem;
+  border-radius: 0;
 }
 
 .website-footer-preview .footer {
-  border-radius: 0.5rem;
+  border-radius: 0;
 }

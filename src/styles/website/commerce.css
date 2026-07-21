@@ -392,7 +392,7 @@
   right: -6px;
   min-width: 18px;
   height: 18px;
-  border-radius: 9999px;
+  border-radius: 0;
   background: var(--vr-terracotta);
   color: var(--vr-white);
   display: inline-flex;
@@ -493,7 +493,7 @@
   gap: 0.45rem;
   padding: 0.55rem 0.9rem;
   border: 1px solid rgba(197, 157, 95, 0.4);
-  border-radius: 0.65rem;
+  border-radius: 0;
   background: var(--vr-white);
   color: var(--vr-forest);
   font: inherit;
@@ -533,7 +533,7 @@
   gap: 1.15rem;
   padding: 1.15rem 1.25rem;
   border: 1px solid rgba(197, 157, 95, 0.18);
-  border-radius: 0.9rem;
+  border-radius: 0;
   box-shadow: 0 1px 2px rgba(10, 42, 27, 0.04);
 }
 
@@ -541,7 +541,7 @@
 .cart-line .commerce-line-placeholder {
   width: 112px;
   height: 112px;
-  border-radius: 0.65rem;
+  border-radius: 0;
 }
 
 .commerce-surface .commerce-line-title {
@@ -567,7 +567,7 @@
 }
 
 .cart-qty {
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--vr-cream);
   border-color: rgba(197, 157, 95, 0.3);
   overflow: hidden;
@@ -637,7 +637,7 @@
 }
 
 .cart-summary {
-  border-radius: 0.9rem;
+  border-radius: 0;
   border-color: rgba(197, 157, 95, 0.2);
   padding: 1.5rem;
   box-shadow: 0 2px 12px rgba(10, 42, 27, 0.05);
@@ -664,7 +664,7 @@
   gap: 0.65rem;
   padding: 0.85rem 0.95rem;
   margin-bottom: 1.15rem;
-  border-radius: 0.65rem;
+  border-radius: 0;
   background: rgba(79, 119, 45, 0.1);
   color: var(--vr-forest);
 }
@@ -693,7 +693,7 @@
   gap: 0.5rem;
   width: 100%;
   padding: 0.9rem 1.1rem;
-  border-radius: 0.7rem;
+  border-radius: 0;
   font: inherit;
   font-size: 0.95rem;
   font-weight: 600;
@@ -746,7 +746,7 @@
   width: 2.4rem;
   height: 2.4rem;
   flex-shrink: 0;
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--vr-gold-muted);
   color: var(--vr-gold-dark);
 }
@@ -797,7 +797,7 @@
   justify-content: center;
   width: 4.5rem;
   height: 4.5rem;
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--vr-gold-muted);
   color: var(--vr-gold-dark);
   margin-bottom: 0.5rem;
@@ -816,7 +816,7 @@
 }
 
 .checkout-section {
-  border-radius: 0.9rem;
+  border-radius: 0;
   border-color: rgba(197, 157, 95, 0.18);
   box-shadow: 0 1px 2px rgba(10, 42, 27, 0.04);
   padding: 1.35rem 1.4rem;
@@ -829,7 +829,7 @@
 
 .commerce-surface .commerce-form-grid input,
 .commerce-surface .commerce-form-grid textarea {
-  border-radius: 0.65rem;
+  border-radius: 0;
   border-color: rgba(197, 157, 95, 0.3);
   background: var(--vr-cream);
   padding: 0.75rem 0.9rem;
@@ -846,7 +846,7 @@
   grid-template-columns: auto auto 1fr;
   align-items: center;
   gap: 0.75rem;
-  border-radius: 0.75rem;
+  border-radius: 0;
   border: 1.5px solid rgba(197, 157, 95, 0.28);
   background: var(--vr-cream);
   padding: 0.95rem 1rem;
@@ -864,7 +864,7 @@
   justify-content: center;
   width: 2.25rem;
   height: 2.25rem;
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--vr-white);
   color: var(--vr-gold-dark);
 }
@@ -892,7 +892,7 @@
 .checkout-summary-thumb {
   width: 56px;
   height: 56px;
-  border-radius: 0.5rem;
+  border-radius: 0;
   overflow: hidden;
 }
 
@@ -977,7 +977,7 @@
   flex-direction: column;
   gap: 0.45rem;
   padding: 0.85rem 1rem;
-  border-radius: 0.9rem;
+  border-radius: 0;
   border: 1px solid rgba(197, 157, 95, 0.2);
   background: var(--vr-white);
 }
@@ -998,7 +998,7 @@
 
 .order-summary-skel {
   height: 1rem;
-  border-radius: 0.4rem;
+  border-radius: 0;
   background: linear-gradient(
     90deg,
     rgba(197, 157, 95, 0.12),
@@ -1043,7 +1043,7 @@
 }
 
 .checkout-step {
-  border-radius: 0.9rem;
+  border-radius: 0;
   border: 1px solid rgba(197, 157, 95, 0.22);
   background: var(--vr-white);
   box-shadow: 0 1px 2px rgba(10, 42, 27, 0.04);
@@ -1084,7 +1084,7 @@
   justify-content: center;
   width: 1.75rem;
   height: 1.75rem;
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--vr-forest);
   color: var(--vr-cream);
   font-size: 0.85rem;
@@ -1203,7 +1203,7 @@
   display: block;
   width: 64px;
   height: 64px;
-  border-radius: 0.5rem;
+  border-radius: 0;
   overflow: hidden;
   background: var(--vr-cream);
 }
@@ -1290,7 +1290,7 @@
 
 .checkout-login-advantages {
   padding: 1rem 1.1rem;
-  border-radius: 0.75rem;
+  border-radius: 0;
   background: rgba(10, 42, 27, 0.04);
   border: 1px solid rgba(197, 157, 95, 0.18);
 }
@@ -1325,7 +1325,7 @@
   justify-content: center;
   width: 2rem;
   height: 2rem;
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--vr-white);
   color: var(--vr-gold-dark);
 }

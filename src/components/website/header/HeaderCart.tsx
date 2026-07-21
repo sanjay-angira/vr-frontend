@@ -31,7 +31,7 @@ export function HeaderCart() {
             right: -6,
             minWidth: 18,
             height: 18,
-            borderRadius: "9999px",
+            borderRadius: 0,
             background: "#ef4444",
             color: "#ffffff",
             display: "inline-flex",

@@ -1,0 +1,90 @@
+/* Admin brand tokens — used by Tailwind utilities and plain CSS fallbacks */
+
+@theme {
+  --color-admin-primary: #c59d5f;
+  --color-admin-primary-hover: #a67c3d;
+  --color-admin-sidebar: #0a2a1b;
+  --color-admin-sidebar-hover: #123d28;
+  --color-admin-surface: #ffffff;
+  --color-admin-muted: #fcf9f2;
+  --color-admin-border: #c59d5f59;
+  --color-admin-accent: #d4b483;
+}
+
+:root {
+  --admin-primary: #c59d5f;
+  --admin-primary-hover: #a67c3d;
+  --admin-sidebar: #0a2a1b;
+  --admin-sidebar-hover: #123d28;
+  --admin-surface: #ffffff;
+  --admin-muted: #fcf9f2;
+  --admin-border: rgba(197, 157, 95, 0.35);
+  --admin-accent: #d4b483;
+}
+
+/*
+ * Explicit utilities so admin colors always apply even if Turbopack
+ * skips generating theme-based bg-admin-* classes in dev.
+ */
+.bg-admin-sidebar {
+  background-color: var(--admin-sidebar);
+}
+.bg-admin-sidebar-hover {
+  background-color: var(--admin-sidebar-hover);
+}
+.bg-admin-primary {
+  background-color: var(--admin-primary);
+}
+.bg-admin-primary-hover {
+  background-color: var(--admin-primary-hover);
+}
+.bg-admin-muted {
+  background-color: var(--admin-muted);
+}
+.bg-admin-surface {
+  background-color: var(--admin-surface);
+}
+.bg-admin-accent {
+  background-color: var(--admin-accent);
+}
+.text-admin-primary {
+  color: var(--admin-primary);
+}
+.border-admin-primary {
+  border-color: var(--admin-primary);
+}
+.border-admin-sidebar-hover {
+  border-color: var(--admin-sidebar-hover);
+}
+.border-admin-border {
+  border-color: var(--admin-border);
+}
+.hover\:bg-admin-sidebar-hover:hover {
+  background-color: var(--admin-sidebar-hover);
+}
+.hover\:bg-admin-primary-hover:hover {
+  background-color: var(--admin-primary-hover);
+}
+.hover\:bg-admin-muted:hover {
+  background-color: var(--admin-muted);
+}
+.hover\:text-admin-primary:hover {
+  color: var(--admin-primary);
+}
+.from-admin-sidebar {
+  --tw-gradient-from: var(--admin-sidebar);
+  --tw-gradient-stops: var(
+    --tw-gradient-via-stops,
+    var(--tw-gradient-position),
+    var(--tw-gradient-from) var(--tw-gradient-from-position),
+    var(--tw-gradient-to) var(--tw-gradient-to-position)
+  );
+}
+.via-admin-primary {
+  --tw-gradient-via: var(--admin-primary);
+  --tw-gradient-via-stops: var(--tw-gradient-position),
+    var(--tw-gradient-from) var(--tw-gradient-from-position),
+    var(--tw-gradient-via) var(--tw-gradient-via-position),
+    var(--tw-gradient-to) var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-via-stops);
+}

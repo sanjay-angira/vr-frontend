@@ -122,7 +122,7 @@ export function AdminForgotPasswordForm() {
             inputStyle={{
               width: "100%",
               height: "2.75rem",
-              borderRadius: "0.5rem",
+              borderRadius: 0,
               border: "1px solid #d4d4d8",
               fontSize: "1.125rem",
               fontWeight: 600,

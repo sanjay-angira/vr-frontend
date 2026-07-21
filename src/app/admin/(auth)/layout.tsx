@@ -1,4 +1,4 @@
-import "@/styles/admin.css";
+import "@/styles/admin/index.css";
 
 export default function AdminAuthLayout({
   children,

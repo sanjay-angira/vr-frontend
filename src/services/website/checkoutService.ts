@@ -32,15 +32,51 @@ export type RazorpayCheckoutPayload = {
   };
 };
 
+export type AppliedOrderOffer = {
+  id?: number;
+  offerName?: string | null;
+  offerSlug?: string | null;
+  discountType?: string | null;
+  discountValue?: number | null;
+  sources?: string[];
+};
+
+export type OrderOfferJson = {
+  listSubtotal?: number;
+  discountTotal?: number;
+  payableSubtotal?: number;
+  shippingFee?: number;
+  payableTotal?: number;
+  items?: Array<{
+    variationId?: number;
+    productId?: number | null;
+    productName?: string;
+    variantName?: string | null;
+    quantity?: number;
+    listUnitPrice?: number;
+    unitPrice?: number;
+    discountAmount?: number;
+    lineListSubtotal?: number;
+    lineDiscount?: number;
+    linePayable?: number;
+    appliedOffer?: AppliedOrderOffer | null;
+  }>;
+  offers?: AppliedOrderOffer[];
+  capturedAt?: string;
+};
+
 export type PlacedOrder = {
   id: number;
   orderNumber: string;
   orderStatus: string;
   paymentMethod: string;
   paymentStatus: string;
+  listSubtotal?: number;
+  discountTotal?: number;
   subtotal: number;
   shippingFee: number;
   total: number;
+  offerJson?: OrderOfferJson | null;
   customerName: string;
   phone: string;
   email?: string | null;
@@ -57,9 +93,13 @@ export type PlacedOrder = {
     productName: string;
     variantName?: string | null;
     quantity: number;
+    listUnitPrice?: number;
     unitPrice: number;
+    discountAmount?: number;
     subtotal: number;
+    listSubtotal?: number;
     image?: string | null;
+    appliedOffer?: AppliedOrderOffer | null;
   }>;
   createdAt?: string;
 };

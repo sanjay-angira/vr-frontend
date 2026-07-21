@@ -1,6 +1,6 @@
 ---
 description: Website spacing — always use gap-3 / 0.75rem for gaps
-globs: vr-web/src/{components/website,styles/website,styles/website.css,app/(website)}/**/*.{css,tsx,ts}
+globs: vr-web/src/{components/website,styles/website,app/(website)}/**/*.{css,tsx,ts}
 alwaysApply: false
 ---
 

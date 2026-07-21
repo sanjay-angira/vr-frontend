@@ -5,6 +5,14 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Vrindavan Rasa",
   description: "Vrindavan Rasa storefront and admin",
+  icons: {
+    icon: [
+      { url: "/icon.jpeg", type: "image/jpeg" },
+      { url: "/favicon.jpeg", type: "image/jpeg" },
+    ],
+    shortcut: "/favicon.jpeg",
+    apple: "/icon.jpeg",
+  },
 };
 
 export default function RootLayout({

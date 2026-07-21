@@ -4,6 +4,12 @@
   min-height: 100vh;
 }
 
+/* Sidebar shell — color must not depend only on Tailwind theme generation */
+.admin-sidebar {
+  background-color: var(--admin-sidebar, #0a2a1b);
+  border-color: var(--admin-sidebar-hover, #123d28);
+}
+
 /* Fallback for native color inputs in admin (matches common Input height) */
 .admin-panel input[type="color"] {
   appearance: none;

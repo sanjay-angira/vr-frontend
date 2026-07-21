@@ -16,13 +16,12 @@ export function HeaderLogo({ logoUrl, textColor }: HeaderLogoProps) {
       alt="Store logo"
       width={140}
       height={40}
-      className="h-10 w-auto object-contain"
+      className="h-15 w-auto object-contain"
       priority
     />
   ) : (
     <>
-      <div className="logo-icon">🕉</div>
-      <span className="logo-text" style={{ color: textColor }}>
+      <span className="logo-text text-[30px] font-bold" style={{ color: textColor }}>
         Vrindavan Rasa
       </span>
     </>

@@ -10,14 +10,11 @@ import {
   type PlacedOrder,
 } from "@/services/website/checkoutService";
 import { AccountShell } from "@/components/website/account/AccountShell";
-
-function formatInr(value: number) {
-  return new Intl.NumberFormat("en-IN", {
-    style: "currency",
-    currency: "INR",
-    maximumFractionDigits: 0,
-  }).format(value || 0);
-}
+import {
+  formatInr,
+  getOrderItemMoney,
+  getOrderMoney,
+} from "@/components/website/account/orderMoney";
 
 function formatDate(value?: string) {
   if (!value) return "";
@@ -70,6 +67,18 @@ export function AccountOrderDetailContent() {
     };
   }, [orderNumber]);
 
+  const money = order ? getOrderMoney(order) : null;
+  const appliedOffers =
+    order?.offerJson?.offers?.filter((offer) => offer?.offerName) ||
+    order?.items
+      .map((item) => item.appliedOffer)
+      .filter((offer): offer is NonNullable<typeof offer> => Boolean(offer?.offerName))
+      .filter(
+        (offer, index, list) =>
+          list.findIndex((row) => row?.id === offer?.id) === index,
+      ) ||
+    [];
+
   return (
     <AccountShell title="Order details">
       <Link href="/account/orders" className="account-back">
@@ -83,7 +92,7 @@ export function AccountOrderDetailContent() {
 
       {error ? <p className="account-error">{error}</p> : null}
 
-      {order ? (
+      {order && money ? (
         <div className="account-order-detail">
           <div className="account-order-detail-head">
             <div>
@@ -105,34 +114,87 @@ export function AccountOrderDetailContent() {
           <section className="thankyou-panel">
             <h2>Items</h2>
             <ul className="commerce-summary-items">
-              {order.items.map((item) => (
-                <li key={item.id}>
-                  <div className="commerce-summary-thumb">
-                    {item.image ? (
-                      <Image
-                        src={item.image}
-                        alt=""
-                        width={48}
-                        height={48}
-                        unoptimized
-                      />
-                    ) : null}
-                  </div>
-                  <div>
-                    <strong>{item.productName}</strong>
-                    <span>
-                      Qty {item.quantity}
-                      {item.variantName ? ` · ${item.variantName}` : ""}
-                    </span>
-                  </div>
-                  <em>{formatInr(item.subtotal)}</em>
-                </li>
-              ))}
+              {order.items.map((item) => {
+                const itemMoney = getOrderItemMoney(item);
+                return (
+                  <li key={item.id}>
+                    <div className="commerce-summary-thumb">
+                      {item.image ? (
+                        <Image
+                          src={item.image}
+                          alt=""
+                          width={48}
+                          height={48}
+                          unoptimized
+                        />
+                      ) : null}
+                    </div>
+                    <div>
+                      <strong>{item.productName}</strong>
+                      <span>
+                        Qty {item.quantity}
+                        {item.variantName ? ` · ${item.variantName}` : ""}
+                      </span>
+                      {itemMoney.offerName ? (
+                        <span className="account-line-offer">
+                          Offer: {itemMoney.offerName}
+                        </span>
+                      ) : null}
+                    </div>
+                    <em className="account-line-price">
+                      {itemMoney.hasDiscount ? (
+                        <span className="account-order-list-price">
+                          {formatInr(itemMoney.listLine)}
+                        </span>
+                      ) : null}
+                      {formatInr(itemMoney.payableLine)}
+                    </em>
+                  </li>
+                );
+              })}
             </ul>
-            <div className="commerce-summary-row total">
-              <span>Total</span>
-              <strong>{formatInr(order.total)}</strong>
+
+            <div className="commerce-summary-row">
+              <span>Price</span>
+              <strong>{formatInr(money.listSubtotal)}</strong>
             </div>
+            {money.hasDiscount ? (
+              <div className="commerce-summary-row order-summary-discount">
+                <span>Offer discount</span>
+                <strong>− {formatInr(money.discountTotal)}</strong>
+              </div>
+            ) : null}
+            <div className="commerce-summary-row">
+              <span>Shipping</span>
+              <strong>
+                {money.shippingFee > 0
+                  ? formatInr(money.shippingFee)
+                  : "Free"}
+              </strong>
+            </div>
+            <div className="commerce-summary-row total">
+              <span>Total paid</span>
+              <strong>{formatInr(money.total)}</strong>
+            </div>
+
+            {appliedOffers.length > 0 ? (
+              <div className="account-applied-offers">
+                <p className="commerce-muted">Applied offers</p>
+                <ul>
+                  {appliedOffers.map((offer, index) => (
+                    <li key={String(offer?.id ?? index)}>
+                      {offer?.offerName}
+                      {offer?.discountType === "percentage"
+                        ? ` · ${offer.discountValue}% off`
+                        : offer?.discountType === "flat" ||
+                            offer?.discountType === "fixed"
+                          ? ` · ${formatInr(Number(offer.discountValue || 0))} off`
+                          : null}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
           </section>
 
           <section className="thankyou-panel">

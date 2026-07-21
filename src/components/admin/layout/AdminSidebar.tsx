@@ -29,7 +29,7 @@ export function AdminSidebar({
 
   return (
     <aside
-      className={`flex h-full min-h-0 shrink-0 flex-col overflow-hidden border-r border-admin-sidebar-hover bg-admin-sidebar transition-all duration-300 ${
+      className={`admin-sidebar flex h-full min-h-0 shrink-0 flex-col overflow-hidden border-r border-admin-sidebar-hover bg-admin-sidebar transition-all duration-300 ${
         collapsed ? "w-20" : "w-64"
       } ${className}`}
     >

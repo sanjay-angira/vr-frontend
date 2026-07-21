@@ -107,16 +107,19 @@ export default async function ProductDetailPage({ params }: PageProps) {
       : [];
 
   return (
-    <div className="container product-page-shell">
+    <div
+      className="container product-page-shell"
+      style={{ paddingTop: "1.25rem", paddingBottom: "3rem" }}
+    >
       <ScrollToTopOnMount />
 
-      <nav className="product-breadcrumbs" aria-label="Breadcrumb">
+      <div className="product-breadcrumbs">
         <Link href="/">Home</Link>
-        <span aria-hidden="true">›</span>
-        <Link href="/products">{product.category?.categoryName || "Shop"}</Link>
-        <span aria-hidden="true">›</span>
+        <span>›</span>
+        <Link href="/shop">{product.category?.categoryName || "Shop"}</Link>
+        <span>›</span>
         <span className="is-current">{product.productName}</span>
-      </nav>
+      </div>
 
       <ProductDetail
         product={detailProduct}
@@ -126,14 +129,9 @@ export default async function ProductDetailPage({ params }: PageProps) {
 
       {(product.description || product.shortDescription) && (
         <section className="product-section-block product-copy-block">
-          <div className="product-section-intro">
-            <p className="product-section-eyebrow">About this product</p>
-            <h2 className="product-section-heading product-copy-heading">
-              Product Description
-            </h2>
-          </div>
+          <h2 className="product-section-heading">Product Description</h2>
           <div
-            className="product-copy-content rich-html"
+            className="product-copy-content"
             dangerouslySetInnerHTML={{
               __html: (product.description || product.shortDescription || "").trim(),
             }}
@@ -142,36 +140,30 @@ export default async function ProductDetailPage({ params }: PageProps) {
       )}
 
       {faqItems.length > 0 && (
-        <section className="product-section-block product-faq-block">
-          <div className="product-faq-shell">
-            <div className="product-faq-intro">
-              <p className="product-section-eyebrow">Need help?</p>
-              <h2 className="product-section-heading product-faq-heading">
-                Frequently Asked Questions
-              </h2>
-              <p className="product-faq-subcopy">
-                Quick answers about this product, ingredients, and usage.
-              </p>
-            </div>
-            <Accordion
-              items={faqItems}
-              showIndex
-              className="product-faq-accordion"
-            />
-          </div>
+        <section
+          className="product-section-block faq-section product-faq-block"
+          style={{ marginTop: "2.25rem" }}
+        >
+          <h2
+            className="section-title product-faq-heading"
+            style={{ marginBottom: "1rem" }}
+          >
+            Frequently Asked Questions
+          </h2>
+          <Accordion items={faqItems} className="product-faq-accordion" />
         </section>
       )}
 
-      <div className="product-reviews-wrap">
+      <div style={{ marginTop: "3rem" }}>
         <ReviewSection productId={product.productSlug} reviews={reviewList} />
       </div>
 
       {comboProducts.length > 0 && (
-        <div className="product-related-wrap">
+        <div className="product-related-wrap" style={{ marginTop: "3.5rem" }}>
           <ProductComboSection
             title="You May Also Like"
             comboProducts={comboProducts}
-            viewAllLink="/products"
+            viewAllLink="/shop"
           />
         </div>
       )}
