@@ -5,12 +5,3 @@
   background: var(--cream-background, var(--vr-cream));
   font-family: var(--font-body);
 }
-
-.auth-page-shell {
-  display: flex;
-  flex: 1;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  padding: 2rem 1rem 3rem;
-}

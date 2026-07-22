@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { usePathname } from "next/navigation";
 import { Eye, Heart, ShoppingCart, Star } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/services/redux/hooks";
 import { setAuthModalOpen } from "@/services/redux/slices/websiteSlices/modalSlice";
@@ -10,7 +9,6 @@ import {
   addWebsiteCartItem,
   fetchWebsiteCart,
 } from "@/services/redux/slices/websiteSlices/cartSlice";
-import { isAuthPagePath } from "@/utils/authRoutes";
 
 export interface WebsiteProductCardData {
   id: string;
@@ -60,7 +58,6 @@ export function ProductCard({
   href,
 }: ProductCardProps) {
   const dispatch = useAppDispatch();
-  const pathname = usePathname();
   const isAuthenticated = useAppSelector((state) => state.userAuth.isAuthenticated);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
 
@@ -118,9 +115,6 @@ export function ProductCard({
 
   const handleWishlist = () => {
     if (!isAuthenticated) {
-      if (isAuthPagePath(pathname)) {
-        return;
-      }
       dispatch(setAuthModalOpen(true));
     }
   };

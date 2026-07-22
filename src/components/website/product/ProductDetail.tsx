@@ -26,8 +26,7 @@ import { fetchWebsiteCart } from "@/services/redux/slices/websiteSlices/cartSlic
 import { addOrUpdateCartItem } from "@/services/website/cartService";
 import type { RootState } from "@/services/redux";
 import { setAuthModalOpen } from "@/services/redux/slices/websiteSlices/modalSlice";
-import { usePathname, useRouter } from "next/navigation";
-import { isAuthPagePath } from "@/utils/authRoutes";
+import { useRouter } from "next/navigation";
 
 export type ProductAttributeView = {
   id: number;
@@ -65,7 +64,6 @@ export default function ProductDetail({
   fallbackImages = [],
   initialVariantSlug = null,
 }: Props) {
-  const pathname = usePathname();
   const router = useRouter();
   const dispatch = useDispatch();
   const isAuthenticated = useSelector((state: RootState) => state.userAuth.isAuthenticated);
@@ -143,7 +141,6 @@ export default function ProductDetail({
 
   const handleWishlist = () => {
     if (!isAuthenticated) {
-      if (isAuthPagePath(pathname)) return;
       dispatch(setAuthModalOpen(true));
     }
   };

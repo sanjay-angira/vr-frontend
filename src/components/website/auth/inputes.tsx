@@ -129,4 +129,50 @@ const Input = ({
   );
 };
 
-export { PhoneInput, OTPInput, Input };
+type AuthTextInputProps = {
+  name: string;
+  type?: string;
+  value: string;
+  placeholder?: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
+  error?: string;
+  disabled?: boolean;
+  maxLength?: number;
+  autoComplete?: string;
+};
+
+const AuthTextInput = ({
+  name,
+  type = "text",
+  value,
+  placeholder,
+  onChange,
+  onBlur,
+  error,
+  disabled,
+  maxLength,
+  autoComplete,
+}: AuthTextInputProps) => {
+  return (
+    <div className="auth-text-field">
+      <div className={`auth-text-control${error ? " has-error" : ""}`}>
+        <input
+          name={name}
+          type={type}
+          value={value}
+          placeholder={placeholder}
+          onChange={onChange}
+          onBlur={onBlur}
+          disabled={disabled}
+          className="auth-text-input"
+          maxLength={maxLength}
+          autoComplete={autoComplete}
+        />
+      </div>
+      {error && <p className="auth-field-error">{error}</p>}
+    </div>
+  );
+};
+
+export { PhoneInput, OTPInput, Input, AuthTextInput };

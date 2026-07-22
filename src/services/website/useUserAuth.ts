@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect } from "react";
 import { userAuthService } from "@/services/website/userAuthService";
+import type { CompleteProfilePayload } from "@/services/website/userAuthService";
 import { STORAGE_KEYS, getJson, setJson, tokenStorage } from "@/services/api/storage";
 import {
   clearUserAuth,
@@ -63,17 +64,83 @@ export function useUserAuth() {
 
       try {
         const result = await userAuthService.verifyWhatsappOtp(phoneNumber, otp);
-        setJson(STORAGE_KEYS.userProfile, result.user);
-        dispatch(
-          setUserCredentials({
-            user: result.user,
-            accessToken: result.accessToken,
-          })
-        );
+
+        if (result.profileCompleted) {
+          setJson(STORAGE_KEYS.userProfile, result.user);
+          dispatch(
+            setUserCredentials({
+              user: result.user,
+              accessToken: result.accessToken,
+            })
+          );
+        }
+
         return result;
       } catch (error) {
         const message =
           error instanceof Error ? error.message : "Invalid OTP";
+        dispatch(setUserAuthError(message));
+        throw error;
+      } finally {
+        dispatch(setUserAuthLoading(false));
+      }
+    },
+    [dispatch]
+  );
+
+  const completeProfile = useCallback(
+    async (payload: CompleteProfilePayload) => {
+      dispatch(setUserAuthLoading(true));
+      dispatch(setUserAuthError(null));
+
+      try {
+        const result = await userAuthService.completeProfile(payload);
+
+        if (result.profileCompleted) {
+          setJson(STORAGE_KEYS.userProfile, result.user);
+          dispatch(
+            setUserCredentials({
+              user: result.user,
+              accessToken: result.accessToken,
+            })
+          );
+        }
+
+        return result;
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "Failed to complete profile";
+        dispatch(setUserAuthError(message));
+        throw error;
+      } finally {
+        dispatch(setUserAuthLoading(false));
+      }
+    },
+    [dispatch]
+  );
+
+  const verifyEmailOtp = useCallback(
+    async (phoneNumber: string, otp: string) => {
+      dispatch(setUserAuthLoading(true));
+      dispatch(setUserAuthError(null));
+
+      try {
+        const result = await userAuthService.verifyEmailOtp(phoneNumber, otp);
+
+        if (result.profileCompleted) {
+          setJson(STORAGE_KEYS.userProfile, result.user);
+          dispatch(
+            setUserCredentials({
+              user: result.user,
+              accessToken: result.accessToken,
+            })
+          );
+        }
+
+        return result;
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "Invalid email OTP";
         dispatch(setUserAuthError(message));
         throw error;
       } finally {
@@ -118,6 +185,8 @@ export function useUserAuth() {
     login,
     sendOtp,
     verifyOtp,
+    completeProfile,
+    verifyEmailOtp,
     logout,
     setLoading,
     setError,

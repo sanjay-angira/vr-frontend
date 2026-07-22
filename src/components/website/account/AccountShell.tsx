@@ -3,8 +3,6 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
-import { useAppDispatch } from "@/services/redux/hooks";
-import { setAuthModalOpen } from "@/services/redux/slices/websiteSlices/modalSlice";
 import { useUserAuth } from "@/services/website/useUserAuth";
 
 const NAV = [
@@ -22,15 +20,13 @@ export function AccountShell({
   children: ReactNode;
 }) {
   const { isAuthenticated, user } = useUserAuth();
-  const dispatch = useAppDispatch();
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
     if (isAuthenticated) return;
-    dispatch(setAuthModalOpen(true));
     router.replace("/");
-  }, [isAuthenticated, dispatch, router]);
+  }, [isAuthenticated, router]);
 
   if (!isAuthenticated || !user) {
     return (

@@ -21,29 +21,14 @@ const FEATURES = [
 ] as const;
 
 const COPY = {
-  login: {
-    heading: "Welcome Back!",
-    sub: (
-      <>
-        Login to explore a world of <strong>authentic products</strong> and{" "}
-        <strong>divine experiences.</strong>
-      </>
-    ),
-  },
-  signup: {
-    heading: "Looks like you're new here!",
-    sub: (
-      <>
-        Sign up with your mobile number to get started with{" "}
-        <strong>authentic products</strong> from Vrindavan.
-      </>
-    ),
-  },
+  heading: "Welcome Back!",
+  sub: (
+    <>
+      Login to explore a world of <strong>authentic products</strong> and{" "}
+      <strong>divine experiences.</strong>
+    </>
+  ),
 } as const;
-
-type AuthBrandPanelProps = {
-  variant?: "login" | "signup";
-};
 
 function MandalaCorner({ className }: { className?: string }) {
   return (
@@ -124,11 +109,7 @@ function TempleSkyline({ className }: { className?: string }) {
   );
 }
 
-export default function AuthBrandPanel({
-  variant = "login",
-}: AuthBrandPanelProps) {
-  const copy = COPY[variant];
-
+export default function AuthBrandPanel() {
   return (
     <aside className="auth-brand-panel">
       <MandalaCorner className="auth-brand-mandala auth-brand-mandala--tl" />
@@ -145,8 +126,8 @@ export default function AuthBrandPanel({
           </div>
         </div>
 
-        <h2 className="auth-brand-heading">{copy.heading}</h2>
-        <p className="auth-brand-sub">{copy.sub}</p>
+        <h2 className="auth-brand-heading">{COPY.heading}</h2>
+        <p className="auth-brand-sub">{COPY.sub}</p>
 
         <ul className="auth-brand-features">
           {FEATURES.map(({ icon: Icon, title, desc }) => (

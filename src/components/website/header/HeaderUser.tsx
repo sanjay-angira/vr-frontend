@@ -3,11 +3,10 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { User } from "lucide-react";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useAppDispatch } from "@/services/redux/hooks";
 import { setAuthModalOpen } from "@/services/redux/slices/websiteSlices/modalSlice";
 import { useUserAuth } from "@/services/website/useUserAuth";
-import { isAuthPagePath } from "@/utils/authRoutes";
 
 export function HeaderUser() {
   const [mounted, setMounted] = useState(false);
@@ -15,7 +14,6 @@ export function HeaderUser() {
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const dispatch = useAppDispatch();
   const router = useRouter();
-  const pathname = usePathname();
   const { user, isAuthenticated, logout } = useUserAuth();
 
   useEffect(() => {
@@ -41,13 +39,11 @@ export function HeaderUser() {
   const handleLogout = () => {
     logout();
     setShowDropdown(false);
+    dispatch(setAuthModalOpen(false));
     router.push("/");
   };
 
   const handleLoginClick = () => {
-    if (isAuthPagePath(pathname)) {
-      return;
-    }
     dispatch(setAuthModalOpen(true));
   };
 

@@ -3,10 +3,8 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Heart, Star } from "lucide-react";
-import { usePathname } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/services/redux/hooks";
 import { setAuthModalOpen } from "@/services/redux/slices/websiteSlices/modalSlice";
-import { isAuthPagePath } from "@/utils/authRoutes";
 import { resolveImageUrl } from "@/components/admin/forms/shared/resolveImageUrl";
 
 export type StoreListProduct = {
@@ -31,7 +29,6 @@ type StoreProductCardProps = {
 
 export function StoreProductCard({ product }: StoreProductCardProps) {
   const dispatch = useAppDispatch();
-  const pathname = usePathname();
   const isAuthenticated = useAppSelector((state) => state.userAuth.isAuthenticated);
   const [wishlistPulse, setWishlistPulse] = useState(false);
 
@@ -61,7 +58,6 @@ export function StoreProductCard({ product }: StoreProductCardProps) {
     setWishlistPulse(true);
     window.setTimeout(() => setWishlistPulse(false), 280);
     if (!isAuthenticated) {
-      if (isAuthPagePath(pathname)) return;
       dispatch(setAuthModalOpen(true));
     }
   };

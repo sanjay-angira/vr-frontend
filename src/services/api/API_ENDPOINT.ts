@@ -202,6 +202,9 @@ export const API_ENDPOINTS = {
   CUSTOMER_AUTH: {
     SEND_WHATSAPP_OTP: "customer/auth/send-whatsapp-otp",
     VERIFY_WHATSAPP_OTP: "customer/auth/verify-whatsapp-otp",
+    COMPLETE_PROFILE: "customer/auth/complete-profile",
+    VERIFY_EMAIL_OTP: "customer/auth/verify-email-otp",
+    RESEND_EMAIL_OTP: "customer/auth/resend-email-otp",
   },
 
   CUSTOMER: {

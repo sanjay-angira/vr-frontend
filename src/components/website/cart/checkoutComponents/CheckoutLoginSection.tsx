@@ -5,7 +5,6 @@
  * inline WhatsApp OTP (not only a modal), advantages list, then Continue.
  */
 
-import Link from "next/link";
 import { Bell, Check, Star, Truck } from "lucide-react";
 import { useAppSelector } from "@/services/redux/hooks";
 import { useUserAuth } from "@/services/website/useUserAuth";
@@ -162,8 +161,7 @@ export function CheckoutLoginSection({
             ))}
           </ul>
           <p className="checkout-login-new">
-            New here?{" "}
-            <Link href="/signup">Create an account</Link>
+            New here? Use your phone number above to create an account.
           </p>
         </aside>
       </div>

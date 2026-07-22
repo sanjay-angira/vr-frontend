@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 import { AccountShell } from "@/components/website/account/AccountShell";
 import { useUserAuth } from "@/services/website/useUserAuth";
+import { useAppDispatch } from "@/services/redux/hooks";
+import { setAuthModalOpen } from "@/services/redux/slices/websiteSlices/modalSlice";
 
 function getInitials(name?: string) {
   if (!name?.trim()) return "VR";
@@ -24,9 +26,11 @@ function getInitials(name?: string) {
 export function AccountProfileContent() {
   const { user, logout } = useUserAuth();
   const router = useRouter();
+  const dispatch = useAppDispatch();
 
   const handleLogout = () => {
     logout();
+    dispatch(setAuthModalOpen(false));
     router.replace("/");
   };
 
