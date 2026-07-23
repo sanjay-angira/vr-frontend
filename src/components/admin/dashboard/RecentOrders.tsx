@@ -1,43 +1,96 @@
+"use client";
+
 import Link from "next/link";
-const recentOrders = [
-  {
-    id: "ORD-1042",
-    customer: "Rahul Sharma",
-    amount: "₹2,499",
-    status: "pending" as const,
-    date: "2 min ago",
-  },
-  {
-    id: "ORD-1041",
-    customer: "Priya Patel",
-    amount: "₹1,850",
-    status: "processing" as const,
-    date: "15 min ago",
-  },
-  {
-    id: "ORD-1040",
-    customer: "Amit Kumar",
-    amount: "₹4,320",
-    status: "shipped" as const,
-    date: "1 hr ago",
-  },
-  {
-    id: "ORD-1039",
-    customer: "Sneha Reddy",
-    amount: "₹980",
-    status: "delivered" as const,
-    date: "3 hr ago",
-  },
-  {
-    id: "ORD-1038",
-    customer: "Vikram Singh",
-    amount: "₹3,150",
-    status: "cancelled" as const,
-    date: "5 hr ago",
-  },
-];
+import { useEffect, useState } from "react";
+import { getData } from "@/services/api/apiService";
+import { API_ENDPOINTS } from "@/services/api/API_ENDPOINT";
+
+type RecentOrderRow = {
+  id: number;
+  orderNumber: string;
+  customerName: string;
+  total: number;
+  orderStatus: string;
+  createdAt?: string;
+};
+
+function formatInr(value: number) {
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 0,
+  }).format(Number(value) || 0);
+}
+
+function formatRelative(value?: string) {
+  if (!value) return "—";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "—";
+
+  const diffMs = Date.now() - date.getTime();
+  const minutes = Math.floor(diffMs / 60000);
+  if (minutes < 1) return "Just now";
+  if (minutes < 60) return `${minutes} min ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} hr ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}d ago`;
+  return date.toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "short",
+  });
+}
+
+function statusClass(status: string) {
+  const value = status.toLowerCase();
+  if (value === "delivered" || value === "confirmed") {
+    return "bg-emerald-50 text-emerald-700";
+  }
+  if (value === "cancelled") return "bg-red-50 text-red-700";
+  if (value === "shipped" || value === "processing") {
+    return "bg-sky-50 text-sky-800";
+  }
+  return "bg-amber-50 text-amber-800";
+}
 
 export function RecentOrders() {
+  const [orders, setOrders] = useState<RecentOrderRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      setLoading(true);
+      setError("");
+      try {
+        const response = await getData(API_ENDPOINTS.ORDERS.LIST, {
+          pageNumber: 1,
+          pageSize: 5,
+          column: "createdAt",
+          order: "DESC",
+        });
+        const rows = Array.isArray(response?.data?.rows)
+          ? (response.data.rows as RecentOrderRow[])
+          : [];
+        if (!cancelled) setOrders(rows);
+      } catch {
+        if (!cancelled) {
+          setError("Unable to load recent orders");
+          setOrders([]);
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    void load();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     <div className="rounded-xl border border-zinc-200 bg-white shadow-sm">
       <div className="flex items-center justify-between border-b border-zinc-100 px-5 py-4">
@@ -46,7 +99,7 @@ export function RecentOrders() {
           <p className="text-sm text-zinc-500">Latest transactions</p>
         </div>
         <Link
-          href={"/admin/orders"}
+          href="/admin/orders"
           className="text-sm font-medium text-zinc-900 hover:underline"
         >
           View all
@@ -65,23 +118,57 @@ export function RecentOrders() {
             </tr>
           </thead>
           <tbody>
-            {recentOrders.map((order) => (
-              <tr
-                key={order.id}
-                className="border-b border-zinc-50 last:border-0 hover:bg-zinc-50/80"
-              >
-                <td className="px-5 py-3.5 font-medium text-zinc-900">
-                  {order.id}
+            {loading ? (
+              <tr>
+                <td colSpan={5} className="px-5 py-8 text-center text-zinc-500">
+                  Loading orders…
                 </td>
-                <td className="px-5 py-3.5 text-zinc-600">{order.customer}</td>
-                <td className="px-5 py-3.5 font-medium text-zinc-900">
-                  {order.amount}
-                </td>
-                <td className="px-5 py-3.5">ggggggggggg
-                </td>
-                <td className="px-5 py-3.5 text-zinc-500">{order.date}</td>
               </tr>
-            ))}
+            ) : error ? (
+              <tr>
+                <td colSpan={5} className="px-5 py-8 text-center text-red-600">
+                  {error}
+                </td>
+              </tr>
+            ) : orders.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="px-5 py-8 text-center text-zinc-500">
+                  No orders yet
+                </td>
+              </tr>
+            ) : (
+              orders.map((order) => (
+                <tr
+                  key={order.id}
+                  className="border-b border-zinc-50 last:border-0 hover:bg-zinc-50/80"
+                >
+                  <td className="px-5 py-3.5 font-medium text-zinc-900">
+                    <Link
+                      href={`/admin/orders/view/${order.id}`}
+                      className="hover:underline"
+                    >
+                      {order.orderNumber}
+                    </Link>
+                  </td>
+                  <td className="px-5 py-3.5 text-zinc-600">
+                    {order.customerName || "—"}
+                  </td>
+                  <td className="px-5 py-3.5 font-medium text-zinc-900">
+                    {formatInr(order.total)}
+                  </td>
+                  <td className="px-5 py-3.5">
+                    <span
+                      className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium capitalize ${statusClass(order.orderStatus)}`}
+                    >
+                      {order.orderStatus}
+                    </span>
+                  </td>
+                  <td className="px-5 py-3.5 text-zinc-500">
+                    {formatRelative(order.createdAt)}
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

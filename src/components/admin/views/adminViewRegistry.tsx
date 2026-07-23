@@ -3,6 +3,7 @@
 import type { ComponentType } from "react";
 import type { AdminModuleKey } from "@/components/admin/commonTable/adminModuleTable.config";
 import { CmsPageView } from "@/components/admin/cms-pages/CmsPageView";
+import { OrderView } from "@/components/admin/orders/OrderView";
 import { ProductView } from "@/components/admin/products/ProductView";
 
 export type AdminViewProps = {
@@ -15,6 +16,7 @@ const adminViewRegistry: Partial<
 > = {
   "cms-pages": CmsPageView,
   products: ProductView,
+  orders: OrderView,
 };
 
 export function getAdminViewComponent(module: string) {

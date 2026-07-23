@@ -12,6 +12,7 @@ import {
   CouponComponentColumns,
   CmsPagesComponentColumns,
   OffersAndDealsColumns,
+  OrdersComponentColumns,
   ProductComponentColumns,
   ProductFaqComponentColumns,
   ReviewsComponentColumns,
@@ -39,7 +40,8 @@ export type AdminModuleKey =
   | "delete-requests"
   | "product-reviews"
   | "product-faq"
-  | "contact-us-leads";
+  | "contact-us-leads"
+  | "orders";
 
 export type AdminModuleTableConfig = {
   label: string;
@@ -179,6 +181,14 @@ export const adminModuleTableConfig: Record<
     description: "Manage contact form leads",
     columns: ContactUsLeadsColumns,
     actions: ["view", "edit", "delete"],
+  },
+  orders: {
+    label: "Orders",
+    description: "View customer orders and products",
+    apiPath: "orders",
+    sortColumn: "createdAt",
+    columns: OrdersComponentColumns,
+    actions: ["view"],
   },
   "cms-pages": {
     label: "CMS Pages",

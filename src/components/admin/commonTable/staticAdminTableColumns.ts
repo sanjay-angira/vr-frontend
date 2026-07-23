@@ -198,3 +198,17 @@ export const BannerComponentColumns: AdminTableColumnDefinition[] = [
   { label: "Updated On", property: "updatedAt", type: "text", datatype: "date", visible: true, cssClasses: ["font-medium"] },
   { label: "Actions", property: "actions", type: "button", datatype: "button", visible: true, cssClasses: ["font-medium"] },
 ];
+
+export const OrdersComponentColumns: AdminTableColumnDefinition[] = [
+  { label: "ID", property: "id", type: "text", datatype: "id", visible: true, cssClasses: ["font-medium"] },
+  { label: "Order #", property: "orderNumber", type: "text", datatype: "text", visible: true, cssClasses: ["font-medium"] },
+  { label: "Customer", property: "customerName", type: "text", datatype: "name", visible: true, cssClasses: ["font-medium"] },
+  { label: "Phone", property: "phone", type: "text", datatype: "phoneNumber", visible: true, cssClasses: ["font-medium"] },
+  { label: "Items", property: "itemCount", type: "text", datatype: "text", visible: true, cssClasses: ["font-medium"] },
+  { label: "Total", property: "total", type: "text", datatype: "text", visible: true, cssClasses: ["font-medium"] },
+  { label: "Payment", property: "paymentMethod", type: "text", datatype: "text", visible: true, cssClasses: ["font-medium"] },
+  { label: "Payment Status", property: "paymentStatus", type: "text", datatype: "text", visible: true, cssClasses: ["font-medium"] },
+  { label: "Order Status", property: "orderStatus", type: "text", datatype: "text", visible: true, cssClasses: ["font-medium"] },
+  { label: "Created On", property: "createdAt", type: "text", datatype: "date", visible: true, cssClasses: ["font-medium"] },
+  { label: "Actions", property: "actions", type: "button", datatype: "button", visible: true },
+];

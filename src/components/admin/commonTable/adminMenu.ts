@@ -116,6 +116,11 @@ export const adminMenuSections: AdminMenuSection[] = [
     title: "Customers",
     items: [
       {
+        label: "Orders",
+        href: "/admin/orders",
+        icon: "clipboard-list",
+      },
+      {
         label: "User",
         href: "/admin/customers",
         icon: "users",
