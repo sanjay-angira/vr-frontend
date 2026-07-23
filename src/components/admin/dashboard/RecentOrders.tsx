@@ -1,17 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { getData } from "@/services/api/apiService";
-import { API_ENDPOINTS } from "@/services/api/API_ENDPOINT";
+import type { DashboardRecentOrder } from "@/services/admin/dashboardService";
 
-type RecentOrderRow = {
-  id: number;
-  orderNumber: string;
-  customerName: string;
-  total: number;
-  orderStatus: string;
-  createdAt?: string;
+type RecentOrdersProps = {
+  orders: DashboardRecentOrder[];
+  loading?: boolean;
 };
 
 function formatInr(value: number) {
@@ -53,44 +47,7 @@ function statusClass(status: string) {
   return "bg-amber-50 text-amber-800";
 }
 
-export function RecentOrders() {
-  const [orders, setOrders] = useState<RecentOrderRow[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function load() {
-      setLoading(true);
-      setError("");
-      try {
-        const response = await getData(API_ENDPOINTS.ORDERS.LIST, {
-          pageNumber: 1,
-          pageSize: 5,
-          column: "createdAt",
-          order: "DESC",
-        });
-        const rows = Array.isArray(response?.data?.rows)
-          ? (response.data.rows as RecentOrderRow[])
-          : [];
-        if (!cancelled) setOrders(rows);
-      } catch {
-        if (!cancelled) {
-          setError("Unable to load recent orders");
-          setOrders([]);
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
-
-    void load();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
+export function RecentOrders({ orders, loading = false }: RecentOrdersProps) {
   return (
     <div className="rounded-xl border border-zinc-200 bg-white shadow-sm">
       <div className="flex items-center justify-between border-b border-zinc-100 px-5 py-4">
@@ -122,12 +79,6 @@ export function RecentOrders() {
               <tr>
                 <td colSpan={5} className="px-5 py-8 text-center text-zinc-500">
                   Loading orders…
-                </td>
-              </tr>
-            ) : error ? (
-              <tr>
-                <td colSpan={5} className="px-5 py-8 text-center text-red-600">
-                  {error}
                 </td>
               </tr>
             ) : orders.length === 0 ? (

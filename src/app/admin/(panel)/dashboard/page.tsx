@@ -1,17 +1,95 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { DashboardStatsCard } from "@/components/admin/dashboard/DashboardStatsCard";
 import { LowStockProducts } from "@/components/admin/dashboard/LowStockProducts";
 import { RecentOrders } from "@/components/admin/dashboard/RecentOrders";
 import { SalesChart } from "@/components/admin/dashboard/SalesChart";
+import {
+  fetchDashboardSummary,
+  type DashboardSummary,
+} from "@/services/admin/dashboardService";
+
+const emptyStats: DashboardSummary["stats"] = {
+  revenue: {
+    value: 0,
+    label: "₹0",
+    change: "0%",
+    trend: "up",
+    changeValue: 0,
+  },
+  orders: {
+    value: 0,
+    label: "0",
+    change: "0%",
+    trend: "up",
+    changeValue: 0,
+  },
+  customers: {
+    value: 0,
+    label: "0",
+    change: "0%",
+    trend: "up",
+    changeValue: 0,
+  },
+  products: {
+    value: 0,
+    label: "0",
+    change: "0%",
+    trend: "up",
+    changeValue: 0,
+  },
+};
 
 export default function DashboardPage() {
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [summary, setSummary] = useState<DashboardSummary | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      setLoading(true);
+      setError("");
+      try {
+        const data = await fetchDashboardSummary();
+        if (!cancelled) setSummary(data);
+      } catch (err) {
+        if (!cancelled) {
+          setError(
+            err instanceof Error ? err.message : "Failed to load dashboard",
+          );
+          setSummary(null);
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    void load();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const stats = summary?.stats ?? emptyStats;
+
   return (
     <div className="space-y-6">
+      {error ? (
+        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {error}
+        </div>
+      ) : null}
+
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <DashboardStatsCard
           title="Total revenue"
-          value="₹4,82,350"
-          change="+12.5%"
-          trend="up"
+          value={stats.revenue.label}
+          change={stats.revenue.change}
+          trend={stats.revenue.trend}
+          loading={loading}
           icon={
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8V7m0 10v-2m-8-2h16" />
@@ -20,9 +98,10 @@ export default function DashboardPage() {
         />
         <DashboardStatsCard
           title="Orders"
-          value="1,284"
-          change="+8.2%"
-          trend="up"
+          value={stats.orders.label}
+          change={stats.orders.change}
+          trend={stats.orders.trend}
+          loading={loading}
           icon={
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
@@ -31,9 +110,10 @@ export default function DashboardPage() {
         />
         <DashboardStatsCard
           title="Customers"
-          value="3,542"
-          change="+5.4%"
-          trend="up"
+          value={stats.customers.label}
+          change={stats.customers.change}
+          trend={stats.customers.trend}
+          loading={loading}
           icon={
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -42,9 +122,10 @@ export default function DashboardPage() {
         />
         <DashboardStatsCard
           title="Products"
-          value="186"
-          change="-2.1%"
-          trend="down"
+          value={stats.products.label}
+          change={stats.products.change}
+          trend={stats.products.trend}
+          loading={loading}
           icon={
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
@@ -55,12 +136,17 @@ export default function DashboardPage() {
 
       <div className="grid gap-6 xl:grid-cols-3">
         <div className="xl:col-span-2">
-          <SalesChart />
+          <SalesChart
+            series={summary?.sales.series ?? []}
+            change={summary?.sales.change ?? "0%"}
+            trend={summary?.sales.trend ?? "up"}
+            loading={loading}
+          />
         </div>
-        <LowStockProducts />
+        <LowStockProducts items={summary?.lowStock ?? []} loading={loading} />
       </div>
 
-      <RecentOrders />
+      <RecentOrders orders={summary?.recentOrders ?? []} loading={loading} />
     </div>
   );
 }

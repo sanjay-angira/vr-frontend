@@ -243,6 +243,10 @@ export const API_ENDPOINTS = {
     DETAILS: (id: number | string) => `orders/${id}`,
   },
 
+  DASHBOARD: {
+    SUMMARY: "dashboard",
+  },
+
   PAYMENTS: {
     LIST: "payments",
   },
