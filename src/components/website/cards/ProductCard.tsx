@@ -3,12 +3,12 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Eye, Heart, ShoppingCart, Star } from "lucide-react";
-import { useAppDispatch, useAppSelector } from "@/services/redux/hooks";
-import { setAuthModalOpen } from "@/services/redux/slices/websiteSlices/modalSlice";
+import { useAppDispatch } from "@/services/redux/hooks";
 import {
   addWebsiteCartItem,
   fetchWebsiteCart,
 } from "@/services/redux/slices/websiteSlices/cartSlice";
+import { useWishlist } from "@/components/website/wishlist/useWishlist";
 
 export interface WebsiteProductCardData {
   id: string;
@@ -58,8 +58,9 @@ export function ProductCard({
   href,
 }: ProductCardProps) {
   const dispatch = useAppDispatch();
-  const isAuthenticated = useAppSelector((state) => state.userAuth.isAuthenticated);
+  const { isWished, toggle } = useWishlist();
   const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [wishBusy, setWishBusy] = useState(false);
 
   const normalizedProduct: WebsiteProductCardData = product ?? {
     id: id ?? "",
@@ -79,6 +80,9 @@ export function ProductCard({
     inStock: inStock ?? true,
   };
 
+  const variationId = Number(normalizedProduct.id);
+  const wished = isWished(variationId);
+
   const currentPrice = Number(normalizedProduct.price || 0);
   const listPrice = Number(normalizedProduct.originalPrice || 0);
   const hasDiscount = listPrice > currentPrice && currentPrice > 0;
@@ -91,11 +95,10 @@ export function ProductCard({
       new Intl.NumberFormat("en-IN", {
         maximumFractionDigits: 0,
       }),
-    []
+    [],
   );
 
   const handleAddToCart = async () => {
-    const variationId = Number(normalizedProduct.id);
     if (!Number.isFinite(variationId) || variationId <= 0) {
       return;
     }
@@ -103,7 +106,7 @@ export function ProductCard({
     try {
       setIsAddingToCart(true);
       await dispatch(
-        addWebsiteCartItem({ variationId, quantity: 1 })
+        addWebsiteCartItem({ variationId, quantity: 1 }),
       ).unwrap();
       void dispatch(fetchWebsiteCart());
     } catch (error) {
@@ -113,9 +116,13 @@ export function ProductCard({
     }
   };
 
-  const handleWishlist = () => {
-    if (!isAuthenticated) {
-      dispatch(setAuthModalOpen(true));
+  const handleWishlist = async () => {
+    if (wishBusy) return;
+    setWishBusy(true);
+    try {
+      await toggle(variationId);
+    } finally {
+      setWishBusy(false);
     }
   };
 
@@ -145,18 +152,20 @@ export function ProductCard({
         <div className="badges">
           {normalizedProduct.isNew && <span className="badge new">New</span>}
           {hasDiscount && (
-            <span className="badge sale">-{discountPercentage}%</span>
+            <span className="badge sale">{discountPercentage}% OFF</span>
           )}
         </div>
 
         <div className="quick-actions">
           <button
             type="button"
-            className="action-btn"
-            onClick={handleWishlist}
-            aria-label="Add to wishlist"
+            className={`action-btn ${wished ? "is-wished" : ""}`}
+            onClick={() => void handleWishlist()}
+            aria-label={wished ? "Remove from wishlist" : "Add to wishlist"}
+            aria-pressed={wished}
+            disabled={wishBusy}
           >
-            <Heart />
+            <Heart fill={wished ? "currentColor" : "none"} />
           </button>
           {href && (
             <Link href={href} className="action-btn" aria-label="Quick view">

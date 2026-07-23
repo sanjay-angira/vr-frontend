@@ -3,6 +3,7 @@ import AuthModals from "@/components/website/auth/AuthModals";
 import { WebsiteFooter } from "@/components/website/footer/WebsiteFooter";
 import { WebsiteHeader } from "@/components/website/header/WebsiteHeader";
 import { CartHydrator } from "@/components/website/cart/CartHydrator";
+import { WishlistHydrator } from "@/components/website/wishlist/useWishlist";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -15,6 +16,7 @@ export function WebsiteShell({ children }: WebsiteShellProps) {
     <div className="website-layout">
       <WebsiteProgressBar />
       <CartHydrator />
+      <WishlistHydrator />
       <AuthModals />
       <WebsiteHeader />
       <main className="flex-1">{children}</main>

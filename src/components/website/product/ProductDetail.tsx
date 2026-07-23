@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import {
   Heart,
   Leaf,
@@ -24,8 +24,7 @@ import {
 } from "@/components/website/product/productVariantUtils";
 import { fetchWebsiteCart } from "@/services/redux/slices/websiteSlices/cartSlice";
 import { addOrUpdateCartItem } from "@/services/website/cartService";
-import type { RootState } from "@/services/redux";
-import { setAuthModalOpen } from "@/services/redux/slices/websiteSlices/modalSlice";
+import { useWishlist } from "@/components/website/wishlist/useWishlist";
 import { useRouter } from "next/navigation";
 
 export type ProductAttributeView = {
@@ -66,7 +65,8 @@ export default function ProductDetail({
 }: Props) {
   const router = useRouter();
   const dispatch = useDispatch();
-  const isAuthenticated = useSelector((state: RootState) => state.userAuth.isAuthenticated);
+  const { isWished, toggle } = useWishlist();
+  const [wishBusy, setWishBusy] = useState(false);
 
   const attributeGroups = useMemo(
     () => buildAttributeGroups(product.variants),
@@ -139,9 +139,13 @@ export default function ProductDetail({
     return product.variants[0] ?? null;
   }, [product.variants, selectedVariantId]);
 
-  const handleWishlist = () => {
-    if (!isAuthenticated) {
-      dispatch(setAuthModalOpen(true));
+  const handleWishlist = async () => {
+    if (!selectedVariant || wishBusy) return;
+    setWishBusy(true);
+    try {
+      await toggle(selectedVariant.id);
+    } finally {
+      setWishBusy(false);
     }
   };
 
@@ -217,14 +221,18 @@ export default function ProductDetail({
     .replace(/\s+/g, " ")
     .trim() || "";
 
+  const wished = isWished(selectedVariant?.id);
+
   const wishlistButton = (
     <button
       type="button"
-      className="product-gallery__wishlist"
-      onClick={handleWishlist}
-      aria-label="Add to wishlist"
+      className={`product-gallery__wishlist${wished ? " is-wished" : ""}`}
+      onClick={() => void handleWishlist()}
+      aria-label={wished ? "Remove from wishlist" : "Add to wishlist"}
+      aria-pressed={wished}
+      disabled={wishBusy || !selectedVariant}
     >
-      <Heart size={18} />
+      <Heart size={18} fill={wished ? "currentColor" : "none"} />
     </button>
   );
 

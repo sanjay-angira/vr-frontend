@@ -131,7 +131,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
         <section className="product-section-block product-copy-block">
           <h2 className="product-section-heading">Product Description</h2>
           <div
-            className="product-copy-content"
+            className="product-copy-content rich-html"
             dangerouslySetInnerHTML={{
               __html: (product.description || product.shortDescription || "").trim(),
             }}
@@ -144,10 +144,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
           className="product-section-block faq-section product-faq-block"
           style={{ marginTop: "2.25rem" }}
         >
-          <h2
-            className="section-title product-faq-heading"
-            style={{ marginBottom: "1rem" }}
-          >
+          <h2 className="product-section-heading" style={{ marginBottom: "1rem" }}>
             Frequently Asked Questions
           </h2>
           <Accordion items={faqItems} className="product-faq-accordion" />

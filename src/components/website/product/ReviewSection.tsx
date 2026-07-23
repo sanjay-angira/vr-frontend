@@ -22,7 +22,7 @@ export default function ReviewSection({ reviews = [] }: ReviewSectionProps) {
   return (
     <section className="review-section">
       <div className="review-header">
-        <h2 className="section-title">Customer Reviews</h2>
+        <h2 className="product-section-heading">Customer Reviews</h2>
         <div className="rating-summary">
           <div className="average-rating">
             <span className="rating-number">{averageRating}</span>

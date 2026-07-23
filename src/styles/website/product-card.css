@@ -52,20 +52,29 @@
 }
 
 .product-card-1 .badge {
-  font-size: 12px;
-  font-weight: 700;
+  font-size: 0.7rem;
+  font-weight: 800;
   line-height: 1;
-  padding: 6px 8px;
-  border-radius: 0;
+  padding: 0.4rem 0.65rem;
+  border-radius: 999px;
   color: #fff;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  box-shadow: 0 6px 14px rgba(10, 42, 27, 0.14);
+  backdrop-filter: blur(6px);
 }
 
 .product-card-1 .badge.new {
-  background: #0f766e;
+  background: linear-gradient(135deg, #1a6b5c 0%, #0f766e 100%);
+  border: 1px solid rgba(255, 255, 255, 0.22);
 }
 
 .product-card-1 .badge.sale {
-  background: var(--vr-gold-dark);
+  background: linear-gradient(135deg, #c45c26 0%, #a34a1c 55%, #8d3f16 100%);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  box-shadow:
+    0 6px 16px rgba(196, 92, 38, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 
 .product-card-1 .quick-actions {
@@ -81,7 +90,7 @@
 .product-card-1 .action-btn {
   width: 34px;
   height: 34px;
-  border-radius: 0;
+  border-radius: 50%;
   border: 1px solid rgba(197, 157, 95, 0.25);
   background: var(--vr-white);
   display: inline-flex;
@@ -105,6 +114,11 @@
   width: 16px;
   height: 16px;
   color: var(--vr-gold-dark);
+}
+
+.product-card-1 .action-btn.is-wished,
+.product-card-1 .action-btn.is-wished svg {
+  color: var(--vr-terracotta);
 }
 
 .product-card-1 .add-to-cart-container {

@@ -229,6 +229,13 @@ export const API_ENDPOINTS = {
     ADDRESSES: "customer/addresses",
     ADDRESS_BY_ID: (id: number | string) => `customer/addresses/${id}`,
     ADDRESS_DEFAULT: (id: number | string) => `customer/addresses/${id}/default`,
+    WISHLIST: "customer/wishlist",
+    WISHLIST_IDS: "customer/wishlist/ids",
+    WISHLIST_COUNT: "customer/wishlist/count",
+    WISHLIST_TOGGLE: "customer/wishlist/toggle",
+    WISHLIST_BY_ID: (id: number | string) => `customer/wishlist/${id}`,
+    WISHLIST_BY_VARIATION: (variationId: number | string) =>
+      `customer/wishlist/by-variation/${variationId}`,
   },
 
   ORDERS: {
@@ -238,10 +245,6 @@ export const API_ENDPOINTS = {
 
   PAYMENTS: {
     LIST: "payments",
-  },
-
-  WISHLIST: {
-    LIST: "wishlist",
   },
 
   SETTINGS: {

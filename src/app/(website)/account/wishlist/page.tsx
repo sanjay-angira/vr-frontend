@@ -1,7 +1,5 @@
+import { AccountWishlistContent } from "@/components/website/account/AccountWishlistContent";
+
 export default function Page() {
-  return (
-    <div>
-      <h1>Wishlist</h1>
-    </div>
-  );
+  return <AccountWishlistContent />;
 }

@@ -14,6 +14,10 @@ type HeaderStaticActionsProps = {
 export function HeaderStaticActions({ settings }: HeaderStaticActionsProps) {
   const [mounted, setMounted] = useState(false);
   const cartCount = useAppSelector((state) => state.websiteCart.count);
+  const wishlistCount = useAppSelector((state) => state.wishlist.count);
+  const isAuthenticated = useAppSelector(
+    (state) => state.userAuth.isAuthenticated,
+  );
 
   useEffect(() => {
     setMounted(true);
@@ -32,8 +36,12 @@ export function HeaderStaticActions({ settings }: HeaderStaticActionsProps) {
           href="/account/wishlist"
           className="icon-button"
           aria-label="Wishlist"
+          style={{ position: "relative" }}
         >
           <Heart size={20} />
+          {mounted && isAuthenticated && wishlistCount > 0 ? (
+            <span className="cart-count-badge">{wishlistCount}</span>
+          ) : null}
         </Link>
       ) : null}
 

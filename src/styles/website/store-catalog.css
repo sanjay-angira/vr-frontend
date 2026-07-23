@@ -453,23 +453,37 @@
 }
 
 .store-card__discount {
-  padding: 0.35rem 0.55rem;
-  border-radius: 0;
-  background: rgba(197, 157, 95, 0.95);
-  color: var(--vr-forest-dark);
-  font-size: 0.72rem;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.4rem 0.7rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #c45c26 0%, #a34a1c 55%, #8d3f16 100%);
+  color: #fff;
+  font-size: 0.7rem;
   font-weight: 800;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  box-shadow:
+    0 6px 16px rgba(196, 92, 38, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(6px);
 }
 
 .store-card__new {
-  padding: 0.28rem 0.5rem;
-  border-radius: 0;
-  background: var(--vr-forest);
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #1a6b5c 0%, #0f766e 100%);
   color: #fff;
   font-size: 0.7rem;
-  font-weight: 700;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   width: fit-content;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow: 0 6px 14px rgba(10, 42, 27, 0.14);
 }
 
 .store-card__wish {
@@ -480,7 +494,7 @@
   width: 34px;
   height: 34px;
   border: 0;
-  border-radius: 0;
+  border-radius: 50%;
   background: rgba(255, 255, 255, 0.95);
   color: #c2410c;
   display: inline-flex;
@@ -492,6 +506,11 @@
 
 .store-card__wish.is-pulse {
   transform: scale(1.12);
+}
+
+.store-card__wish.is-wished {
+  color: #9a3412;
+  background: rgba(255, 247, 237, 0.98);
 }
 
 .store-card__body {

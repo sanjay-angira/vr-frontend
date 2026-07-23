@@ -3,9 +3,8 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Heart, Star } from "lucide-react";
-import { useAppDispatch, useAppSelector } from "@/services/redux/hooks";
-import { setAuthModalOpen } from "@/services/redux/slices/websiteSlices/modalSlice";
 import { resolveImageUrl } from "@/components/admin/forms/shared/resolveImageUrl";
+import { useWishlist } from "@/components/website/wishlist/useWishlist";
 
 export type StoreListProduct = {
   id: number;
@@ -28,9 +27,12 @@ type StoreProductCardProps = {
 };
 
 export function StoreProductCard({ product }: StoreProductCardProps) {
-  const dispatch = useAppDispatch();
-  const isAuthenticated = useAppSelector((state) => state.userAuth.isAuthenticated);
+  const { isWished, toggle } = useWishlist();
   const [wishlistPulse, setWishlistPulse] = useState(false);
+  const [wishBusy, setWishBusy] = useState(false);
+
+  const variationId = Number(product.variantId);
+  const wished = isWished(variationId);
 
   const finalPrice = Number(product.finalPrice || 0);
   const originalPrice = Number(product.originalPrice || 0);
@@ -54,11 +56,15 @@ export function StoreProductCard({ product }: StoreProductCardProps) {
   const image = resolveImageUrl(product.image || "") || "/next.svg";
   const rating = Number(product.rating || 0);
 
-  const handleWishlist = () => {
+  const handleWishlist = async () => {
+    if (wishBusy) return;
     setWishlistPulse(true);
     window.setTimeout(() => setWishlistPulse(false), 280);
-    if (!isAuthenticated) {
-      dispatch(setAuthModalOpen(true));
+    setWishBusy(true);
+    try {
+      await toggle(variationId);
+    } finally {
+      setWishBusy(false);
     }
   };
 
@@ -94,11 +100,15 @@ export function StoreProductCard({ product }: StoreProductCardProps) {
 
         <button
           type="button"
-          className={`store-card__wish ${wishlistPulse ? "is-pulse" : ""}`}
-          onClick={handleWishlist}
-          aria-label="Add to wishlist"
+          className={`store-card__wish ${wishlistPulse ? "is-pulse" : ""} ${
+            wished ? "is-wished" : ""
+          }`}
+          onClick={() => void handleWishlist()}
+          aria-label={wished ? "Remove from wishlist" : "Add to wishlist"}
+          aria-pressed={wished}
+          disabled={wishBusy}
         >
-          <Heart size={16} />
+          <Heart size={16} fill={wished ? "currentColor" : "none"} />
         </button>
       </div>
 
