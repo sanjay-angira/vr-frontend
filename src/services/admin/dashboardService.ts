@@ -17,7 +17,10 @@ export type DashboardSalesPoint = {
 
 export type DashboardLowStockItem = {
   id: number;
+  variantId: number;
   productId: number | null;
+  productName: string;
+  variantName: string;
   name: string;
   sku: string;
   stock: number;

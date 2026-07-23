@@ -51,7 +51,7 @@ export function SalesChart({
   const hasSales = data.some((item) => item.value > 0);
 
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
+    <div className="w-full rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
       <div className="mb-5 flex items-center justify-between gap-3">
         <div>
           <h2 className="text-base font-semibold text-zinc-900">Sales overview</h2>

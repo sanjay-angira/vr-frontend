@@ -134,19 +134,16 @@ export default function DashboardPage() {
         />
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-3">
-        <div className="xl:col-span-2">
-          <SalesChart
-            series={summary?.sales.series ?? []}
-            change={summary?.sales.change ?? "0%"}
-            trend={summary?.sales.trend ?? "up"}
-            loading={loading}
-          />
-        </div>
-        <LowStockProducts items={summary?.lowStock ?? []} loading={loading} />
-      </div>
+      <SalesChart
+        series={summary?.sales.series ?? []}
+        change={summary?.sales.change ?? "0%"}
+        trend={summary?.sales.trend ?? "up"}
+        loading={loading}
+      />
 
       <RecentOrders orders={summary?.recentOrders ?? []} loading={loading} />
+
+      <LowStockProducts items={summary?.lowStock ?? []} loading={loading} />
     </div>
   );
 }
