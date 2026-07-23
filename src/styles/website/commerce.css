@@ -5,12 +5,14 @@
     radial-gradient(circle at top left, rgba(197, 157, 95, 0.12), transparent 42%),
     linear-gradient(180deg, var(--vr-cream) 0%, var(--vr-cream-dark) 100%);
   min-height: 60vh;
-  padding: 2.5rem 1.25rem 4rem;
+  padding: 2.5rem 0 4rem;
 }
 
 .commerce-container {
-  width: min(1120px, 100%);
+  width: 100%;
+  max-width: var(--container-max, 1920px);
   margin: 0 auto;
+  padding: 0 var(--container-padding-x, 3rem);
 }
 
 .commerce-header {
@@ -471,13 +473,6 @@
   background: var(--vr-cream);
   padding: 2.75rem 0 3.5rem;
   font-family: var(--font-body);
-}
-
-.commerce-surface .commerce-container {
-  width: 100%;
-  max-width: var(--container-max, 1920px);
-  margin: 0 auto;
-  padding: 0 3rem;
 }
 
 .commerce-surface .cart-header h1 {
@@ -1418,10 +1413,6 @@
 }
 
 @media (max-width: 560px) {
-  .commerce-surface .commerce-container {
-    padding: 0 1rem;
-  }
-
   .cart-line {
     grid-template-columns: 80px minmax(0, 1fr);
     padding: 0.95rem;

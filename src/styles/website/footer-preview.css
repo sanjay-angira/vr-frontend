@@ -21,10 +21,6 @@
 .footer .container {
   position: relative;
   z-index: 1;
-  max-width: var(--container-max, 1920px);
-  margin: 0 auto;
-  padding: 0 1rem;
-  width: 100%;
 }
 
 .footer-grid {

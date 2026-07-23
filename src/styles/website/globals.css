@@ -30,7 +30,7 @@ body {
 .container {
   max-width: var(--container-max, 1920px);
   margin: 0 auto;
-  padding: 0 3rem;
+  padding: 0 var(--container-padding-x, 3rem);
   width: 100%;
 }
 
@@ -4116,7 +4116,9 @@ body {
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .container {
+  .container,
+  .account-container,
+  .commerce-container {
     padding: 0 0.5rem;
   }
   
@@ -4155,14 +4157,12 @@ body {
     grid-template-columns: 1fr;
     gap: var(--gap);
   }
-  
-  .header-content {
-    padding: 0 0.5rem;
-  }
 }
 
 @media (max-width: 480px) {
-  .container {
+  .container,
+  .account-container,
+  .commerce-container {
     padding: 0 0.25rem;
   }
   
@@ -4176,10 +4176,6 @@ body {
   .top-header-left,
   .top-header-right {
     gap: var(--gap);
-  }
-  
-  .header-content {
-    padding: 0 0.25rem;
   }
   
   .hero-title {
