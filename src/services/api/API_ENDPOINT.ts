@@ -226,6 +226,9 @@ export const API_ENDPOINTS = {
     RAZORPAY_VERIFY: "customer/payments/razorpay/verify",
     ORDER_DETAILS: (orderNumber: string) => `customer/order/${orderNumber}`,
     ORDERS: "customer/orders",
+    ADDRESSES: "customer/addresses",
+    ADDRESS_BY_ID: (id: number | string) => `customer/addresses/${id}`,
+    ADDRESS_DEFAULT: (id: number | string) => `customer/addresses/${id}/default`,
   },
 
   ORDERS: {

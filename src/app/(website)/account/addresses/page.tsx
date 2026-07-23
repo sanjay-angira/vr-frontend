@@ -1,7 +1,5 @@
+import { AccountAddressesContent } from "@/components/website/account/AccountAddressesContent";
+
 export default function Page() {
-  return (
-    <div>
-      <h1>My Addresses</h1>
-    </div>
-  );
+  return <AccountAddressesContent />;
 }

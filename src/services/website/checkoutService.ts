@@ -6,16 +6,31 @@ import {
 } from "@/utils/cartIdentity";
 
 export type CheckoutPayload = {
-  customerName: string;
-  phone: string;
+  addressId?: number;
+  customerName?: string;
+  phone?: string;
   email?: string;
-  addressLine1: string;
+  addressLine1?: string;
   addressLine2?: string;
+  city?: string;
+  state?: string;
+  pincode?: string;
+  addressLabel?: string;
+  notes?: string;
+  paymentMethod: "cod" | "online";
+};
+
+export type OrderShippingAddress = {
+  addressId?: number | null;
+  label?: string | null;
+  fullName: string;
+  phone: string;
+  email?: string | null;
+  addressLine1: string;
+  addressLine2?: string | null;
   city: string;
   state: string;
   pincode: string;
-  notes?: string;
-  paymentMethod: "cod" | "online";
 };
 
 export type RazorpayCheckoutPayload = {
@@ -77,6 +92,7 @@ export type PlacedOrder = {
   shippingFee: number;
   total: number;
   offerJson?: OrderOfferJson | null;
+  shippingAddress?: OrderShippingAddress | null;
   customerName: string;
   phone: string;
   email?: string | null;

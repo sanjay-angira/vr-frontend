@@ -33,7 +33,14 @@ export type PaymentSummaryShippingMode = OrderSummaryShippingMode;
 export type PaymentSummaryConfig = OrderSummaryConfig & { showItems?: boolean };
 
 export type DeliveryAddress = Omit<CheckoutPayload, "paymentMethod" | "notes"> & {
+  customerName: string;
+  phone: string;
+  addressLine1: string;
+  city: string;
+  state: string;
+  pincode: string;
   notes?: string;
+  addressId?: number;
 };
 
 type PlaceOrderContextType = {
@@ -127,7 +134,7 @@ function PlaceOrderFlowWrapper({ children }: { children: ReactNode }) {
 
     try {
       const order = await placeOrder({
-        ...confirmDeliveryAddress,
+        addressId: confirmDeliveryAddress.addressId,
         customerName: confirmDeliveryAddress.customerName.trim(),
         phone: confirmDeliveryAddress.phone.trim(),
         email: confirmDeliveryAddress.email?.trim() || undefined,
