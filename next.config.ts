@@ -27,6 +27,12 @@ const nextConfig: NextConfig = {
       { source: "/signup", destination: "/", permanent: false },
     ];
   },
+  async rewrites() {
+    return [
+      // Browsers often request /favicon.ico by default
+      { source: "/favicon.ico", destination: "/favicon-32.png" },
+    ];
+  },
 };
 
 export default nextConfig;
