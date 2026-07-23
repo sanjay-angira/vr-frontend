@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useUserAuth } from "@/services/website/useUserAuth";
 
 const NAV = [
@@ -15,18 +15,55 @@ const NAV = [
 export function AccountShell({
   title,
   children,
+  skeleton,
 }: {
   title: string;
   children: ReactNode;
+  /** Shown while auth hydrates from cookies/localStorage. */
+  skeleton?: ReactNode;
 }) {
   const { isAuthenticated, user } = useUserAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
     if (isAuthenticated) return;
     router.replace("/");
-  }, [isAuthenticated, router]);
+  }, [hydrated, isAuthenticated, router]);
+
+  if (!hydrated) {
+    return (
+      <div className="account-page" aria-busy="true" aria-live="polite">
+        <div className="account-container">
+          <header className="account-header">
+            <div className="skeleton-line w-30" />
+            <div className="skeleton-line account-skeleton-title" />
+            <div className="skeleton-line w-40" />
+          </header>
+
+          <div className="account-layout">
+            <nav className="account-nav" aria-hidden>
+              {NAV.map((item) => (
+                <div
+                  key={item.href}
+                  className="account-nav-link is-skeleton"
+                >
+                  <div className="skeleton-line w-70" />
+                </div>
+              ))}
+            </nav>
+            <div className="account-main">{skeleton}</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!isAuthenticated || !user) {
     return (

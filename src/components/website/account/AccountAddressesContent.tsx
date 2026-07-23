@@ -3,6 +3,7 @@
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { AccountShell } from "@/components/website/account/AccountShell";
+import { AccountAddressesSkeleton } from "@/components/website/account/AccountSkeletons";
 import {
   createUserAddress,
   deleteUserAddress,
@@ -143,7 +144,7 @@ export function AccountAddressesContent() {
   };
 
   return (
-    <AccountShell title="Addresses">
+    <AccountShell title="Addresses" skeleton={<AccountAddressesSkeleton />}>
       <div className="account-addresses">
         <div className="account-addresses-toolbar">
           <p className="commerce-muted">
@@ -154,6 +155,7 @@ export function AccountAddressesContent() {
             type="button"
             className="cart-btn cart-btn-primary"
             onClick={startCreate}
+            disabled={loading}
           >
             Add address
           </button>
@@ -281,7 +283,7 @@ export function AccountAddressesContent() {
         ) : null}
 
         {loading ? (
-          <p className="commerce-muted">Loading addresses…</p>
+          <AccountAddressesSkeleton />
         ) : addresses.length === 0 ? (
           <p className="commerce-muted">No saved addresses yet.</p>
         ) : (

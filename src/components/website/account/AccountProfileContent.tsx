@@ -16,6 +16,7 @@ import { AccountShell } from "@/components/website/account/AccountShell";
 import { useUserAuth } from "@/services/website/useUserAuth";
 import { useAppDispatch } from "@/services/redux/hooks";
 import { setAuthModalOpen } from "@/services/redux/slices/websiteSlices/modalSlice";
+import { AccountProfileSkeleton } from "@/components/website/account/AccountSkeletons";
 
 function getInitials(name?: string) {
   if (!name?.trim()) return "VR";
@@ -35,7 +36,7 @@ export function AccountProfileContent() {
   };
 
   return (
-    <AccountShell title="Profile">
+    <AccountShell title="Profile" skeleton={<AccountProfileSkeleton />}>
       <div className="account-profile">
         <section className="account-profile-hero">
           <div className="account-profile-avatar" aria-hidden>

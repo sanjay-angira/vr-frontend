@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Heart, ShoppingCart, Trash2 } from "lucide-react";
 import { toast } from "react-toastify";
 import { AccountShell } from "@/components/website/account/AccountShell";
+import { AccountWishlistSkeleton } from "@/components/website/account/AccountSkeletons";
 import { resolveImageUrl } from "@/components/admin/forms/shared/resolveImageUrl";
 import { useAppDispatch, useAppSelector } from "@/services/redux/hooks";
 import {
@@ -81,9 +82,9 @@ export function AccountWishlistContent() {
   };
 
   return (
-    <AccountShell title="Wishlist">
+    <AccountShell title="Wishlist" skeleton={<AccountWishlistSkeleton />}>
       {loading && items.length === 0 ? (
-        <p className="commerce-muted">Loading your wishlist…</p>
+        <AccountWishlistSkeleton />
       ) : items.length === 0 ? (
         <div className="account-empty">
           <div className="account-empty-icon" aria-hidden>

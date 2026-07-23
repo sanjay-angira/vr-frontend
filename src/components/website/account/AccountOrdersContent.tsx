@@ -9,6 +9,7 @@ import {
   type PlacedOrder,
 } from "@/services/website/checkoutService";
 import { AccountShell } from "@/components/website/account/AccountShell";
+import { AccountOrdersSkeleton } from "@/components/website/account/AccountSkeletons";
 
 function formatInr(value: number) {
   return new Intl.NumberFormat("en-IN", {
@@ -69,10 +70,8 @@ export function AccountOrdersContent() {
   }, []);
 
   return (
-    <AccountShell title="My orders">
-      {loading ? (
-        <p className="commerce-muted">Loading your orders…</p>
-      ) : null}
+    <AccountShell title="My orders" skeleton={<AccountOrdersSkeleton />}>
+      {loading ? <AccountOrdersSkeleton /> : null}
 
       {error ? <p className="account-error">{error}</p> : null}
 
@@ -89,6 +88,7 @@ export function AccountOrdersContent() {
         </div>
       ) : null}
 
+      {!loading ? (
       <ul className="account-order-list">
         {orders.map((order) => {
           const first = order.items[0];
@@ -131,6 +131,7 @@ export function AccountOrdersContent() {
           );
         })}
       </ul>
+      ) : null}
     </AccountShell>
   );
 }

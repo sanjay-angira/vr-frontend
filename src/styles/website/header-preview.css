@@ -69,6 +69,16 @@
   text-decoration: none;
   color: var(--header-text);
   flex-shrink: 0;
+  transition: none;
+  filter: none;
+}
+
+.logo:hover,
+.logo:focus,
+.logo:active {
+  filter: none;
+  transform: none;
+  opacity: 1;
 }
 
 .logo-icon {

@@ -553,6 +553,80 @@
   }
 }
 
+.account-skeleton-title {
+  width: min(14rem, 55%);
+  height: 1.85rem;
+  margin: 0.55rem 0 0.65rem;
+}
+
+.account-nav-link.is-skeleton {
+  pointer-events: none;
+  padding: 0.75rem 0.85rem;
+}
+
+.account-skeleton-order {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  gap: 0.9rem;
+  align-items: center;
+  padding: 0;
+  text-decoration: none;
+}
+
+.account-skeleton-thumb {
+  width: 72px;
+  height: 72px;
+}
+
+.account-address-card.is-skeleton,
+.account-wishlist-item.is-skeleton,
+.account-profile-hero.is-skeleton,
+.account-profile-card.is-skeleton,
+.account-profile-link.is-skeleton {
+  pointer-events: none;
+}
+
+.account-skeleton-address-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.account-skeleton-actions {
+  min-width: 5.5rem;
+}
+
+.account-skeleton-btn {
+  height: 2.35rem;
+  width: 8.5rem;
+}
+
+.account-skeleton-avatar {
+  width: 88px;
+  height: 88px;
+  flex-shrink: 0;
+}
+
+.account-skeleton-profile-fields {
+  margin-top: 0.85rem;
+}
+
+.account-skeleton-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  flex-shrink: 0;
+}
+
+.account-skeleton-link-copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.account-skeleton-logout {
+  height: 2.75rem;
+  width: min(12rem, 100%);
+  margin-top: 0.5rem;
+}
+
 .account-back {
   display: inline-flex;
   align-items: center;
