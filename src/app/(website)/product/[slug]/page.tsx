@@ -159,8 +159,10 @@ export default async function ProductDetailPage({ params }: PageProps) {
         <div className="product-related-wrap" style={{ marginTop: "3.5rem" }}>
           <ProductComboSection
             title="You May Also Like"
+            accent="Like"
+            subtitle="RECOMMENDED FOR YOU"
             comboProducts={comboProducts}
-            viewAllLink="/shop"
+            viewAllLink="/products"
           />
         </div>
       )}

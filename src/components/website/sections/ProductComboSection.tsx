@@ -32,6 +32,8 @@ export function ProductComboSection({
     description,
   };
 
+  const viewAllLabel = resolvedHeading.title.trim() || "Products";
+
   return (
     <section className="section combo-section">
       <div className="container">
@@ -44,7 +46,7 @@ export function ProductComboSection({
         {viewAllLink && (
           <div className="combo-view-all-wrap">
             <Link href={viewAllLink} className="combo-view-all-link">
-              View All {resolvedHeading.title}
+              View All {viewAllLabel || "Products"}
             </Link>
           </div>
         )}
