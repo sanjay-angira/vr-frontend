@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/services/redux/hooks";
 import {
   clearWishlist,
@@ -30,6 +30,9 @@ export function WishlistHydrator() {
 
 export function useWishlist() {
   const dispatch = useAppDispatch();
+  // SSR HTML has empty wishlist; client Redux may already be hydrated from a
+  // prior navigation. Defer wished/count until after mount to avoid mismatch.
+  const [mounted, setMounted] = useState(false);
   const isAuthenticated = useAppSelector(
     (state) => state.userAuth.isAuthenticated,
   );
@@ -38,13 +41,18 @@ export function useWishlist() {
   const loading = useAppSelector((state) => state.wishlist.loading);
   const mutating = useAppSelector((state) => state.wishlist.mutating);
 
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const isWished = useCallback(
     (variationId: number | null | undefined) => {
+      if (!mounted) return false;
       const id = Number(variationId);
       if (!Number.isFinite(id) || id <= 0) return false;
       return variationIds.includes(id);
     },
-    [variationIds],
+    [mounted, variationIds],
   );
 
   const toggle = useCallback(
@@ -75,10 +83,11 @@ export function useWishlist() {
 
   return {
     isAuthenticated,
-    variationIds,
-    count,
+    variationIds: mounted ? variationIds : [],
+    count: mounted ? count : 0,
     loading,
     mutating,
+    ready: mounted,
     isWished,
     toggle,
   };

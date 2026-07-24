@@ -88,6 +88,7 @@ export function HomePageSections({ sections }: HomePageSectionsProps) {
                 title={heading.title}
                 subtitle={heading.eyebrow}
                 banners={section.banners}
+                effect={section.data?.bannerEffect}
               />
             );
 
@@ -144,6 +145,7 @@ export function HomePageSections({ sections }: HomePageSectionsProps) {
                     title={heading.title}
                     subtitle={heading.eyebrow}
                     banners={section.banners}
+                    effect={section.data?.bannerEffect}
                   />
                 )}
                 {section.categories.length > 0 && (

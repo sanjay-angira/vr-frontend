@@ -70,6 +70,8 @@ export type HomepageSection = {
     headingAccent?: string;
     description?: string;
     displayStyle: string;
+    /** Hero carousel transition: fade | slide */
+    bannerEffect?: "fade" | "slide" | string;
     maxProducts: number;
   };
   products: HomepageProduct[];

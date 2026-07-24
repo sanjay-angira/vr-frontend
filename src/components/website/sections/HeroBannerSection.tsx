@@ -15,15 +15,23 @@ const Slider = dynamic(() => import("react-slick"), {
   loading: () => <div className="cms-hero-banner__skeleton" aria-hidden />,
 });
 
+export type HeroBannerEffect = "fade" | "slide";
+
 type HeroBannerSectionProps = {
   title?: string;
   subtitle?: string;
   banners: HomepageBanner[];
+  /** Carousel transition. Defaults to fade. */
+  effect?: HeroBannerEffect | string | null;
 };
 
 type ArrowProps = {
   onClick?: () => void;
 };
+
+function normalizeEffect(effect?: string | null): HeroBannerEffect {
+  return effect === "slide" ? "slide" : "fade";
+}
 
 function PrevArrow({ onClick }: ArrowProps) {
   return (
@@ -51,8 +59,12 @@ function NextArrow({ onClick }: ArrowProps) {
   );
 }
 
-export function HeroBannerSection({ banners }: HeroBannerSectionProps) {
+export function HeroBannerSection({
+  banners,
+  effect,
+}: HeroBannerSectionProps) {
   const [mounted, setMounted] = useState(false);
+  const bannerEffect = normalizeEffect(effect);
   const slides = useMemo(
     () =>
       Array.isArray(banners)
@@ -70,8 +82,8 @@ export function HeroBannerSection({ banners }: HeroBannerSectionProps) {
     () => ({
       dots: count > 1,
       infinite: count > 1,
-      speed: 700,
-      fade: true,
+      speed: bannerEffect === "slide" ? 600 : 700,
+      fade: bannerEffect === "fade",
       cssEase: "ease-in-out",
       slidesToShow: 1,
       slidesToScroll: 1,
@@ -90,7 +102,7 @@ export function HeroBannerSection({ banners }: HeroBannerSectionProps) {
       waitForAnimate: false,
       dotsClass: "slick-dots cms-hero-banner__dots",
     }),
-    [count]
+    [count, bannerEffect]
   );
 
   if (count === 0) {
@@ -116,10 +128,10 @@ export function HeroBannerSection({ banners }: HeroBannerSectionProps) {
 
   return (
     <section
-      className="cms-hero-banner cms-hero-banner--slick"
+      className={`cms-hero-banner cms-hero-banner--slick cms-hero-banner--${bannerEffect}`}
       aria-label="Featured banner"
     >
-      <Slider key={`hero-slick-${count}`} {...settings}>
+      <Slider key={`hero-slick-${bannerEffect}-${count}`} {...settings}>
         {slides.map((banner, index) => (
           <div key={`${banner.id}-${index}`}>
             <HeroSlide banner={banner} />

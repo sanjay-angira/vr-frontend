@@ -65,12 +65,22 @@ const DISPLAY_STYLES = [
   { label: "List", value: "list" },
 ];
 
+const BANNER_EFFECTS = [
+  { label: "Fade", value: "fade" },
+  { label: "Slide", value: "slide" },
+];
+
+function usesBannerEffect(type: string) {
+  return type === "hero_banner" || type === "custom";
+}
+
 type SectionFormValues = {
   title: string;
   slug: string;
   type: string;
   visible: boolean;
   displayStyle: string;
+  bannerEffect: string;
   maxProducts: number;
   heading: string;
   headingAccent: string;
@@ -95,6 +105,7 @@ const schema = Yup.object({
     .required("Slug is required"),
   type: Yup.string().required("Section type is required"),
   displayStyle: Yup.string().required(),
+  bannerEffect: Yup.string().oneOf(["fade", "slide"]).required(),
   maxProducts: Yup.number().min(1).max(100).required(),
 });
 
@@ -128,6 +139,7 @@ export function SectionSettingsPage({ sectionId }: SectionSettingsPageProps) {
     type: "product_slider",
     visible: true,
     displayStyle: "grid",
+    bannerEffect: "fade",
     maxProducts: 8,
     heading: "",
     headingAccent: "",
@@ -192,6 +204,8 @@ export function SectionSettingsPage({ sectionId }: SectionSettingsPageProps) {
           type: section.type,
           visible: Boolean(section.status),
           displayStyle: String(data.displayStyle ?? "grid"),
+          bannerEffect:
+            String(data.bannerEffect ?? "fade") === "slide" ? "slide" : "fade",
           maxProducts: Number(data.maxProducts ?? 8),
           heading: String(data.heading ?? ""),
           headingAccent: String(data.headingAccent ?? ""),
@@ -225,6 +239,9 @@ export function SectionSettingsPage({ sectionId }: SectionSettingsPageProps) {
       status: values.visible,
       data: {
         displayStyle: values.displayStyle,
+        bannerEffect: usesBannerEffect(values.type)
+          ? values.bannerEffect
+          : undefined,
         maxProducts: values.maxProducts,
         heading: values.heading,
         headingAccent: values.headingAccent,
@@ -312,17 +329,33 @@ export function SectionSettingsPage({ sectionId }: SectionSettingsPageProps) {
                 label="Section Type"
                 required
                 value={values.type}
-                onChange={(value) => setFieldValue("type", value)}
+                onChange={(value) => {
+                  setFieldValue("type", value);
+                  if (usesBannerEffect(value) && !values.bannerEffect) {
+                    setFieldValue("bannerEffect", "fade");
+                  }
+                }}
                 options={SECTION_TYPES}
               />
 
-              <FormDropdown
-                label="Display Style"
-                required
-                value={values.displayStyle}
-                onChange={(value) => setFieldValue("displayStyle", value)}
-                options={DISPLAY_STYLES}
-              />
+              {usesBannerEffect(values.type) ? (
+                <FormDropdown
+                  label="Banner Effect"
+                  required
+                  value={values.bannerEffect}
+                  onChange={(value) => setFieldValue("bannerEffect", value)}
+                  options={BANNER_EFFECTS}
+                  hint="Transition between hero slides on the storefront."
+                />
+              ) : (
+                <FormDropdown
+                  label="Display Style"
+                  required
+                  value={values.displayStyle}
+                  onChange={(value) => setFieldValue("displayStyle", value)}
+                  options={DISPLAY_STYLES}
+                />
+              )}
 
               <Input
                 label="Maximum Products"

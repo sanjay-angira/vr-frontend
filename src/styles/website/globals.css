@@ -172,6 +172,17 @@ body {
   line-height: 0;
 }
 
+/* Slide effect: keep adjacent slides in a horizontal track */
+.cms-hero-banner--slide.cms-hero-banner--slick .slick-track {
+  display: flex;
+  align-items: stretch;
+}
+
+.cms-hero-banner--slide.cms-hero-banner--slick .slick-slide {
+  float: none;
+  height: auto;
+}
+
 .cms-hero-banner__slide-inner {
   position: relative;
   width: 100%;
