@@ -450,10 +450,10 @@ export function buildProductPayload(
         url,
         sortOrder: idx + 1,
       }));
-      if (variantImages.length > 0) variantPayload.images = variantImages;
-      if (variant.productVariantOffers.length > 0) {
-        variantPayload.productVariantOffers = variant.productVariantOffers;
-      }
+      // Always send images/offers/attributes so clearing them on edit reaches the API.
+      // Omitting empty arrays left old ManyToMany / child rows attached.
+      variantPayload.images = variantImages;
+      variantPayload.productVariantOffers = variant.productVariantOffers;
       const variantAttributes = variant.variantAttributes
         .filter((item) => item.value.trim())
         .map((item) => {
@@ -479,7 +479,7 @@ export function buildProductPayload(
           if (display === "image") return Boolean(item.image);
           return true;
         });
-      if (variantAttributes.length > 0) variantPayload.variantAttributes = variantAttributes;
+      variantPayload.variantAttributes = variantAttributes;
       return variantPayload;
     }),
     seo: {
