@@ -60,7 +60,11 @@
   /* Layout — shared page / header / footer width */
   --container-max: 1920px;
   --container-padding-x: 3rem;
-  --gap: 0.75rem; /* Tailwind gap-3 */
+  --gap-xs: 0.5rem; /* Tailwind gap-1 */
+  --gap-s: 0.75rem; /* Tailwind gap-3 */
+  --gap-m: 1rem; /* Tailwind gap-4 */
+  --gap-l: 1.5rem; /* Tailwind gap-6 */
+  --gap-xl: 2rem; /* Tailwind gap-8 */
 
   /* Typography — loaded at runtime via website layout <link>; CSS vars keep stacks stable at build */
   --font-inter: "Inter", "Segoe UI", sans-serif;

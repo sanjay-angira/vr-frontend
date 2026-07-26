@@ -5,6 +5,7 @@ import { fetchHomepageSections } from "@/services/website/homepageService";
 
 export default async function Page() {
   const sections = await fetchHomepageSections();
+  console.dir(sections,{dep:null})
   
   if (sections.length === 0) {
     return (

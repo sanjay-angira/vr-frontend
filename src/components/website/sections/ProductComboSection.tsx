@@ -35,21 +35,21 @@ export function ProductComboSection({
   const viewAllLabel = resolvedHeading.title.trim() || "Products";
 
   return (
-    <section className="section combo-section">
+    <section className="section home-section home-product-section combo-section">
       <div className="container">
         <SectionHeading {...resolvedHeading} />
-        <div className="combo-grid">
+        <div className="home-product-grid combo-grid">
           {comboProducts.map((combo) => (
             <ComboProductCard key={combo.id} combo={combo} />
           ))}
         </div>
-        {viewAllLink && (
-          <div className="combo-view-all-wrap">
-            <Link href={viewAllLink} className="combo-view-all-link">
+        {viewAllLink ? (
+          <div className="home-section__actions">
+            <Link href={viewAllLink} className="btn btn-outline btn-lg">
               View All {viewAllLabel || "Products"}
             </Link>
           </div>
-        )}
+        ) : null}
       </div>
     </section>
   );

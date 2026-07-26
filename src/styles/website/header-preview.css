@@ -185,6 +185,7 @@
 .icon-button:hover {
   color: var(--header-accent);
   background-color: var(--vr-gold-muted);
+  border-radius: 50%;
 }
 
 .header-login-btn {

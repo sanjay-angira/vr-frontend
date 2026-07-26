@@ -166,7 +166,7 @@
 .product-card-1 .content {
   display: flex;
   flex-direction: column;
-  gap: var(--gap);
+  gap: var(--gap-s);
   padding: 14px 14px 16px;
 }
 

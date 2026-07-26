@@ -74,7 +74,7 @@ export function SectionHeading({
         <div className="section-eyebrow">
           <span className="section-eyebrow__line" aria-hidden />
           <span className="section-eyebrow__badge">
-            <LeafMark className="section-eyebrow__icon" />
+            {/* <LeafMark className="section-eyebrow__icon" /> */}
             <span className="section-eyebrow__text">{(eyebrow ?? "").trim()}</span>
           </span>
           <span className="section-eyebrow__line" aria-hidden />

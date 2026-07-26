@@ -522,7 +522,7 @@ body {
 .home-product-grid {
   display: grid;
   grid-template-columns: repeat(1, minmax(0, 1fr));
-  gap: var(--gap);
+  gap: var(--gap-l);
 }
 
 @media (min-width: 640px) {
@@ -536,12 +536,12 @@ body {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
-
 @media (min-width: 1280px) {
   .home-product-grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
+
 
 /* Category Section */
 .category-section {
@@ -2899,7 +2899,7 @@ body {
 .product-reviews-grid {
   display: grid;
   grid-template-columns: repeat(1, minmax(0, 1fr));
-  gap: var(--gap);
+  gap: var(--gap-l);
 }
 
 @media (min-width: 768px) {
@@ -2971,6 +2971,17 @@ body {
   line-height: 1.7;
 }
 
+.product-review-quote.rich-html p {
+  margin: 0 0 0.65rem;
+  color: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.product-review-quote.rich-html p:last-child {
+  margin-bottom: 0;
+}
+
 .product-review-stars {
   display: flex;
   gap: var(--gap);
@@ -3038,7 +3049,7 @@ body {
 .blog-grid {
   display: grid;
   grid-template-columns: repeat(1, minmax(0, 1fr));
-  gap: var(--gap);
+  gap: var(--gap-l);
 }
 
 @media (min-width: 768px) {
@@ -3158,30 +3169,12 @@ body {
 }
 
 /* Product Combo Section */
+.combo-section.home-product-section {
+  padding: 3.5rem 0;
+}
+
 .combo-section .section-header {
-  margin-bottom: 1.5rem;
-}
-
-.product-related-wrap .combo-section {
-  padding-top: 0;
-}
-
-.combo-grid {
-  display: grid;
-  grid-template-columns: repeat(1, minmax(0, 1fr));
-  gap: var(--gap);
-}
-
-@media (min-width: 768px) {
-  .combo-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 1200px) {
-  .combo-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
+  margin: 0 auto 2.25rem;
 }
 
 .combo-card {

@@ -30,7 +30,10 @@ export function ProductReviewsShowcase({
               <div className="product-review-quote-mark" aria-hidden>
                 <Quote size={28} />
               </div>
-              <p className="product-review-quote">{review.quote}</p>
+              <div
+                className="product-review-quote rich-html"
+                dangerouslySetInnerHTML={{ __html: review.quote || "" }}
+              />
               <div className="product-review-stars" aria-label={`Rated ${review.rating} out of 5`}>
                 {[...Array(5)].map((_, index) => (
                   <Star

@@ -107,65 +107,62 @@ export default async function ProductDetailPage({ params }: PageProps) {
       : [];
 
   return (
-    <div
-      className="container product-page-shell"
-      style={{ paddingTop: "1.25rem", paddingBottom: "3rem" }}
-    >
-      <ScrollToTopOnMount />
+    <>
+      <div className="container product-page-shell">
+        <ScrollToTopOnMount />
 
-      <div className="product-breadcrumbs">
-        <Link href="/">Home</Link>
-        <span>›</span>
-        <Link href="/shop">{product.category?.categoryName || "Shop"}</Link>
-        <span>›</span>
-        <span className="is-current">{product.productName}</span>
-      </div>
+        <div className="product-breadcrumbs">
+          <Link href="/">Home</Link>
+          <span>›</span>
+          <Link href="/shop">{product.category?.categoryName || "Shop"}</Link>
+          <span>›</span>
+          <span className="is-current">{product.productName}</span>
+        </div>
 
-      <ProductDetail
-        product={detailProduct}
-        fallbackImages={baseImages}
-        initialVariantSlug={requestedVariantSlug}
-      />
+        <ProductDetail
+          product={detailProduct}
+          fallbackImages={baseImages}
+          initialVariantSlug={requestedVariantSlug}
+        />
 
-      {(product.description || product.shortDescription) && (
-        <section className="product-section-block product-copy-block">
-          <h2 className="product-section-heading">Product Description</h2>
-          <div
-            className="product-copy-content rich-html"
-            dangerouslySetInnerHTML={{
-              __html: (product.description || product.shortDescription || "").trim(),
-            }}
-          />
-        </section>
-      )}
+        {(product.description || product.shortDescription) && (
+          <section className="product-section-block product-copy-block">
+            <h2 className="product-section-heading">Product Description</h2>
+            <div
+              className="product-copy-content rich-html"
+              dangerouslySetInnerHTML={{
+                __html: (product.description || product.shortDescription || "").trim(),
+              }}
+            />
+          </section>
+        )}
 
-      {faqItems.length > 0 && (
-        <section
-          className="product-section-block faq-section product-faq-block"
-          style={{ marginTop: "2.25rem" }}
-        >
-          <h2 className="product-section-heading" style={{ marginBottom: "1rem" }}>
-            Frequently Asked Questions
-          </h2>
-          <Accordion items={faqItems} className="product-faq-accordion" />
-        </section>
-      )}
+        {faqItems.length > 0 && (
+          <section
+            className="product-section-block faq-section product-faq-block"
+            style={{ marginTop: "2.25rem" }}
+          >
+            <h2 className="product-section-heading" style={{ marginBottom: "1rem" }}>
+              Frequently Asked Questions
+            </h2>
+            <Accordion items={faqItems} className="product-faq-accordion" />
+          </section>
+        )}
 
-      <div style={{ marginTop: "3rem" }}>
-        <ReviewSection productId={product.productSlug} reviews={reviewList} />
+        <div className="product-reviews-wrap">
+          <ReviewSection productId={product.productSlug} reviews={reviewList} />
+        </div>
       </div>
 
       {comboProducts.length > 0 && (
-        <div className="product-related-wrap" style={{ marginTop: "3.5rem" }}>
-          <ProductComboSection
-            title="You May Also Like"
-            accent="Like"
-            subtitle="RECOMMENDED FOR YOU"
-            comboProducts={comboProducts}
-            viewAllLink="/products"
-          />
-        </div>
+        <ProductComboSection
+          title="You May Also Like"
+          accent="Like"
+          subtitle="RECOMMENDED FOR YOU"
+          comboProducts={comboProducts}
+          viewAllLink="/products"
+        />
       )}
-    </div>
+    </>
   );
 }

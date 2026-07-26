@@ -19,7 +19,6 @@ export function ProductSection({
   products,
   viewAllLink,
 }: ProductSectionProps) {
-  console.dir(heading, { depth: null });
   return (
     <section className="section home-section home-product-section">
       <div className="container">

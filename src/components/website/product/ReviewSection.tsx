@@ -67,7 +67,10 @@ export default function ReviewSection({ reviews = [] }: ReviewSectionProps) {
                 </div>
                 <span className="review-date">{review.date}</span>
               </div>
-              <div dangerouslySetInnerHTML={{ __html: review.comment }} />
+              <div
+                className="review-comment rich-html"
+                dangerouslySetInnerHTML={{ __html: review.comment || "" }}
+              />
             </div>
           ))
         )}
