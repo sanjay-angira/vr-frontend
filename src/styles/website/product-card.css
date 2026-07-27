@@ -83,7 +83,7 @@
   right: 12px;
   display: flex;
   flex-direction: column;
-  gap: var(--gap);
+  gap: var(--gap-xs);
   z-index: 2;
 }
 
