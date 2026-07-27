@@ -19,13 +19,13 @@
 .announcement-bar-right {
   display: flex;
   align-items: center;
-  gap: var(--gap);
+  gap: var(--gap-m);
 }
 
 .announcement-bar-item {
   display: flex;
   align-items: center;
-  gap: var(--gap);
+  gap: var(--gap-xs);
 }
 
 .announcement-bar-icon {
@@ -59,13 +59,13 @@
   align-items: center;
   justify-content: space-between;
   height: 64px;
-  gap: var(--gap);
+  gap: var(--gap-m);
 }
 
 .logo {
   display: flex;
   align-items: center;
-  gap: var(--gap);
+  gap: var(--gap-s);
   text-decoration: none;
   color: var(--header-text);
   flex-shrink: 0;
@@ -94,7 +94,7 @@
 .nav {
   display: flex;
   align-items: center;
-  gap: var(--gap);
+  gap: var(--gap-s);
 }
 
 .nav-item {
@@ -113,7 +113,7 @@
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
-  gap: var(--gap);
+  gap: var(--gap-xs);
   text-decoration: none;
 }
 
@@ -165,7 +165,7 @@
 .header-actions {
   display: flex;
   align-items: center;
-  gap: var(--gap);
+  gap: var(--gap-s);
   flex-shrink: 0;
 }
 

@@ -34,14 +34,14 @@ export function MobileNavigation({
 
   return (
     <div className="mobile-nav-panel">
-      <nav className="flex flex-col gap-3">
+      <nav className="flex flex-col vr-gap-s">
         {items.map((item) => {
           const hasChildren = item.children.length > 0;
           const isExpanded = expandedIds.includes(item.id);
 
           return (
             <div key={item.id}>
-              <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center justify-between vr-gap-s">
                 <Link
                   href={item.url}
                   className="nav-button flex-1 justify-start"
@@ -63,7 +63,7 @@ export function MobileNavigation({
               </div>
 
               {hasChildren && isExpanded ? (
-                <div className="mt-1 flex flex-col gap-3 pl-4">
+                <div className="mt-1 flex flex-col vr-gap-s pl-4">
                   {item.children.map((child) => (
                     <Link
                       key={child.id}

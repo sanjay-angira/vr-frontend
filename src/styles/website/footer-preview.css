@@ -26,7 +26,7 @@
 .footer-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: var(--gap);
+  gap: var(--gap-m);
   margin-bottom: 2rem;
 }
 
@@ -68,7 +68,7 @@
 .footer-contact-list li {
   display: flex;
   align-items: flex-start;
-  gap: var(--gap);
+  gap: var(--gap-m);
   color: var(--footer-text);
 }
 
@@ -79,7 +79,7 @@
 .footer-social-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--gap);
+  gap: var(--gap-m);
 }
 
 .footer-social-link {
@@ -108,7 +108,7 @@
 .footer-payment-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--gap);
+  gap: var(--gap-m);
 }
 
 .footer-payment-item {
@@ -153,7 +153,7 @@
 
   .footer-grid {
     grid-template-columns: 1fr;
-    gap: var(--gap);
+    gap: var(--gap-m);
   }
 }
 

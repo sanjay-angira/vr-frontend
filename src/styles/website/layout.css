@@ -5,3 +5,21 @@
   background: var(--cream-background, var(--vr-cream));
   font-family: var(--font-body);
 }
+
+/* Gap utility helpers (class names avoid Tailwind gap-* collision) */
+.vr-gap-xs {
+  gap: var(--gap-xs);
+}
+.vr-gap-s {
+  gap: var(--gap-s);
+}
+.vr-gap-m {
+  gap: var(--gap-m);
+}
+.vr-gap-l {
+  gap: var(--gap-l);
+}
+.vr-gap-xl {
+  gap: var(--gap-xl);
+}
+

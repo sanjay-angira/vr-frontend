@@ -30,7 +30,7 @@ const STORE_GRID_STYLES = `
 .store-catalog__grid {
   display: grid !important;
   grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-  gap: var(--gap) !important;
+  gap: var(--gap-m) !important;
   width: 100% !important;
 }
 .store-catalog__grid > * {

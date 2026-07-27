@@ -47,7 +47,7 @@
   left: 12px;
   display: flex;
   flex-direction: column;
-  gap: var(--gap);
+  gap: var(--gap-xs);
   z-index: 2;
 }
 
@@ -149,7 +149,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--gap);
+  gap: var(--gap-s);
   cursor: pointer;
   transition: background 0.2s ease, opacity 0.2s ease;
 }
@@ -204,7 +204,7 @@
 .product-card-1 .rating {
   display: flex;
   align-items: center;
-  gap: var(--gap);
+  gap: var(--gap-xs);
   min-height: 20px;
 }
 
@@ -233,13 +233,13 @@
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: var(--gap);
+  gap: var(--gap-s);
 }
 
 .product-card-1 .prices {
   display: flex;
   align-items: baseline;
-  gap: var(--gap);
+  gap: var(--gap-s);
 }
 
 .product-card-1 .current-price {
