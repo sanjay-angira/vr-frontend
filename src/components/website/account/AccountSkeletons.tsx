@@ -7,9 +7,9 @@ type SkeletonProps = {
 const NAV_SLOTS = 4;
 
 function SkeletonLines({
-  widths = ["w-70", "w-40", "w-30"],
+  widths = ["sk-w-70", "sk-w-40", "sk-w-30"],
 }: {
-  widths?: Array<"w-30" | "w-40" | "w-70">;
+  widths?: Array<"sk-w-30" | "sk-w-40" | "sk-w-70">;
 }) {
   return (
     <div className="account-skeleton-lines">
@@ -30,16 +30,16 @@ export function AccountChromeSkeleton({
     <div className="account-page" aria-busy="true" aria-live="polite">
       <div className="account-container">
         <header className="account-header account-header--skeleton">
-          <div className="skeleton-line w-30" />
+          <div className="skeleton-line sk-w-30" />
           <div className="skeleton-line account-skeleton-title" />
-          <div className="skeleton-line w-40" />
+          <div className="skeleton-line sk-w-40" />
         </header>
 
         <div className="account-layout">
           <nav className="account-nav" aria-hidden>
             {Array.from({ length: NAV_SLOTS }, (_, index) => (
               <div key={`nav-skel-${index}`} className="account-nav-link is-skeleton">
-                <div className="skeleton-line w-70" />
+                <div className="skeleton-line sk-w-70" />
               </div>
             ))}
           </nav>
@@ -60,7 +60,7 @@ export function AccountOrdersSkeleton({ count = 3 }: SkeletonProps) {
           <div className="account-order-card-link account-skeleton-order">
             <div className="skeleton-block account-skeleton-thumb" />
             <div className="account-order-body">
-              <SkeletonLines widths={["w-40", "w-70", "w-30"]} />
+              <SkeletonLines widths={["sk-w-40", "sk-w-70", "sk-w-30"]} />
             </div>
           </div>
         </li>
@@ -72,11 +72,11 @@ export function AccountOrdersSkeleton({ count = 3 }: SkeletonProps) {
 export function AccountOrderDetailSkeleton() {
   return (
     <div className="account-order-detail is-skeleton" aria-busy="true" aria-live="polite">
-      <div className="skeleton-line w-30 account-skeleton-back" />
+      <div className="skeleton-line sk-w-30 account-skeleton-back" />
 
       <div className="account-order-detail-head account-skeleton-detail-head">
         <div className="account-skeleton-detail-copy">
-          <SkeletonLines widths={["w-40", "w-30"]} />
+          <SkeletonLines widths={["sk-w-40", "sk-w-30"]} />
         </div>
         <div className="account-order-detail-badges account-skeleton-detail-badges">
           <div className="skeleton-block account-skeleton-badge" />
@@ -85,21 +85,21 @@ export function AccountOrderDetailSkeleton() {
       </div>
 
       <section className="account-profile-card is-skeleton">
-        <div className="skeleton-line w-40" />
+        <div className="skeleton-line sk-w-40" />
         <div className="account-skeleton-detail-items">
           {Array.from({ length: 2 }, (_, index) => (
             <div key={`detail-item-${index}`} className="account-skeleton-detail-item">
               <div className="skeleton-block account-skeleton-thumb" />
-              <SkeletonLines widths={["w-70", "w-40", "w-30"]} />
+              <SkeletonLines widths={["sk-w-70", "sk-w-40", "sk-w-30"]} />
             </div>
           ))}
         </div>
       </section>
 
       <section className="account-profile-card is-skeleton">
-        <div className="skeleton-line w-40" />
+        <div className="skeleton-line sk-w-40" />
         <div className="account-skeleton-profile-fields">
-          <SkeletonLines widths={["w-70", "w-40", "w-70", "w-30"]} />
+          <SkeletonLines widths={["sk-w-70", "sk-w-40", "sk-w-70", "sk-w-30"]} />
         </div>
       </section>
     </div>
@@ -108,45 +108,59 @@ export function AccountOrderDetailSkeleton() {
 
 export function AccountAddressesSkeleton({ count = 3 }: SkeletonProps) {
   return (
-    <ul className="account-address-list" aria-busy="true" aria-live="polite">
-      {Array.from({ length: count }, (_, index) => (
-        <li
-          key={`address-skel-${index}`}
-          className="account-address-card is-skeleton"
-        >
-          <div className="account-skeleton-address-body">
-            <SkeletonLines widths={["w-40", "w-70", "w-70", "w-30"]} />
-          </div>
-          <div className="account-address-actions account-skeleton-actions">
-            <div className="skeleton-line w-30" />
-            <div className="skeleton-line w-40" />
-            <div className="skeleton-line w-30" />
-          </div>
-        </li>
-      ))}
-    </ul>
+    <div className="account-addresses" aria-busy="true" aria-live="polite">
+      <div className="account-addresses-toolbar account-addresses-toolbar--skeleton">
+        <div className="account-skeleton-lines" style={{ flex: 1 }}>
+          <div className="skeleton-line sk-w-70" />
+          <div className="skeleton-line sk-w-40" />
+        </div>
+        <div className="skeleton-block account-skeleton-btn" />
+      </div>
+      <ul className="account-address-list">
+        {Array.from({ length: count }, (_, index) => (
+          <li
+            key={`address-skel-${index}`}
+            className="account-address-card is-skeleton"
+          >
+            <div className="account-skeleton-address-body">
+              <SkeletonLines widths={["sk-w-40", "sk-w-70", "sk-w-70", "sk-w-30"]} />
+            </div>
+            <div className="account-address-actions account-skeleton-actions">
+              <div className="skeleton-line sk-w-30" />
+              <div className="skeleton-line sk-w-40" />
+              <div className="skeleton-line sk-w-30" />
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 
 export function AccountWishlistSkeleton({ count = 3 }: SkeletonProps) {
   return (
-    <ul className="account-wishlist-list" aria-busy="true" aria-live="polite">
-      {Array.from({ length: count }, (_, index) => (
-        <li
-          key={`wishlist-skel-${index}`}
-          className="account-wishlist-item is-skeleton"
-        >
-          <div className="account-wishlist-media skeleton-block" />
-          <div className="account-wishlist-body">
-            <SkeletonLines widths={["w-70", "w-30", "w-40"]} />
-          </div>
-          <div className="account-wishlist-actions account-skeleton-actions">
-            <div className="skeleton-block account-skeleton-btn" />
-            <div className="skeleton-block account-skeleton-btn" />
-          </div>
-        </li>
-      ))}
-    </ul>
+    <div className="account-wishlist" aria-busy="true" aria-live="polite">
+      <div className="account-wishlist-toolbar">
+        <div className="skeleton-line sk-w-30" />
+      </div>
+      <ul className="account-wishlist-list">
+        {Array.from({ length: count }, (_, index) => (
+          <li
+            key={`wishlist-skel-${index}`}
+            className="account-wishlist-item is-skeleton"
+          >
+            <div className="account-wishlist-media skeleton-block" />
+            <div className="account-wishlist-body">
+              <SkeletonLines widths={["sk-w-70", "sk-w-30", "sk-w-40"]} />
+            </div>
+            <div className="account-wishlist-actions account-skeleton-actions">
+              <div className="skeleton-block account-skeleton-btn" />
+              <div className="skeleton-block account-skeleton-btn" />
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 
@@ -156,14 +170,14 @@ export function AccountProfileSkeleton() {
       <section className="account-profile-hero is-skeleton">
         <div className="account-profile-avatar skeleton-block account-skeleton-avatar" />
         <div className="account-profile-hero-copy">
-          <SkeletonLines widths={["w-40", "w-70"]} />
+          <SkeletonLines widths={["sk-w-40", "sk-w-70"]} />
         </div>
       </section>
 
       <section className="account-profile-card is-skeleton">
-        <div className="skeleton-line w-40" />
+        <div className="skeleton-line sk-w-40" />
         <div className="account-skeleton-profile-fields">
-          <SkeletonLines widths={["w-70", "w-40", "w-70"]} />
+          <SkeletonLines widths={["sk-w-70", "sk-w-40", "sk-w-70"]} />
         </div>
       </section>
 
@@ -171,13 +185,13 @@ export function AccountProfileSkeleton() {
         <div className="account-profile-link is-skeleton">
           <div className="skeleton-block account-skeleton-icon" />
           <div className="account-skeleton-link-copy">
-            <SkeletonLines widths={["w-40", "w-70"]} />
+            <SkeletonLines widths={["sk-w-40", "sk-w-70"]} />
           </div>
         </div>
         <div className="account-profile-link is-skeleton">
           <div className="skeleton-block account-skeleton-icon" />
           <div className="account-skeleton-link-copy">
-            <SkeletonLines widths={["w-40", "w-70"]} />
+            <SkeletonLines widths={["sk-w-40", "sk-w-70"]} />
           </div>
         </div>
       </section>

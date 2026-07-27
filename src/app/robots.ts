@@ -16,8 +16,11 @@ export default function robots(): MetadataRoute.Robots {
         disallow: [
           "/admin",
           "/admin/",
-          "/account",
-          "/account/",
+
+          "/profile",
+          "/orders",
+          "/wishlist",
+          "/addresses",
           "/cart",
           "/checkout",
           "/thank-you",

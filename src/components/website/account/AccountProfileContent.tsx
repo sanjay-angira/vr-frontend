@@ -85,7 +85,7 @@ export function AccountProfileContent() {
         </section>
 
         <section className="account-profile-links">
-          <Link href="/account/orders" className="account-profile-link">
+          <Link href="/orders" className="account-profile-link">
             <span className="account-profile-link-icon" aria-hidden>
               <Package size={18} />
             </span>
@@ -95,7 +95,7 @@ export function AccountProfileContent() {
             </span>
             <ChevronRight size={18} aria-hidden />
           </Link>
-          <Link href="/account/addresses" className="account-profile-link">
+          <Link href="/addresses" className="account-profile-link">
             <span className="account-profile-link-icon" aria-hidden>
               <MapPin size={18} />
             </span>

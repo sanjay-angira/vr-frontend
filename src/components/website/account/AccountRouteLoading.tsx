@@ -1,13 +1,14 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { AccountChromeSkeleton } from "@/components/website/account/AccountSkeletons";
 import { getAccountMeta } from "@/components/website/account/accountMeta";
 
-/** Route-aware account loading UI for (panel)/loading.tsx */
+/**
+ * Content-only skeleton for (account)/loading.tsx.
+ * Layout already provides AccountShell chrome — do not nest another full page.
+ */
 export function AccountRouteLoading() {
   const pathname = usePathname();
   const { skeleton } = getAccountMeta(pathname);
-
-  return <AccountChromeSkeleton>{skeleton}</AccountChromeSkeleton>;
+  return <>{skeleton}</>;
 }

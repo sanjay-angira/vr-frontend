@@ -33,7 +33,7 @@ export function HeaderStaticActions({ settings }: HeaderStaticActionsProps) {
 
       {settings.showWishlist ? (
         <Link
-          href="/account/wishlist"
+          href="/wishlist"
           className="icon-button"
           aria-label="Wishlist"
           style={{ position: "relative" }}

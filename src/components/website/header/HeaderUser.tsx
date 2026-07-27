@@ -78,7 +78,7 @@ export function HeaderUser() {
               My Profile
             </Link>
             <Link
-              href="/account/orders"
+              href="/orders"
               className="dropdown-item"
               onClick={() => setShowDropdown(false)}
             >

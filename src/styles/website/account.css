@@ -547,15 +547,15 @@
   min-width: 0;
 }
 
-.skeleton-line.w-30 {
+.skeleton-line.sk-w-30 {
   width: 30%;
 }
 
-.skeleton-line.w-40 {
+.skeleton-line.sk-w-40 {
   width: 40%;
 }
 
-.skeleton-line.w-70 {
+.skeleton-line.sk-w-70 {
   width: 70%;
 }
 
@@ -606,6 +606,24 @@
   min-width: 0;
 }
 
+.account-order-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--gap-xs);
+}
+
+.account-order-meta strong {
+  color: var(--vr-forest);
+  font-size: 0.98rem;
+}
+
+.account-order-meta span {
+  font-size: 0.84rem;
+  color: var(--vr-text-light, #667066);
+}
+
 .account-skeleton-thumb {
   width: 72px;
   height: 72px;
@@ -621,6 +639,32 @@
   pointer-events: none;
 }
 
+/* Dark hero: use light shimmer so bars stay visible */
+.account-profile-hero.is-skeleton .skeleton-line,
+.account-profile-hero.is-skeleton .skeleton-block {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.12),
+    rgba(255, 255, 255, 0.28),
+    rgba(255, 255, 255, 0.12)
+  );
+  background-size: 200% 100%;
+  animation: account-shimmer 1.2s ease-in-out infinite;
+}
+
+.account-profile-hero.is-skeleton .account-skeleton-avatar {
+  border-color: rgba(255, 255, 255, 0.2);
+  background: transparent;
+}
+
+.account-addresses-toolbar--skeleton {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gap-m);
+  margin-bottom: 1.15rem;
+}
+
 .account-skeleton-address-body {
   flex: 1;
   min-width: 0;
@@ -631,6 +675,10 @@
   flex-direction: column;
   gap: var(--gap-xs);
   min-width: 5.5rem;
+}
+
+.account-skeleton-actions .skeleton-line {
+  height: 0.85rem;
 }
 
 .account-skeleton-btn {
@@ -714,6 +762,8 @@
 
 .account-wishlist-item.is-skeleton .account-wishlist-media {
   background: transparent;
+  min-height: 5.5rem;
+  aspect-ratio: 1;
 }
 
 .account-back {

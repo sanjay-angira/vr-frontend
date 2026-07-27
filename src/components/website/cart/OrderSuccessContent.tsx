@@ -93,7 +93,7 @@ export function OrderSuccessContent() {
           <p className="commerce-muted">Order number: {orderNumber}</p>
           <div className="thankyou-actions">
             {isAuthenticated ? (
-              <Link href="/account/orders" className="btn btn-primary">
+              <Link href="/orders" className="btn btn-primary">
                 View my orders
               </Link>
             ) : null}
@@ -130,7 +130,7 @@ export function OrderSuccessContent() {
           </p>
           <div className="thankyou-actions">
             {isAuthenticated ? (
-              <Link href="/account/orders" className="btn btn-primary">
+              <Link href="/orders" className="btn btn-primary">
                 <Package size={16} aria-hidden />
                 View my orders
               </Link>

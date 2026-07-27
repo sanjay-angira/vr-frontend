@@ -87,7 +87,7 @@ export function AccountOrderDetailContent() {
 
       {!loading && order && money ? (
         <>
-          <Link href="/account/orders" className="account-back">
+          <Link href="/orders" className="account-back">
             <ArrowLeft size={16} aria-hidden />
             Back to orders
           </Link>

@@ -25,6 +25,20 @@ const nextConfig: NextConfig = {
     return [
       { source: "/login", destination: "/", permanent: false },
       { source: "/signup", destination: "/", permanent: false },
+      { source: "/account", destination: "/profile", permanent: false },
+      { source: "/account/profile", destination: "/profile", permanent: false },
+      { source: "/account/orders", destination: "/orders", permanent: false },
+      {
+        source: "/account/orders/:id",
+        destination: "/orders/:id",
+        permanent: false,
+      },
+      { source: "/account/wishlist", destination: "/wishlist", permanent: false },
+      {
+        source: "/account/addresses",
+        destination: "/addresses",
+        permanent: false,
+      },
     ];
   },
   async rewrites() {

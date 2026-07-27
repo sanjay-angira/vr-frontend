@@ -72,7 +72,7 @@ export function AccountOrdersContent() {
     <>
       {loading ? <AccountOrdersSkeleton /> : null}
 
-      {error ? <p className="account-error">{error}</p> : null}
+      {!loading && error ? <p className="account-error">{error}</p> : null}
 
       {!loading && !error && orders.length === 0 ? (
         <div className="account-empty">
@@ -87,7 +87,7 @@ export function AccountOrdersContent() {
         </div>
       ) : null}
 
-      {!loading ? (
+      {!loading && !error && orders.length > 0 ? (
       <ul className="account-order-list">
         {orders.map((order) => {
           const first = order.items[0];
@@ -95,7 +95,7 @@ export function AccountOrdersContent() {
           return (
             <li key={order.id} className="account-order-card">
               <Link
-                href={`/account/orders/${encodeURIComponent(order.orderNumber)}`}
+                href={`/orders/${encodeURIComponent(order.orderNumber)}`}
                 className="account-order-card-link"
               >
                 <div className="account-order-thumb">

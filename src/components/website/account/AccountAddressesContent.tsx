@@ -142,7 +142,9 @@ export function AccountAddressesContent() {
     }
   };
 
-  return (
+  return loading ? (
+    <AccountAddressesSkeleton />
+  ) : (
       <div className="account-addresses">
         <div className="account-addresses-toolbar">
           <p className="commerce-muted">
@@ -153,7 +155,6 @@ export function AccountAddressesContent() {
             type="button"
             className="cart-btn cart-btn-primary"
             onClick={startCreate}
-            disabled={loading}
           >
             Add address
           </button>
@@ -280,9 +281,7 @@ export function AccountAddressesContent() {
           </form>
         ) : null}
 
-        {loading ? (
-          <AccountAddressesSkeleton />
-        ) : addresses.length === 0 ? (
+        {addresses.length === 0 ? (
           <p className="commerce-muted">No saved addresses yet.</p>
         ) : (
           <ul className="account-address-list">
