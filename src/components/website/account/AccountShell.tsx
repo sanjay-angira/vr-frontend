@@ -2,30 +2,27 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useUserAuth } from "@/services/website/useUserAuth";
+import { AccountChromeSkeleton } from "@/components/website/account/AccountSkeletons";
+import { getAccountMeta } from "@/components/website/account/accountMeta";
 
 const NAV = [
   { href: "/account/profile", label: "Profile" },
   { href: "/account/orders", label: "My orders" },
   { href: "/account/wishlist", label: "Wishlist" },
   { href: "/account/addresses", label: "Addresses" },
-];
+] as const;
 
-export function AccountShell({
-  title,
-  children,
-  skeleton,
-}: {
-  title: string;
-  children: ReactNode;
-  /** Shown while auth hydrates from cookies/localStorage. */
-  skeleton?: ReactNode;
-}) {
+export function AccountShell({ children }: { children: ReactNode }) {
   const { isAuthenticated, user } = useUserAuth();
   const router = useRouter();
   const pathname = usePathname();
   const [hydrated, setHydrated] = useState(false);
+  const { title, skeleton } = useMemo(
+    () => getAccountMeta(pathname),
+    [pathname],
+  );
 
   useEffect(() => {
     setHydrated(true);
@@ -37,42 +34,8 @@ export function AccountShell({
     router.replace("/");
   }, [hydrated, isAuthenticated, router]);
 
-  if (!hydrated) {
-    return (
-      <div className="account-page" aria-busy="true" aria-live="polite">
-        <div className="account-container">
-          <header className="account-header">
-            <div className="skeleton-line w-30" />
-            <div className="skeleton-line account-skeleton-title" />
-            <div className="skeleton-line w-40" />
-          </header>
-
-          <div className="account-layout">
-            <nav className="account-nav" aria-hidden>
-              {NAV.map((item) => (
-                <div
-                  key={item.href}
-                  className="account-nav-link is-skeleton"
-                >
-                  <div className="skeleton-line w-70" />
-                </div>
-              ))}
-            </nav>
-            <div className="account-main">{skeleton}</div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!isAuthenticated || !user) {
-    return (
-      <div className="account-page">
-        <div className="account-container">
-          <p className="commerce-muted">Please log in to view your account.</p>
-        </div>
-      </div>
-    );
+  if (!hydrated || !isAuthenticated || !user) {
+    return <AccountChromeSkeleton>{skeleton}</AccountChromeSkeleton>;
   }
 
   return (
@@ -90,7 +53,7 @@ export function AccountShell({
               const active =
                 pathname === item.href ||
                 (item.href !== "/account/profile" &&
-                  pathname?.startsWith(item.href));
+                  Boolean(pathname?.startsWith(item.href)));
               return (
                 <Link
                   key={item.href}

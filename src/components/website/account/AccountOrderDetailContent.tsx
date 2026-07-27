@@ -9,7 +9,7 @@ import {
   getOrderByNumber,
   type PlacedOrder,
 } from "@/services/website/checkoutService";
-import { AccountShell } from "@/components/website/account/AccountShell";
+import { AccountOrderDetailSkeleton } from "@/components/website/account/AccountSkeletons";
 import {
   formatInr,
   getOrderItemMoney,
@@ -80,20 +80,19 @@ export function AccountOrderDetailContent() {
     [];
 
   return (
-    <AccountShell title="Order details">
-      <Link href="/account/orders" className="account-back">
-        <ArrowLeft size={16} aria-hidden />
-        Back to orders
-      </Link>
+    <>
+      {loading ? <AccountOrderDetailSkeleton /> : null}
 
-      {loading ? (
-        <p className="commerce-muted">Loading order…</p>
-      ) : null}
+      {!loading && error ? <p className="account-error">{error}</p> : null}
 
-      {error ? <p className="account-error">{error}</p> : null}
+      {!loading && order && money ? (
+        <>
+          <Link href="/account/orders" className="account-back">
+            <ArrowLeft size={16} aria-hidden />
+            Back to orders
+          </Link>
 
-      {order && money ? (
-        <div className="account-order-detail">
+          <div className="account-order-detail">
           <div className="account-order-detail-head">
             <div>
               <strong>{order.orderNumber}</strong>
@@ -212,7 +211,8 @@ export function AccountOrderDetailContent() {
             </p>
           </section>
         </div>
+        </>
       ) : null}
-    </AccountShell>
+    </>
   );
 }

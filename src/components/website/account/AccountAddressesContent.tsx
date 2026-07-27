@@ -2,7 +2,6 @@
 
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { AccountShell } from "@/components/website/account/AccountShell";
 import { AccountAddressesSkeleton } from "@/components/website/account/AccountSkeletons";
 import {
   createUserAddress,
@@ -144,7 +143,6 @@ export function AccountAddressesContent() {
   };
 
   return (
-    <AccountShell title="Addresses" skeleton={<AccountAddressesSkeleton />}>
       <div className="account-addresses">
         <div className="account-addresses-toolbar">
           <p className="commerce-muted">
@@ -331,6 +329,5 @@ export function AccountAddressesContent() {
           </ul>
         )}
       </div>
-    </AccountShell>
   );
 }
