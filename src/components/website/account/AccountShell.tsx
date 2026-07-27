@@ -8,10 +8,10 @@ import { AccountChromeSkeleton } from "@/components/website/account/AccountSkele
 import { getAccountMeta } from "@/components/website/account/accountMeta";
 
 const NAV = [
-  { href: "/account/profile", label: "Profile" },
-  { href: "/account/orders", label: "My orders" },
-  { href: "/account/wishlist", label: "Wishlist" },
-  { href: "/account/addresses", label: "Addresses" },
+  { href: "/profile", label: "Profile" },
+  { href: "/orders", label: "My orders" },
+  { href: "/wishlist", label: "Wishlist" },
+  { href: "/addresses", label: "Addresses" },
 ] as const;
 
 export function AccountShell({ children }: { children: ReactNode }) {
@@ -52,7 +52,7 @@ export function AccountShell({ children }: { children: ReactNode }) {
             {NAV.map((item) => {
               const active =
                 pathname === item.href ||
-                (item.href !== "/account/profile" &&
+                (item.href !== "/profile" &&
                   Boolean(pathname?.startsWith(item.href)));
               return (
                 <Link
