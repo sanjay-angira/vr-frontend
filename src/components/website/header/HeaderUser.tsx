@@ -71,7 +71,7 @@ export function HeaderUser() {
           <div className="dropdown-menu profile-dropdown-menu">
             <div className="profile-dropdown-name">{user.name}</div>
             <Link
-              href="/account/profile"
+              href="/profile"
               className="dropdown-item"
               onClick={() => setShowDropdown(false)}
             >
