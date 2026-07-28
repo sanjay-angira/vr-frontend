@@ -26,7 +26,11 @@ export function ComboProductCard({ combo }: { combo: ComboProduct }) {
   return (
     <article className="combo-card">
       <div className="combo-card-image-wrap">
-        <img src={combo.image} alt={combo.name} className="combo-card-image" />
+        {combo.image?.trim() ? (
+          <img src={combo.image} alt={combo.name} className="combo-card-image" />
+        ) : (
+          <div className="combo-card-image combo-card-image--placeholder" aria-hidden />
+        )}
         <span className="combo-badge">Combo Offer</span>
         {hasDiscount && (
           <span className="combo-discount">Save {discountPercent}%</span>

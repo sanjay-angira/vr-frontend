@@ -18,13 +18,11 @@ import {
 } from "./shared/FormFields";
 import { getData } from "@/services/api/apiService";
 import { useAdminCrudForm } from "./shared/useAdminCrudForm";
-import { useSlugSync } from "./shared/useSlugSync";
 import { UPLOAD_PATHS } from "./shared/uploadPaths";
-import { activeField, requiredString, slugField } from "./shared/validation";
+import { activeField, requiredString } from "./shared/validation";
 
 type Values = {
   couponCode: string;
-  couponSlug: string;
   image: string;
   discountType: string;
   discountValue: number | "";
@@ -37,7 +35,6 @@ type Values = {
 
 const initialValues: Values = {
   couponCode: "",
-  couponSlug: "",
   image: "",
   discountType: "percentage",
   discountValue: "",
@@ -50,7 +47,6 @@ const initialValues: Values = {
 
 const schema = Yup.object({
   couponCode: requiredString("Coupon code", 2, 50),
-  couponSlug: slugField("Coupon slug"),
   image: Yup.string(),
   discountType: Yup.string().oneOf(["percentage", "fixed"]).required(),
   discountValue: Yup.number().min(0).required("Discount value is required"),
@@ -90,7 +86,6 @@ export function CouponForm({ module, recordId }: AdminFormProps) {
 
       return {
         couponCode: String(r.couponCode ?? ""),
-        couponSlug: String(r.couponSlug ?? ""),
         image: String(r.image ?? ""),
         discountType: String(r.discountType ?? "percentage"),
         discountValue: Number(r.discountValue ?? 0),
@@ -103,7 +98,6 @@ export function CouponForm({ module, recordId }: AdminFormProps) {
     },
     mapValuesToPayload: (v) => ({
       couponCode: v.couponCode.trim(),
-      couponSlug: v.couponSlug.trim(),
       image: v.image || null,
       discountType: v.discountType,
       discountValue: Number(v.discountValue),
@@ -114,8 +108,6 @@ export function CouponForm({ module, recordId }: AdminFormProps) {
       ...(v.isUserSpecific ? { userIds: v.userIds } : {}),
     }),
   });
-
-  useSlugSync(formik, "couponCode", "couponSlug", !isEdit);
 
   useEffect(() => {
     if (formik.values.isUserSpecific) {
@@ -134,7 +126,6 @@ export function CouponForm({ module, recordId }: AdminFormProps) {
       <form onSubmit={formik.handleSubmit} className="space-y-8">
         <FormSection title="Coupon details">
           <FormInput formik={formik} name="couponCode" label="Coupon Code" required />
-          <FormInput formik={formik} name="couponSlug" label="Coupon Slug" required />
           <FormSelect
             formik={formik}
             name="discountType"

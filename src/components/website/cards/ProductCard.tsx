@@ -126,7 +126,7 @@ export function ProductCard({
     }
   };
 
-  const imageElement = (
+  const imageElement = normalizedProduct.image?.trim() ? (
     <img
       src={normalizedProduct.image}
       alt={normalizedProduct.name}
@@ -136,6 +136,8 @@ export function ProductCard({
         event.currentTarget.src = "/next.svg";
       }}
     />
+  ) : (
+    <div className="product-image product-image--placeholder" aria-hidden />
   );
 
   return (

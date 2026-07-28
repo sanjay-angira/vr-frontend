@@ -17,10 +17,12 @@ export default function ProductImageGallery({ images, alt, topRightSlot }: Props
   const [isZoomed, setIsZoomed] = useState(false);
   const [fadeKey, setFadeKey] = useState(0);
 
-  const safeImages = images.length > 0 ? images : [];
+  const safeImages = images.filter(
+    (src): src is string => typeof src === "string" && src.trim().length > 0
+  );
   const hasMultiple = safeImages.length > 1;
   const activeIndex = Math.min(current, Math.max(safeImages.length - 1, 0));
-  const activeImage = safeImages[activeIndex];
+  const activeImage = safeImages[activeIndex] ?? null;
 
   useEffect(() => {
     setCurrent(0);

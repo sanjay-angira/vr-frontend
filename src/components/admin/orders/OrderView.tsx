@@ -24,7 +24,16 @@ type OrderItemRecord = {
   subtotal: number;
   listSubtotal: number;
   image?: string | null;
+  offerJson?: { offerName?: string } | null;
   appliedOffer?: { offerName?: string } | null;
+};
+
+type OrderCoupon = {
+  id?: number | null;
+  couponCode?: string | null;
+  discountType?: string | null;
+  discountValue?: number | null;
+  couponDiscount?: number | null;
 };
 
 type OrderRecord = {
@@ -44,6 +53,14 @@ type OrderRecord = {
   paymentStatus: string;
   listSubtotal: number;
   discountTotal: number;
+  offerDiscountTotal?: number;
+  couponDiscount?: number;
+  couponId?: number | null;
+  couponCode?: string | null;
+  couponDiscountType?: string | null;
+  couponDiscountValue?: number | null;
+  coupon?: OrderCoupon | null;
+  couponJson?: OrderCoupon | null;
   subtotal: number;
   shippingFee: number;
   total: number;
@@ -52,6 +69,25 @@ type OrderRecord = {
   items: OrderItemRecord[];
   createdAt?: string;
 };
+
+function couponDiscountLabel(order: OrderRecord) {
+  const type = (
+    order.couponDiscountType ??
+    order.couponJson?.discountType ??
+    order.coupon?.discountType ??
+    ""
+  ).toLowerCase();
+  const value = Number(
+    order.couponDiscountValue ??
+      order.couponJson?.discountValue ??
+      order.coupon?.discountValue ??
+      0,
+  );
+  if (!Number.isFinite(value) || value <= 0) return null;
+  if (type === "percentage" || type === "percent") return `${value}% off`;
+  if (type === "flat" || type === "fixed") return `${formatInr(value)} off`;
+  return null;
+}
 
 function formatInr(value: unknown) {
   const num = Number(value);
@@ -237,6 +273,24 @@ export function OrderView({ module, recordId }: AdminViewProps) {
     .filter(Boolean)
     .join("\n");
 
+  const couponCode =
+    order.couponCode ??
+    order.couponJson?.couponCode ??
+    order.coupon?.couponCode ??
+    null;
+  const couponDiscount = Number(
+    order.couponDiscount ??
+      order.couponJson?.couponDiscount ??
+      order.coupon?.couponDiscount ??
+      0,
+  );
+  const offerDiscountTotal = Number(
+    order.offerDiscountTotal ??
+      Math.max(0, Number(order.discountTotal || 0) - couponDiscount),
+  );
+  const hasCoupon = Boolean(couponCode) || couponDiscount > 0.009;
+  const couponRule = couponDiscountLabel(order);
+
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -298,9 +352,12 @@ export function OrderView({ module, recordId }: AdminViewProps) {
                         {item.variantName ? ` · ${item.variantName}` : ""}
                         {item.sku ? ` · SKU ${item.sku}` : ""}
                       </p>
-                      {item.appliedOffer?.offerName ? (
+                      {(item.offerJson?.offerName ||
+                        item.appliedOffer?.offerName) ? (
                         <p className="mt-1 text-xs font-medium text-amber-700">
-                          Offer: {item.appliedOffer.offerName}
+                          Offer:{" "}
+                          {item.offerJson?.offerName ||
+                            item.appliedOffer?.offerName}
                         </p>
                       ) : null}
                       <p className="mt-1 text-xs text-zinc-400">
@@ -353,6 +410,36 @@ export function OrderView({ module, recordId }: AdminViewProps) {
             </div>
           </section>
 
+          {hasCoupon ? (
+            <section className="rounded-xl border border-zinc-200 bg-white p-5">
+              <h2 className="text-base font-semibold text-zinc-900">
+                Applied coupon
+              </h2>
+              <div className="mt-4 grid gap-4">
+                <InfoItem label="Code" value={couponCode || "—"} />
+                {order.couponId != null ||
+                order.couponJson?.id != null ||
+                order.coupon?.id != null ? (
+                  <InfoItem
+                    label="Coupon ID"
+                    value={String(
+                      order.couponId ??
+                        order.couponJson?.id ??
+                        order.coupon?.id,
+                    )}
+                  />
+                ) : null}
+                {couponRule ? (
+                  <InfoItem label="Discount rule" value={couponRule} />
+                ) : null}
+                <InfoItem
+                  label="Amount saved"
+                  value={`−${formatInr(couponDiscount)}`}
+                />
+              </div>
+            </section>
+          ) : null}
+
           <section className="rounded-xl border border-zinc-200 bg-white p-5">
             <h2 className="text-base font-semibold text-zinc-900">Totals</h2>
             <dl className="mt-4 space-y-2 text-sm">
@@ -362,12 +449,33 @@ export function OrderView({ module, recordId }: AdminViewProps) {
                   {formatInr(order.listSubtotal)}
                 </dd>
               </div>
-              <div className="flex justify-between gap-3">
-                <dt className="text-zinc-500">Discount</dt>
-                <dd className="font-medium text-zinc-900">
-                  −{formatInr(order.discountTotal)}
-                </dd>
-              </div>
+              {offerDiscountTotal > 0.009 ? (
+                <div className="flex justify-between gap-3">
+                  <dt className="text-zinc-500">Offer discount</dt>
+                  <dd className="font-medium text-zinc-900">
+                    −{formatInr(offerDiscountTotal)}
+                  </dd>
+                </div>
+              ) : null}
+              {couponDiscount > 0.009 ? (
+                <div className="flex justify-between gap-3">
+                  <dt className="text-zinc-500">
+                    Coupon
+                    {couponCode ? ` (${couponCode})` : ""}
+                  </dt>
+                  <dd className="font-medium text-zinc-900">
+                    −{formatInr(couponDiscount)}
+                  </dd>
+                </div>
+              ) : Number(order.discountTotal) > 0.009 &&
+                offerDiscountTotal <= 0.009 ? (
+                <div className="flex justify-between gap-3">
+                  <dt className="text-zinc-500">Discount</dt>
+                  <dd className="font-medium text-zinc-900">
+                    −{formatInr(order.discountTotal)}
+                  </dd>
+                </div>
+              ) : null}
               <div className="flex justify-between gap-3">
                 <dt className="text-zinc-500">Subtotal</dt>
                 <dd className="font-medium text-zinc-900">

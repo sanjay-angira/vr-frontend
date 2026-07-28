@@ -11,6 +11,7 @@ import {
   normalizeVariants,
   toNumber,
 } from "@/components/website/product/productApi";
+import { fetchWebsiteCoupons } from "@/services/website/couponService";
 import { ScrollToTopOnMount } from "@/components/website/shared/ScrollToTopOnMount";
 
 type PageProps = {
@@ -19,7 +20,10 @@ type PageProps = {
 
 export default async function ProductDetailPage({ params }: PageProps) {
   const { slug } = await params;
-  const product = await fetchProductBySlug(slug);
+  const [product, availableCoupons] = await Promise.all([
+    fetchProductBySlug(slug),
+    fetchWebsiteCoupons(),
+  ]);
 
   if (!product) {
     notFound();
@@ -38,7 +42,8 @@ export default async function ProductDetailPage({ params }: PageProps) {
     product.images
       ?.slice()
       .sort((a, b) => a.sortOrder - b.sortOrder)
-      .map((image) => image.url) ?? [];
+      .map((image) => image.url)
+      .filter((url): url is string => typeof url === "string" && url.trim().length > 0) ?? [];
 
   const reviewList = (product.reviews || []).map((review) => ({
     id: String(review.id),
@@ -77,6 +82,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
     variants: normalizedVariants,
     rating: averageRating,
     reviewCount: reviewList.length,
+    availableCoupons,
   };
 
   const faqItems =
@@ -98,7 +104,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
           name: item.productName,
           description: item.shortDescription || "",
           price: item.price || 0,
-          image: item.image || "",
+          image: item.image?.trim() || "",
           category: "Recommended",
           rating: 5,
           reviewCount: 0,

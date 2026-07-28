@@ -14,7 +14,9 @@ import {
 import ProductImageGallery from "@/components/website/product/ProductImageGallery";
 import GroupedVariantPicker from "@/components/website/product/GroupedVariantPicker";
 import ProductPriceBlock from "@/components/website/product/ProductPriceBlock";
+import { ProductCouponBanner } from "@/components/website/product/ProductCouponBanner";
 import type { ProductVariantView } from "@/components/website/product/productApi";
+import type { WebsiteCoupon } from "@/services/website/couponService";
 import {
   buildAttributeGroups,
   findVariantBySlug,
@@ -45,6 +47,7 @@ export type ProductDetailView = {
   variants: ProductVariantView[];
   rating: number;
   reviewCount: number;
+  availableCoupons?: WebsiteCoupon[];
 };
 
 type Props = {
@@ -290,7 +293,10 @@ export default function ProductDetail({
         {shortCopy && <p className="product-detail-subtitle">{shortCopy}</p>}
 
         {selectedVariant && (
-          <ProductPriceBlock pricing={selectedVariant.pricing} inStock={inStock} />
+          <ProductPriceBlock
+            pricing={selectedVariant.pricing}
+            inStock={inStock}
+          />
         )}
 
         {showVariantPicker && (
@@ -368,6 +374,11 @@ export default function ProductDetail({
             Buy Now
           </button>
         </div>
+
+        <ProductCouponBanner
+          coupons={product.availableCoupons ?? []}
+          variantId={selectedVariant?.id ?? null}
+        />
 
         <ul className="product-trust-row" aria-label="Purchase benefits">
           <li>

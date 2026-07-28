@@ -328,21 +328,6 @@ export function renderAdminCell(
       const discountType = String(value ?? row.type ?? "").trim();
       return discountType ? <span>{titleCase(discountType)}</span> : <span>NA</span>;
     }
-    case "couponSlug": {
-      const slug =
-        (typeof value === "string" && value.trim()) ||
-        (typeof row.couponSlug === "string" && row.couponSlug.trim()) ||
-        (typeof row.couponCode === "string"
-          ? row.couponCode
-              .toLowerCase()
-              .trim()
-              .replace(/\s+/g, "-")
-              .replace(/[^\w-]+/g, "")
-              .replace(/-+/g, "-")
-              .replace(/^-+|-+$/g, "")
-          : "");
-      return slug ? <span>{slug}</span> : <span>NA</span>;
-    }
     default:
       return <DefaultCell value={value} />;
   }

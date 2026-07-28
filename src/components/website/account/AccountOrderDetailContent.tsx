@@ -69,10 +69,12 @@ export function AccountOrderDetailContent() {
 
   const money = order ? getOrderMoney(order) : null;
   const appliedOffers =
-    order?.offerJson?.offers?.filter((offer) => offer?.offerName) ||
+    order?.offers?.filter((offer) => offer?.offerName) ||
     order?.items
-      .map((item) => item.appliedOffer)
-      .filter((offer): offer is NonNullable<typeof offer> => Boolean(offer?.offerName))
+      .map((item) => item.offerJson ?? item.appliedOffer)
+      .filter((offer): offer is NonNullable<typeof offer> =>
+        Boolean(offer?.offerName),
+      )
       .filter(
         (offer, index, list) =>
           list.findIndex((row) => row?.id === offer?.id) === index,
@@ -157,10 +159,19 @@ export function AccountOrderDetailContent() {
               <span>Price</span>
               <strong>{formatInr(money.listSubtotal)}</strong>
             </div>
-            {money.hasDiscount ? (
+            {money.hasOfferDiscount ? (
               <div className="commerce-summary-row order-summary-discount">
                 <span>Offer discount</span>
-                <strong>− {formatInr(money.discountTotal)}</strong>
+                <strong>− {formatInr(money.offerDiscountTotal)}</strong>
+              </div>
+            ) : null}
+            {money.hasCouponDiscount ? (
+              <div className="commerce-summary-row order-summary-discount">
+                <span>
+                  Coupon
+                  {money.couponCode ? ` (${money.couponCode})` : ""}
+                </span>
+                <strong>− {formatInr(money.couponDiscount)}</strong>
               </div>
             ) : null}
             <div className="commerce-summary-row">
@@ -176,9 +187,9 @@ export function AccountOrderDetailContent() {
               <strong>{formatInr(money.total)}</strong>
             </div>
 
-            {appliedOffers.length > 0 ? (
+            {appliedOffers.length > 0 || money.hasCouponDiscount ? (
               <div className="account-applied-offers">
-                <p className="commerce-muted">Applied offers</p>
+                <p className="commerce-muted">Applied discounts</p>
                 <ul>
                   {appliedOffers.map((offer, index) => (
                     <li key={String(offer?.id ?? index)}>
@@ -191,6 +202,13 @@ export function AccountOrderDetailContent() {
                           : null}
                     </li>
                   ))}
+                  {money.hasCouponDiscount ? (
+                    <li>
+                      Coupon
+                      {money.couponCode ? ` · ${money.couponCode}` : ""}
+                      {` · −${formatInr(money.couponDiscount)}`}
+                    </li>
+                  ) : null}
                 </ul>
               </div>
             ) : null}

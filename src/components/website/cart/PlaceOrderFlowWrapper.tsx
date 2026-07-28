@@ -9,7 +9,7 @@ import React, {
   useState,
   type ReactNode,
 } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { CartItemData } from "@/services/website/cartService";
 import { useCart } from "@/components/website/hooks/useCart";
 import { OrderSummary } from "@/components/website/cart/OrderSummary";
@@ -19,6 +19,12 @@ import {
   type CheckoutPayload,
 } from "@/services/website/checkoutService";
 import { openRazorpayCheckout } from "@/utils/razorpayCheckout";
+import {
+  applyCouponCode,
+  computeCouponDiscountAmount,
+  type AppliedCoupon,
+} from "@/services/website/couponService";
+import { getOrderSummaryTotals } from "@/components/website/cart/commerceUtils";
 
 export type OrderSummaryShippingMode = "threshold" | "free";
 
@@ -64,6 +70,15 @@ type PlaceOrderContextType = {
   paymentMethod: "cod" | "online";
   setPaymentMethod: (method: "cod" | "online") => void;
 
+  appliedCoupon: AppliedCoupon | null;
+  couponDiscount: number;
+  couponInput: string;
+  setCouponInput: (value: string) => void;
+  couponApplying: boolean;
+  couponError: string | null;
+  applyCoupon: (code?: string) => Promise<void>;
+  removeCoupon: () => void;
+
   checkoutLoading: boolean;
   checkoutError: string | null;
   handlePlaceOrder: () => void;
@@ -94,6 +109,7 @@ function configForPath(pathname: string | null): OrderSummaryConfig {
 function PlaceOrderFlowWrapper({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const cart = useCart();
 
   const [config, setConfig] = useState<OrderSummaryConfig>(() =>
@@ -105,7 +121,29 @@ function PlaceOrderFlowWrapper({ children }: { children: ReactNode }) {
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
+  const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
+  const [couponInput, setCouponInput] = useState("");
+  const [couponApplying, setCouponApplying] = useState(false);
+  const [couponError, setCouponError] = useState<string | null>(null);
+  const [pendingDeepLinkCoupon, setPendingDeepLinkCoupon] = useState<string | null>(
+    null,
+  );
+
   const isCheckout = Boolean(pathname?.startsWith("/checkout"));
+
+  const merchandiseTotal = useMemo(
+    () => getOrderSummaryTotals(cart.items).merchandiseTotal,
+    [cart.items],
+  );
+
+  const couponDiscount = useMemo(() => {
+    if (!appliedCoupon) return 0;
+    return computeCouponDiscountAmount(
+      appliedCoupon.discountType,
+      appliedCoupon.discountValue,
+      merchandiseTotal,
+    );
+  }, [appliedCoupon, merchandiseTotal]);
 
   useEffect(() => {
     setConfig(configForPath(pathname));
@@ -118,6 +156,103 @@ function PlaceOrderFlowWrapper({ children }: { children: ReactNode }) {
   useEffect(() => {
     void cart.fetchCart();
   }, [cart.fetchCart]);
+
+  useEffect(() => {
+    const code = searchParams?.get("coupon")?.trim();
+    if (!code) return;
+    setCouponInput(code);
+    setPendingDeepLinkCoupon(code);
+  }, [searchParams]);
+
+  const removeCoupon = useCallback(() => {
+    setAppliedCoupon(null);
+    setCouponError(null);
+    setCouponInput("");
+  }, []);
+
+  const applyCoupon = useCallback(
+    async (code?: string) => {
+      const nextCode = (code ?? couponInput).trim();
+      if (!nextCode) {
+        setCouponError("Enter a coupon code");
+        return;
+      }
+
+      setCouponApplying(true);
+      setCouponError(null);
+
+      try {
+        const applied = await applyCouponCode(nextCode);
+        const amount = computeCouponDiscountAmount(
+          applied.discountType,
+          applied.discountValue,
+          merchandiseTotal,
+        );
+
+        if (
+          applied.discountType.toLowerCase() === "fixed" &&
+          applied.discountValue > merchandiseTotal
+        ) {
+          throw new Error(
+            "Cart total is too low for this coupon. Add more items to use it.",
+          );
+        }
+
+        if (amount <= 0) {
+          throw new Error("Coupon discount is not applicable on this cart");
+        }
+
+        setAppliedCoupon(applied);
+        setCouponInput(applied.couponCode);
+      } catch (error) {
+        setAppliedCoupon(null);
+        const message =
+          error instanceof Error ? error.message : "Invalid Coupon Code";
+        setCouponError(message);
+        throw error;
+      } finally {
+        setCouponApplying(false);
+      }
+    },
+    [couponInput, merchandiseTotal],
+  );
+
+  useEffect(() => {
+    if (!pendingDeepLinkCoupon) return;
+    if (cart.loading) return;
+    if (cart.items.length === 0) return;
+
+    const code = pendingDeepLinkCoupon;
+    setPendingDeepLinkCoupon(null);
+
+    void applyCoupon(code).finally(() => {
+      if (typeof window !== "undefined") {
+        const url = new URL(window.location.href);
+        if (url.searchParams.has("coupon")) {
+          url.searchParams.delete("coupon");
+          window.history.replaceState({}, "", url.pathname + url.search);
+        }
+      }
+    });
+  }, [
+    pendingDeepLinkCoupon,
+    cart.loading,
+    cart.items.length,
+    applyCoupon,
+  ]);
+
+  useEffect(() => {
+    if (!appliedCoupon) return;
+    if (
+      appliedCoupon.discountType.toLowerCase() === "fixed" &&
+      appliedCoupon.discountValue > merchandiseTotal
+    ) {
+      setAppliedCoupon(null);
+      setCouponError(
+        "Coupon removed because cart total is below the fixed discount.",
+      );
+    }
+  }, [appliedCoupon, merchandiseTotal]);
 
   const handlePlaceOrder = useCallback(() => {
     if (cart.items.length === 0) return;
@@ -145,6 +280,7 @@ function PlaceOrderFlowWrapper({ children }: { children: ReactNode }) {
         pincode: confirmDeliveryAddress.pincode.trim(),
         notes: confirmDeliveryAddress.notes?.trim() || undefined,
         paymentMethod,
+        ...(appliedCoupon?.id ? { couponId: appliedCoupon.id } : {}),
       });
 
       if (paymentMethod === "online") {
@@ -162,8 +298,6 @@ function PlaceOrderFlowWrapper({ children }: { children: ReactNode }) {
             razorpay_signature: payment.razorpay_signature,
           });
         } catch (verifyErr) {
-          // Payment succeeded at Razorpay; don't block thank-you.
-          // Webhook / retry can still finalize the order.
           console.error("Razorpay verify failed after payment:", verifyErr);
         }
       }
@@ -175,6 +309,8 @@ function PlaceOrderFlowWrapper({ children }: { children: ReactNode }) {
       }
 
       setConfirmDeliveryAddress(null);
+      setAppliedCoupon(null);
+      setCouponInput("");
       router.replace(
         `/thank-you?order=${encodeURIComponent(order.orderNumber)}`,
       );
@@ -188,7 +324,7 @@ function PlaceOrderFlowWrapper({ children }: { children: ReactNode }) {
     } finally {
       setCheckoutLoading(false);
     }
-  }, [confirmDeliveryAddress, cart, paymentMethod, router]);
+  }, [confirmDeliveryAddress, cart, paymentMethod, router, appliedCoupon]);
 
   const value = useMemo<PlaceOrderContextType>(
     () => ({
@@ -217,6 +353,14 @@ function PlaceOrderFlowWrapper({ children }: { children: ReactNode }) {
       setConfirmDeliveryAddress,
       paymentMethod,
       setPaymentMethod,
+      appliedCoupon,
+      couponDiscount,
+      couponInput,
+      setCouponInput,
+      couponApplying,
+      couponError,
+      applyCoupon,
+      removeCoupon,
       checkoutLoading,
       checkoutError,
       handlePlaceOrder,
@@ -236,6 +380,13 @@ function PlaceOrderFlowWrapper({ children }: { children: ReactNode }) {
       isCheckout,
       confirmDeliveryAddress,
       paymentMethod,
+      appliedCoupon,
+      couponDiscount,
+      couponInput,
+      couponApplying,
+      couponError,
+      applyCoupon,
+      removeCoupon,
       checkoutLoading,
       checkoutError,
       handlePlaceOrder,

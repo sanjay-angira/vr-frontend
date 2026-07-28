@@ -196,7 +196,8 @@ export function normalizeVariants(
       images: (variant.images || [])
         .slice()
         .sort((a, b) => a.sortOrder - b.sortOrder)
-        .map((image) => image.url),
+        .map((image) => image.url)
+        .filter((url): url is string => typeof url === "string" && url.trim().length > 0),
       variantAttributes: normalizeVariantAttributes(variant.variantAttributes || []),
       pricing,
     };

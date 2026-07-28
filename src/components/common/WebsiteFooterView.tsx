@@ -69,9 +69,10 @@ function IconTile({
   className: string;
   imageClassName: string;
 }) {
-  const content = iconUrl ? (
+  const safeIconUrl = iconUrl.trim();
+  const content = safeIconUrl ? (
     // eslint-disable-next-line @next/next/no-img-element
-    <img src={iconUrl} alt={label} className={imageClassName} />
+    <img src={safeIconUrl} alt={label} className={imageClassName} />
   ) : (
     <span className="footer-payment-label">{label}</span>
   );

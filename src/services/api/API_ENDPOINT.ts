@@ -223,6 +223,7 @@ export const API_ENDPOINTS = {
     CART_COUNT: "customer/cart-count",
     REMOVE_CART: (id: number | string) => `customer/remove-cart-item/${id}`,
     CHECKOUT: "customer/checkout",
+    APPLY_COUPON: "customer/apply-coupon",
     RAZORPAY_VERIFY: "customer/payments/razorpay/verify",
     ORDER_DETAILS: (orderNumber: string) => `customer/order/${orderNumber}`,
     ORDERS: "customer/orders",

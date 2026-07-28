@@ -15,7 +15,9 @@ import {
   RotateCcw,
   ShieldCheck,
   Tag,
+  Ticket,
   Truck,
+  X,
   Zap,
 } from "lucide-react";
 import { usePlaceOrderContext } from "@/components/website/cart/PlaceOrderFlowWrapper";
@@ -74,11 +76,26 @@ export function OrderSummary() {
     submitCheckout,
     checkoutError,
     paymentMethod,
+    appliedCoupon,
+    couponDiscount,
+    couponInput,
+    setCouponInput,
+    couponApplying,
+    couponError,
+    applyCoupon,
+    removeCoupon,
   } = usePlaceOrderContext();
   const { shippingMode, secureNote } = config;
 
-  const { itemCount, unitCount, listTotal, payableTotal, discount } =
-    getOrderSummaryTotals(items);
+  const {
+    itemCount,
+    unitCount,
+    listTotal,
+    payableTotal,
+    offerDiscount,
+    couponDiscount: appliedCouponDiscount,
+    discount,
+  } = getOrderSummaryTotals(items, couponDiscount);
 
   const shippingGap = Math.max(0, FREE_SHIPPING_THRESHOLD - payableTotal);
   const qualifiesFreeShipping =
@@ -147,13 +164,23 @@ export function OrderSummary() {
           <strong>{formatInr(listTotal)}</strong>
         </div>
 
-        {discount > 0 ? (
+        {offerDiscount > 0 ? (
           <div className="commerce-summary-row order-summary-discount">
             <span>
               <Tag size={14} strokeWidth={2} aria-hidden />
-              Discount
+              Offer Discount
             </span>
-            <strong>− {formatInr(discount)}</strong>
+            <strong>− {formatInr(offerDiscount)}</strong>
+          </div>
+        ) : null}
+
+        {appliedCouponDiscount > 0 ? (
+          <div className="commerce-summary-row order-summary-discount">
+            <span>
+              <Ticket size={14} strokeWidth={2} aria-hidden />
+              Coupon ({appliedCoupon?.couponCode})
+            </span>
+            <strong>− {formatInr(appliedCouponDiscount)}</strong>
           </div>
         ) : null}
 
@@ -176,6 +203,57 @@ export function OrderSummary() {
             You will save {formatInr(discount)} on this order
           </p>
         ) : null}
+
+        <div className="order-summary-coupon">
+          <p className="order-summary-coupon__label">Have a coupon?</p>
+          {appliedCoupon ? (
+            <div className="order-summary-coupon__applied">
+              <span>
+                <Ticket size={14} aria-hidden />
+                {appliedCoupon.couponCode}
+              </span>
+              <button
+                type="button"
+                className="order-summary-coupon__remove"
+                onClick={removeCoupon}
+                aria-label="Remove coupon"
+              >
+                <X size={14} />
+                Remove
+              </button>
+            </div>
+          ) : (
+            <form
+              className="order-summary-coupon__form"
+              onSubmit={(event) => {
+                event.preventDefault();
+                void applyCoupon();
+              }}
+            >
+              <input
+                type="text"
+                value={couponInput}
+                onChange={(event) => setCouponInput(event.target.value.toUpperCase())}
+                placeholder="Enter coupon code"
+                className="order-summary-coupon__input"
+                disabled={couponApplying}
+                autoComplete="off"
+              />
+              <button
+                type="submit"
+                className="order-summary-coupon__apply"
+                disabled={couponApplying || !couponInput.trim()}
+              >
+                {couponApplying ? "Applying…" : "Apply"}
+              </button>
+            </form>
+          )}
+          {couponError ? (
+            <p className="order-summary-coupon__error" role="alert">
+              {couponError}
+            </p>
+          ) : null}
+        </div>
 
         <div
           className={`cart-shipping-banner${qualifiesFreeShipping ? " is-free" : ""}`}
@@ -203,7 +281,6 @@ export function OrderSummary() {
           </p>
         ) : null}
 
-        {/* Pathname only swaps CTA — same aside chrome (tid pattern) */}
         <div className="payment-summary-actions order-summary-actions">
           {isCheckout ? (
             <>
@@ -216,13 +293,13 @@ export function OrderSummary() {
                 }}
               >
                 <Lock size={16} strokeWidth={2.25} aria-hidden />
-              {checkoutLoading
-                ? paymentMethod === "online"
-                  ? "Opening Razorpay…"
-                  : "Placing order…"
-                : paymentMethod === "online"
-                  ? `Pay now · ${formatInr(payableTotal)}`
-                  : `Place order · ${formatInr(payableTotal)}`}
+                {checkoutLoading
+                  ? paymentMethod === "online"
+                    ? "Opening Razorpay…"
+                    : "Placing order…"
+                  : paymentMethod === "online"
+                    ? `Pay now · ${formatInr(payableTotal)}`
+                    : `Place order · ${formatInr(payableTotal)}`}
               </button>
               <Link href="/cart" className="cart-btn cart-btn-secondary">
                 <ArrowLeft size={16} strokeWidth={2.25} aria-hidden />

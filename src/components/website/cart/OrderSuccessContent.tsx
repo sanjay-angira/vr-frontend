@@ -209,10 +209,19 @@ export function OrderSuccessContent() {
               <span>Price</span>
               <strong>{formatInr(money.listSubtotal)}</strong>
             </div>
-            {money.hasDiscount ? (
+            {money.hasOfferDiscount ? (
               <div className="commerce-summary-row order-summary-discount">
                 <span>Offer discount</span>
-                <strong>− {formatInr(money.discountTotal)}</strong>
+                <strong>− {formatInr(money.offerDiscountTotal)}</strong>
+              </div>
+            ) : null}
+            {money.hasCouponDiscount ? (
+              <div className="commerce-summary-row order-summary-discount">
+                <span>
+                  Coupon
+                  {money.couponCode ? ` (${money.couponCode})` : ""}
+                </span>
+                <strong>− {formatInr(money.couponDiscount)}</strong>
               </div>
             ) : null}
             <div className="commerce-summary-row">

@@ -56,6 +56,7 @@ export function getOrderSummaryTotals(
     finalPrice?: number | null;
     subtotal?: number;
   }>,
+  couponDiscount = 0,
 ) {
   const { itemCount, unitCount } = getCartCounts(items);
 
@@ -68,13 +69,22 @@ export function getOrderSummaryTotals(
     payableTotal += line;
   }
 
-  const discount = Math.max(0, listTotal - payableTotal);
+  const offerDiscount = Math.max(0, listTotal - payableTotal);
+  const safeCouponDiscount = Math.min(
+    payableTotal,
+    Math.max(0, Number(couponDiscount) || 0),
+  );
+  const finalPayable = Math.max(0, payableTotal - safeCouponDiscount);
+  const discount = offerDiscount + safeCouponDiscount;
 
   return {
     itemCount,
     unitCount,
     listTotal,
-    payableTotal,
+    payableTotal: finalPayable,
+    merchandiseTotal: payableTotal,
+    offerDiscount,
+    couponDiscount: safeCouponDiscount,
     discount,
   };
 }

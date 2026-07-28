@@ -11,7 +11,6 @@ export function formatInr(value: number) {
 export function getOrderMoney(order: PlacedOrder) {
   const listSubtotal = Number(
     order.listSubtotal ??
-      order.offerJson?.listSubtotal ??
       order.items.reduce(
         (sum, item) =>
           sum +
@@ -22,23 +21,39 @@ export function getOrderMoney(order: PlacedOrder) {
         0,
       ),
   );
-  const payableSubtotal = Number(
-    order.offerJson?.payableSubtotal ?? order.subtotal,
+  const payableSubtotal = Number(order.subtotal);
+  const couponDiscount = Number(
+    order.couponDiscount ??
+      order.couponJson?.couponDiscount ??
+      order.coupon?.couponDiscount ??
+      0,
+  );
+  const offerDiscountTotal = Number(
+    order.offerDiscountTotal ??
+      Math.max(0, Number(order.discountTotal ?? 0) - couponDiscount),
   );
   const discountTotal = Number(
-    order.discountTotal ??
-      order.offerJson?.discountTotal ??
-      Math.max(0, listSubtotal - payableSubtotal),
+    order.discountTotal ?? Math.max(0, listSubtotal - payableSubtotal),
   );
   const shippingFee = Number(order.shippingFee || 0);
   const total = Number(order.total);
+  const couponCode =
+    order.couponCode ??
+    order.couponJson?.couponCode ??
+    order.coupon?.couponCode ??
+    null;
 
   return {
     listSubtotal,
     payableSubtotal,
+    offerDiscountTotal,
+    couponDiscount,
+    couponCode,
     discountTotal,
     shippingFee,
     total,
+    hasOfferDiscount: offerDiscountTotal > 0.009,
+    hasCouponDiscount: couponDiscount > 0.009,
     hasDiscount: discountTotal > 0.009,
   };
 }
@@ -63,6 +78,7 @@ export function getOrderItemMoney(item: PlacedOrder["items"][number]) {
     payableLine,
     discount,
     hasDiscount: listLine > payableLine + 0.009,
-    offerName: item.appliedOffer?.offerName || null,
+    offerName:
+      item.appliedOffer?.offerName || item.offerJson?.offerName || null,
   };
 }

@@ -18,6 +18,7 @@ export type CheckoutPayload = {
   addressLabel?: string;
   notes?: string;
   paymentMethod: "cod" | "online";
+  couponId?: number;
 };
 
 export type OrderShippingAddress = {
@@ -56,28 +57,12 @@ export type AppliedOrderOffer = {
   sources?: string[];
 };
 
-export type OrderOfferJson = {
-  listSubtotal?: number;
-  discountTotal?: number;
-  payableSubtotal?: number;
-  shippingFee?: number;
-  payableTotal?: number;
-  items?: Array<{
-    variationId?: number;
-    productId?: number | null;
-    productName?: string;
-    variantName?: string | null;
-    quantity?: number;
-    listUnitPrice?: number;
-    unitPrice?: number;
-    discountAmount?: number;
-    lineListSubtotal?: number;
-    lineDiscount?: number;
-    linePayable?: number;
-    appliedOffer?: AppliedOrderOffer | null;
-  }>;
-  offers?: AppliedOrderOffer[];
-  capturedAt?: string;
+export type AppliedOrderCoupon = {
+  id?: number | null;
+  couponCode?: string | null;
+  discountType?: string | null;
+  discountValue?: number | null;
+  couponDiscount?: number | null;
 };
 
 export type PlacedOrder = {
@@ -88,10 +73,18 @@ export type PlacedOrder = {
   paymentStatus: string;
   listSubtotal?: number;
   discountTotal?: number;
+  offerDiscountTotal?: number;
+  couponDiscount?: number;
+  couponId?: number | null;
+  couponCode?: string | null;
+  couponDiscountType?: string | null;
+  couponDiscountValue?: number | null;
+  coupon?: AppliedOrderCoupon | null;
+  couponJson?: AppliedOrderCoupon | null;
+  offers?: AppliedOrderOffer[];
   subtotal: number;
   shippingFee: number;
   total: number;
-  offerJson?: OrderOfferJson | null;
   shippingAddress?: OrderShippingAddress | null;
   customerName: string;
   phone: string;
@@ -115,6 +108,7 @@ export type PlacedOrder = {
     subtotal: number;
     listSubtotal?: number;
     image?: string | null;
+    offerJson?: AppliedOrderOffer | null;
     appliedOffer?: AppliedOrderOffer | null;
   }>;
   createdAt?: string;
