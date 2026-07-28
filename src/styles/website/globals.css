@@ -2902,7 +2902,7 @@ body {
 }
 
 .review-item {
-  background: linear-gradient(180deg, #fffefb, #fff);
+  background: #fff;
   border: 1px solid rgba(197, 157, 95, 0.22);
   border-radius: 0;
   padding: 1.25rem 1.35rem;
@@ -2986,7 +2986,7 @@ body {
   height: 100%;
   border-radius: 0;
   padding: 1.35rem;
-  background: #fffdfa;
+  background: #fff;
   border: 1px solid rgba(184, 164, 131, 0.28);
   box-shadow: 0 8px 20px rgba(44, 24, 16, 0.05);
   transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
@@ -3114,7 +3114,7 @@ body {
   height: 100%;
   overflow: hidden;
   border-radius: 0;
-  background: #fffdfa;
+  background: #fff;
   border: 1px solid rgba(184, 164, 131, 0.28);
   box-shadow: 0 10px 24px rgba(10, 42, 27, 0.06);
   transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
