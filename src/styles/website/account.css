@@ -64,7 +64,9 @@
   margin-bottom: 1.75rem;
 }
 
-.account-header h1 {
+/* Profile title — source of truth for page titles */
+.account-header h1,
+.vr-page-title {
   margin: 0;
   color: var(--vr-forest);
   font-family: var(--font-heading);

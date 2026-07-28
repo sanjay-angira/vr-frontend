@@ -5,6 +5,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
 import { CommerceLayout } from "@/components/website/cart/CommerceLayout";
+import {
+  CartClearSkeleton,
+  CartSkeleton,
+} from "@/components/website/cart/CartSkeleton";
 import { usePlaceOrderContext } from "@/components/website/cart/PlaceOrderFlowWrapper";
 import {
   formatInr,
@@ -54,8 +58,10 @@ export function CartPageContent() {
       <CommerceLayout
         eyebrow="Shopping bag"
         title="Your Cart"
-        loadingMessage="Loading your cart…"
-      />
+        headerAction={<CartClearSkeleton />}
+      >
+        <CartSkeleton />
+      </CommerceLayout>
     );
   }
 

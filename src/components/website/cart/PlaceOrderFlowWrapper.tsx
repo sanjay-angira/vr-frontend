@@ -128,8 +128,11 @@ function PlaceOrderFlowWrapper({ children }: { children: ReactNode }) {
   const [pendingDeepLinkCoupon, setPendingDeepLinkCoupon] = useState<string | null>(
     null,
   );
+  /** False until first client fetch finishes — keeps SSR + hydrate on loading UI. */
+  const [cartReady, setCartReady] = useState(false);
 
   const isCheckout = Boolean(pathname?.startsWith("/checkout"));
+  const cartLoading = !cartReady || cart.loading;
 
   const merchandiseTotal = useMemo(
     () => getOrderSummaryTotals(cart.items).merchandiseTotal,
@@ -154,7 +157,13 @@ function PlaceOrderFlowWrapper({ children }: { children: ReactNode }) {
   }, [pathname]);
 
   useEffect(() => {
-    void cart.fetchCart();
+    let cancelled = false;
+    void cart.fetchCart().finally(() => {
+      if (!cancelled) setCartReady(true);
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [cart.fetchCart]);
 
   useEffect(() => {
@@ -219,7 +228,7 @@ function PlaceOrderFlowWrapper({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!pendingDeepLinkCoupon) return;
-    if (cart.loading) return;
+    if (cartLoading) return;
     if (cart.items.length === 0) return;
 
     const code = pendingDeepLinkCoupon;
@@ -236,7 +245,7 @@ function PlaceOrderFlowWrapper({ children }: { children: ReactNode }) {
     });
   }, [
     pendingDeepLinkCoupon,
-    cart.loading,
+    cartLoading,
     cart.items.length,
     applyCoupon,
   ]);
@@ -330,7 +339,7 @@ function PlaceOrderFlowWrapper({ children }: { children: ReactNode }) {
     () => ({
       items: cart.items,
       total: cart.total,
-      loading: cart.loading,
+      loading: cartLoading,
       error: cart.error,
       config,
       isCheckout,
@@ -369,7 +378,7 @@ function PlaceOrderFlowWrapper({ children }: { children: ReactNode }) {
     [
       cart.items,
       cart.total,
-      cart.loading,
+      cartLoading,
       cart.error,
       cart.fetchCart,
       cart.updateQuantity,

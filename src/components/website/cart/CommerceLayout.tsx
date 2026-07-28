@@ -38,7 +38,7 @@ export function CommerceLayout({
     return (
       <div className="place-order-main-loading">
         <p className="commerce-eyebrow">{eyebrow}</p>
-        <h1>{title}</h1>
+        <h1 className="vr-page-title">{title}</h1>
         <p className="commerce-muted">{loadingMessage}</p>
       </div>
     );
@@ -50,7 +50,7 @@ export function CommerceLayout({
         <span className="cart-empty-icon" aria-hidden>
           {empty.icon}
         </span>
-        <h1>{empty.title}</h1>
+        <h1 className="vr-page-title">{empty.title}</h1>
         <p>{empty.description}</p>
         {empty.action}
       </div>
@@ -62,7 +62,7 @@ export function CommerceLayout({
       <header className="commerce-header cart-header">
         <div>
           <p className="commerce-eyebrow">{eyebrow}</p>
-          <h1>{title}</h1>
+          <h1 className="vr-page-title">{title}</h1>
           {subtitle ? <p className="commerce-muted">{subtitle}</p> : null}
         </div>
         {headerAction}
