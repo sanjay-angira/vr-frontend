@@ -94,10 +94,6 @@ const DEFAULT_HEADING: SectionHeadingProps = {
     "Experience premium grocery shopping with carefully selected spices, dry fruits, puja essentials, wellness products, and everyday household items. We combine authentic quality, secure shopping, and dependable delivery to bring the goodness of tradition right to your doorstep.",
 };
 
-type WhyChooseSectionProps = {
-  heading?: Partial<SectionHeadingProps>;
-};
-
 function BotanicalDecor() {
   return (
     <>
@@ -185,14 +181,7 @@ function BotanicalDecor() {
   );
 }
 
-export function WhyChooseSection({ heading }: WhyChooseSectionProps = {}) {
-  const resolvedHeading: SectionHeadingProps = {
-    eyebrow: heading?.eyebrow?.trim() || DEFAULT_HEADING.eyebrow,
-    title: heading?.title?.trim() || DEFAULT_HEADING.title,
-    accent: heading?.accent?.trim() || DEFAULT_HEADING.accent,
-    description: heading?.description?.trim() || DEFAULT_HEADING.description,
-  };
-
+export function WhyChooseSection({ heading }: { heading: SectionHeadingProps }) {
   return (
     <section
       className="why-choose-section"
@@ -201,7 +190,7 @@ export function WhyChooseSection({ heading }: WhyChooseSectionProps = {}) {
       <BotanicalDecor />
 
       <div className="container why-choose-inner">
-        <SectionHeading {...resolvedHeading} />
+        <SectionHeading {...heading} />
 
         <div className="why-choose-grid">
           {features.map((feature, index) => {

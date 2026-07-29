@@ -7,10 +7,11 @@ import {
   listRecentlyViewedProducts,
   mapRecentlyViewedToCard,
 } from "@/services/website/recentlyViewedService";
+import { SectionHeadingProps } from "../shared/SectionHeading";
 
 const HOME_LIMIT = 8;
 
-export function RecentlyViewedSection() {
+export function RecentlyViewedSection({ heading }: { heading: SectionHeadingProps }) {
   const [products, setProducts] = useState<WebsiteProductCardData[]>([]);
   const [ready, setReady] = useState(false);
 
@@ -42,12 +43,7 @@ export function RecentlyViewedSection() {
 
   return (
     <ProductSection
-      heading={{
-        eyebrow: "RECENTLY VIEWED",
-        title: "Continue Shopping with Your",
-        accent: "Recently Viewed Products",
-        description: "Rediscover the products you've recently explored, from premium spices and groceries to pooja essentials and wellness products. Pick up where you left off and shop with ease.",
-      }}
+      heading={heading}
       products={products}
       viewAllLink="/recently-viewed-products"
     />

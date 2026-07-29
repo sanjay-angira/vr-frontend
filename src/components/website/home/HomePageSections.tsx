@@ -150,18 +150,17 @@ export function HomePageSections({ sections }: HomePageSectionsProps) {
               return (
                 <WhyChooseSection
                   key={key}
-                  heading={{
-                    eyebrow: heading.eyebrow,
-                    title: heading.title || "Why Thousands of Families Choose Vrindavan Rasa",
-                    accent: heading.accent || "Vrindavan Rasa",
-                    description: heading.description,
-                  }}
+                  heading={heading}
                 />
               );
             }
 
             if (customKey === "recently_viewed") {
-              return <RecentlyViewedSection key={key} />;
+              return (<RecentlyViewedSection
+                key={key}
+                heading={heading}
+              />
+              );
             }
 
             return (
