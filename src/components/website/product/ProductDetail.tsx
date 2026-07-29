@@ -26,6 +26,7 @@ import {
 } from "@/components/website/product/productVariantUtils";
 import { fetchWebsiteCart } from "@/services/redux/slices/websiteSlices/cartSlice";
 import { addOrUpdateCartItem } from "@/services/website/cartService";
+import { trackRecentlyViewedProduct } from "@/services/website/recentlyViewedService";
 import { useWishlist } from "@/components/website/wishlist/useWishlist";
 import { useRouter } from "next/navigation";
 
@@ -132,6 +133,15 @@ export default function ProductDetail({
     window.addEventListener("popstate", syncFromUrl);
     return () => window.removeEventListener("popstate", syncFromUrl);
   }, [product.variants]);
+
+  useEffect(() => {
+    if (!product.id) return;
+    // Avoid duplicate POSTs under React Strict Mode remounts.
+    const timer = window.setTimeout(() => {
+      void trackRecentlyViewedProduct(product.id);
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [product.id]);
 
   const selectedVariant = useMemo(() => {
     if (selectedVariantId) {

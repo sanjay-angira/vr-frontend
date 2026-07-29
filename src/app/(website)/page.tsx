@@ -1,12 +1,12 @@
 import { Suspense } from "react";
 import { HomePageSkeleton } from "@/components/website/shared/HomePageSkeleton";
 import { HomePageSections } from "@/components/website/home/HomePageSections";
+import { RecentlyViewedSection } from "@/components/website/sections/RecentlyViewedSection";
 import { fetchHomepageSections } from "@/services/website/homepageService";
 
 export default async function Page() {
   const sections = await fetchHomepageSections();
-  console.dir(sections,{dep:null})
-  
+
   if (sections.length === 0) {
     return (
       <div className="container home-empty">
@@ -16,9 +16,11 @@ export default async function Page() {
       </div>
     );
   }
-   return (
+
+  return (
     <Suspense fallback={<HomePageSkeleton />}>
       <HomePageSections sections={sections} />
+      <RecentlyViewedSection />
     </Suspense>
   );
 }
