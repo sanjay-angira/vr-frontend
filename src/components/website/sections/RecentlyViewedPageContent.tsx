@@ -7,6 +7,7 @@ import {
   type WebsiteProductCardData,
 } from "@/components/website/cards/ProductCard";
 import { SectionHeading } from "@/components/website/shared/SectionHeading";
+import { ProductGridSkeleton } from "@/components/website/shared/ProductGridSkeleton";
 import {
   listRecentlyViewedProducts,
   mapRecentlyViewedToCard,
@@ -49,7 +50,7 @@ export function RecentlyViewedPageContent() {
         />
 
         {loading ? (
-          <p className="home-empty__message">Loading recently viewed products…</p>
+          <ProductGridSkeleton count={8} />
         ) : products.length === 0 ? (
           <div className="home-empty">
             <p className="home-empty__message">
