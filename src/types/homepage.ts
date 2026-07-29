@@ -73,6 +73,9 @@ export type HomepageSection = {
     /** Hero carousel transition: fade | slide */
     bannerEffect?: "fade" | "slide" | string;
     maxProducts: number;
+    /** Manual block key when type is `custom` (e.g. why_choose) */
+    customSection?: string;
+    sectionName?: string;
   };
   products: HomepageProduct[];
   categories: HomepageCategory[];

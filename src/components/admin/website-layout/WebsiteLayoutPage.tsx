@@ -150,6 +150,13 @@ function SortableSectionRow({
           <h3 className="truncate font-medium text-zinc-900">{section.title}</h3>
           <div className="mt-1 flex flex-wrap items-center gap-2">
             <span className="text-xs text-zinc-500">{section.type}</span>
+            {section.type === "custom" &&
+            typeof section.data?.customSection === "string" &&
+            section.data.customSection ? (
+              <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-800">
+                {String(section.data.customSection)}
+              </span>
+            ) : null}
             <span className="rounded-full bg-admin-primary/10 px-2 py-0.5 text-xs text-admin-primary">
               {getSectionApiTag(section.type)}
             </span>

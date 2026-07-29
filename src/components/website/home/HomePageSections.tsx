@@ -8,6 +8,8 @@ import { CategorySection } from "@/components/website/sections/CategorySection";
 import { ProductSection } from "@/components/website/sections/ProductSection";
 import { BlogSection } from "@/components/website/sections/BlogSection";
 import { ProductReviewsShowcase } from "@/components/website/sections/ProductReviewsShowcase";
+import { WhyChooseSection } from "@/components/website/sections/WhyChooseSection";
+import { RecentlyViewedSection } from "@/components/website/sections/RecentlyViewedSection";
 
 type HomePageSectionsProps = {
   sections: HomepageSection[];
@@ -137,7 +139,31 @@ export function HomePageSections({ sections }: HomePageSectionsProps) {
               />
             );
 
-          case "custom":
+          case "custom": {
+            const customKey = String(
+              section.data?.customSection || section.data?.sectionName || "",
+            )
+              .trim()
+              .toLowerCase();
+
+            if (customKey === "why_choose") {
+              return (
+                <WhyChooseSection
+                  key={key}
+                  heading={{
+                    eyebrow: heading.eyebrow,
+                    title: heading.title || "Why Thousands of Families Choose Vrindavan Rasa",
+                    accent: heading.accent || "Vrindavan Rasa",
+                    description: heading.description,
+                  }}
+                />
+              );
+            }
+
+            if (customKey === "recently_viewed") {
+              return <RecentlyViewedSection key={key} />;
+            }
+
             return (
               <div key={key}>
                 {section.banners.length > 0 && (
@@ -179,6 +205,7 @@ export function HomePageSections({ sections }: HomePageSectionsProps) {
                 )}
               </div>
             );
+          }
 
           default:
             return null;

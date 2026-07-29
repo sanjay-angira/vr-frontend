@@ -1,7 +1,6 @@
 import { Suspense } from "react";
 import { HomePageSkeleton } from "@/components/website/shared/HomePageSkeleton";
 import { HomePageSections } from "@/components/website/home/HomePageSections";
-import { RecentlyViewedSection } from "@/components/website/sections/RecentlyViewedSection";
 import { fetchHomepageSections } from "@/services/website/homepageService";
 
 export default async function Page() {
@@ -20,7 +19,6 @@ export default async function Page() {
   return (
     <Suspense fallback={<HomePageSkeleton />}>
       <HomePageSections sections={sections} />
-      <RecentlyViewedSection />
     </Suspense>
   );
 }

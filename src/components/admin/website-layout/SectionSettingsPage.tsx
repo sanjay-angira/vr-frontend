@@ -59,6 +59,18 @@ const SECTION_TYPES = [
   { label: "Custom", value: "custom" },
 ];
 
+/** Manual storefront blocks that can be placed via Custom section type. */
+export const CUSTOM_SECTION_OPTIONS = [
+  {
+    label: "Why Choose Vrindavan Rasa",
+    value: "why_choose",
+  },
+  {
+    label: "Recently Viewed Products",
+    value: "recently_viewed",
+  },
+];
+
 const DISPLAY_STYLES = [
   { label: "Grid", value: "grid" },
   { label: "Carousel", value: "carousel" },
@@ -74,10 +86,15 @@ function usesBannerEffect(type: string) {
   return type === "hero_banner" || type === "custom";
 }
 
+function isCustomType(type: string) {
+  return type === "custom";
+}
+
 type SectionFormValues = {
   title: string;
   slug: string;
   type: string;
+  customSection: string;
   visible: boolean;
   displayStyle: string;
   bannerEffect: string;
@@ -104,6 +121,11 @@ const schema = Yup.object({
     .matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Use lowercase letters, numbers, and hyphens")
     .required("Slug is required"),
   type: Yup.string().required("Section type is required"),
+  customSection: Yup.string().when("type", {
+    is: "custom",
+    then: (s) => s.required("Section name is required for custom type"),
+    otherwise: (s) => s.optional(),
+  }),
   displayStyle: Yup.string().required(),
   bannerEffect: Yup.string().oneOf(["fade", "slide"]).required(),
   maxProducts: Yup.number().min(1).max(100).required(),
@@ -137,6 +159,7 @@ export function SectionSettingsPage({ sectionId }: SectionSettingsPageProps) {
     title: "",
     slug: "",
     type: "product_slider",
+    customSection: "",
     visible: true,
     displayStyle: "grid",
     bannerEffect: "fade",
@@ -202,6 +225,7 @@ export function SectionSettingsPage({ sectionId }: SectionSettingsPageProps) {
           title: section.title,
           slug: section.slug || generateSlug(section.title),
           type: section.type,
+          customSection: String(data.customSection ?? data.sectionName ?? ""),
           visible: Boolean(section.status),
           displayStyle: String(data.displayStyle ?? "grid"),
           bannerEffect:
@@ -247,6 +271,9 @@ export function SectionSettingsPage({ sectionId }: SectionSettingsPageProps) {
         headingAccent: values.headingAccent,
         subHeading: values.subHeading,
         description: values.description,
+        ...(isCustomType(values.type) && values.customSection
+          ? { customSection: values.customSection }
+          : {}),
       },
       productIds: values.productIds,
       categoryIds: values.categoryIds,
@@ -334,11 +361,37 @@ export function SectionSettingsPage({ sectionId }: SectionSettingsPageProps) {
                   if (usesBannerEffect(value) && !values.bannerEffect) {
                     setFieldValue("bannerEffect", "fade");
                   }
+                  if (!isCustomType(value)) {
+                    setFieldValue("customSection", "");
+                  } else if (!values.customSection) {
+                    setFieldValue(
+                      "customSection",
+                      CUSTOM_SECTION_OPTIONS[0]?.value ?? "",
+                    );
+                  }
                 }}
                 options={SECTION_TYPES}
               />
 
-              {usesBannerEffect(values.type) ? (
+              {isCustomType(values.type) ? (
+                <FormDropdown
+                  label="Section Name"
+                  required
+                  value={values.customSection}
+                  onChange={(value) => {
+                    setFieldValue("customSection", value);
+                    const option = CUSTOM_SECTION_OPTIONS.find(
+                      (item) => item.value === value,
+                    );
+                    if (option && !values.title.trim()) {
+                      setFieldValue("title", option.label);
+                    }
+                  }}
+                  options={CUSTOM_SECTION_OPTIONS}
+                />
+              ) : null}
+
+              {usesBannerEffect(values.type) && !isCustomType(values.type) ? (
                 <FormDropdown
                   label="Banner Effect"
                   required
@@ -347,7 +400,7 @@ export function SectionSettingsPage({ sectionId }: SectionSettingsPageProps) {
                   options={BANNER_EFFECTS}
                   hint="Transition between hero slides on the storefront."
                 />
-              ) : (
+              ) : !isCustomType(values.type) ? (
                 <FormDropdown
                   label="Display Style"
                   required
@@ -355,7 +408,7 @@ export function SectionSettingsPage({ sectionId }: SectionSettingsPageProps) {
                   onChange={(value) => setFieldValue("displayStyle", value)}
                   options={DISPLAY_STYLES}
                 />
-              )}
+              ) : null}
 
               <Input
                 label="Maximum Products"
