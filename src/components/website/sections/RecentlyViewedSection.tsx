@@ -43,9 +43,10 @@ export function RecentlyViewedSection() {
   return (
     <ProductSection
       heading={{
-        title: "Recently Viewed",
-        accent: "Products",
-        description: "Take a quick look at what you explored earlier",
+        eyebrow: "RECENTLY VIEWED",
+        title: "Continue Shopping with Your",
+        accent: "Recently Viewed Products",
+        description: "Rediscover the products you've recently explored, from premium spices and groceries to pooja essentials and wellness products. Pick up where you left off and shop with ease.",
       }}
       products={products}
       viewAllLink="/recently-viewed-products"
