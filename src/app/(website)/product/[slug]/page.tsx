@@ -3,16 +3,17 @@ import { notFound } from "next/navigation";
 import { Accordion } from "@/components/website/shared/Accordion";
 import ReviewSection from "@/components/website/product/ReviewSection";
 import ProductDetail from "@/components/website/product/ProductDetail";
-import { ProductComboSection } from "@/components/website/sections/ProductComboSection";
-import type { ComboProduct } from "@/components/website/cards/ComboProductCard";
+import { ProductSection } from "@/components/website/sections/ProductSection";
 import {
   fetchProductBySlug,
+  fetchSameCategoryProducts,
   normalizeAttributes,
   normalizeVariants,
   toNumber,
 } from "@/components/website/product/productApi";
 import { fetchWebsiteCoupons } from "@/services/website/couponService";
 import { ScrollToTopOnMount } from "@/components/website/shared/ScrollToTopOnMount";
+import { resolveImageUrl } from "@/components/admin/forms/shared/resolveImageUrl";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -28,6 +29,16 @@ export default async function ProductDetailPage({ params }: PageProps) {
   if (!product) {
     notFound();
   }
+
+  const categoryId = Number(product.category?.id);
+  const recommendedProducts =
+    Number.isFinite(categoryId) && categoryId > 0
+      ? await fetchSameCategoryProducts({
+          categoryId,
+          excludeProductId: product.id,
+          limit: 8,
+        })
+      : [];
 
   const normalizedVariants = normalizeVariants(
     product.variants as Parameters<typeof normalizeVariants>[0]
@@ -97,20 +108,24 @@ export default async function ProductDetailPage({ params }: PageProps) {
           }))
       : [];
 
-  const comboProducts: ComboProduct[] =
-    product.frequentlyBoughtTogether && product.frequentlyBoughtTogether.length > 0
-      ? product.frequentlyBoughtTogether.map((item) => ({
-          id: String(item.id),
-          name: item.productName,
-          description: item.shortDescription || "",
-          price: item.price || 0,
-          image: item.image?.trim() || "",
-          category: "Recommended",
-          rating: 5,
-          reviewCount: 0,
-          inStock: item.inStock ?? true,
-        }))
-      : [];
+  const recommendedCards = recommendedProducts.map((item) => ({
+    id: item.id,
+    slug: item.slug,
+    name: item.name,
+    description: item.description,
+    price: item.price,
+    originalPrice: item.originalPrice,
+    image: resolveImageUrl(item.image),
+    category: item.category || product.category?.categoryName || "",
+    rating: item.rating,
+    reviewCount: item.reviewCount,
+    inStock: item.inStock,
+  }));
+
+  const categoryShopLink =
+    Number.isFinite(categoryId) && categoryId > 0
+      ? `/products?categoryIds=${categoryId}`
+      : "/products";
 
   return (
     <>
@@ -120,7 +135,9 @@ export default async function ProductDetailPage({ params }: PageProps) {
         <div className="product-breadcrumbs">
           <Link href="/">Home</Link>
           <span>›</span>
-          <Link href="/shop">{product.category?.categoryName || "Shop"}</Link>
+          <Link href={categoryShopLink}>
+            {product.category?.categoryName || "Shop"}
+          </Link>
           <span>›</span>
           <span className="is-current">{product.productName}</span>
         </div>
@@ -160,13 +177,18 @@ export default async function ProductDetailPage({ params }: PageProps) {
         </div>
       </div>
 
-      {comboProducts.length > 0 && (
-        <ProductComboSection
-          title="You May Also Like"
-          accent="Like"
-          subtitle="RECOMMENDED FOR YOU"
-          comboProducts={comboProducts}
-          viewAllLink="/products"
+      {recommendedCards.length > 0 && (
+        <ProductSection
+          heading={{
+            title: "You May Also Like",
+            accent: "Like",
+            eyebrow: "RECOMMENDED FOR YOU",
+            description: product.category?.categoryName
+              ? `More from ${product.category.categoryName}`
+              : "Products from the same category",
+          }}
+          products={recommendedCards}
+          viewAllLink={categoryShopLink}
         />
       )}
     </>
