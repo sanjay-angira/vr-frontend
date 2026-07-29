@@ -3436,6 +3436,28 @@ body {
   padding: 1.25rem 0 2.5rem;
 }
 
+.cms-page-shell {
+  padding: 2rem 0 3.5rem;
+  max-width: 860px;
+}
+
+.cms-page-header {
+  margin-bottom: 1.5rem;
+}
+
+.cms-page-title {
+  margin: 0;
+  font-family: var(--font-display, var(--font-body));
+  font-size: clamp(1.75rem, 3vw, 2.5rem);
+  font-weight: 600;
+  color: var(--text-primary, #1a1a1a);
+  line-height: 1.2;
+}
+
+.cms-page-content {
+  color: var(--text-secondary, #4a4036);
+}
+
 .contact-page-card {
   display: grid;
   grid-template-columns: 1fr;
