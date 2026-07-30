@@ -184,7 +184,12 @@ export function ProductCard({
             disabled={!normalizedProduct.inStock || isAddingToCart}
           >
             <ShoppingCart />
-            {isAddingToCart ? "Adding..." : "Add to Cart"}
+            <span className="add-to-cart-btn__label add-to-cart-btn__label--full">
+              {isAddingToCart ? "Adding..." : "Add to Cart"}
+            </span>
+            <span className="add-to-cart-btn__label add-to-cart-btn__label--short">
+              {isAddingToCart ? "…" : "Add"}
+            </span>
           </button>
         </div>
       </div>

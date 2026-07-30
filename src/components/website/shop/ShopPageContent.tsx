@@ -42,6 +42,7 @@ const STORE_GRID_STYLES = `
 @media (max-width: 900px) {
   .store-catalog__grid {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: var(--gap-s) !important;
   }
 }
 `;

@@ -593,6 +593,7 @@
 
   .store-catalog__grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--gap-s);
   }
 
   .store-filters__desktop {
