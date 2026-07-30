@@ -58,8 +58,8 @@
   --footer-border: rgba(197, 157, 95, 0.22);
 
   /* Layout — shared page / header / footer width */
-  --container-max: 1920px;
-  --container-padding-x: 3rem;
+  --container-max: 1400px;
+  --container-padding-x: 1.5rem;
 
   /* Spacing scale */
   --gap-xs: 0.5rem;
@@ -77,4 +77,16 @@
   --font-body: var(--font-inter);
   --font-geist-sans: "Segoe UI", system-ui, sans-serif;
   --font-geist-mono: ui-monospace, "Cascadia Code", monospace;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --container-padding-x: 2rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  :root {
+    --container-padding-x: 2.5rem;
+  }
 }
