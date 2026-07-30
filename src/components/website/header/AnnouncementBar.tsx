@@ -5,6 +5,26 @@ type AnnouncementBarProps = {
   data: AnnouncementBarData | null;
 };
 
+function AnnouncementMessage({ data }: { data: AnnouncementBarData }) {
+  return (
+    <p className="announcement-bar-message" style={{ color: data.textColor }}>
+      {data.message}
+      {data.linkText && data.linkUrl ? (
+        <>
+          {" "}
+          <Link
+            href={data.linkUrl}
+            className="announcement-bar-link"
+            style={{ color: data.textColor }}
+          >
+            {data.linkText}
+          </Link>
+        </>
+      ) : null}
+    </p>
+  );
+}
+
 export function AnnouncementBar({ data }: AnnouncementBarProps) {
   if (!data?.isActive || !data.message) {
     return null;
@@ -20,31 +40,31 @@ export function AnnouncementBar({ data }: AnnouncementBarProps) {
         ["--announcement-text" as string]: data.textColor,
       }}
     >
-      <div className="container">
-        <div
-          className="announcement-bar-content"
-          style={{ justifyContent: "center", height: "40px" }}
-        >
-          <p
-            className="m-0 text-center text-sm font-medium"
-            style={{ color: data.textColor }}
-          >
-            {data.message}
-            {data.linkText && data.linkUrl ? (
-              <>
-                {" "}
-                <Link
-                  href={data.linkUrl}
-                  className="underline underline-offset-2 transition-opacity hover:opacity-80"
-                  style={{ color: data.textColor }}
-                >
-                  {data.linkText}
-                </Link>
-              </>
-            ) : null}
-          </p>
+      {/* Desktop: centered static message */}
+      <div className="container announcement-bar-desktop">
+        <div className="announcement-bar-content">
+          <AnnouncementMessage data={data} />
         </div>
       </div>
+
+      {/* Mobile: right → left marquee (two identical halves for a seamless loop) */}
+      <div className="announcement-bar-marquee" aria-hidden="true">
+        <div className="announcement-bar-marquee-track">
+          <div className="announcement-bar-marquee-group">
+            <AnnouncementMessage data={data} />
+            <AnnouncementMessage data={data} />
+          </div>
+          <div className="announcement-bar-marquee-group">
+            <AnnouncementMessage data={data} />
+            <AnnouncementMessage data={data} />
+          </div>
+        </div>
+      </div>
+
+      <span className="sr-only">
+        {data.message}
+        {data.linkText ? ` ${data.linkText}` : ""}
+      </span>
     </div>
   );
 }
