@@ -49,8 +49,8 @@ export function HeaderUser() {
 
   if (!mounted) {
     return (
-      <button type="button" className="header-login-btn" aria-label="Login">
-        Login
+      <button type="button" className="icon-button" aria-label="Login">
+        <User size={20} />
       </button>
     );
   }
@@ -100,11 +100,11 @@ export function HeaderUser() {
   return (
     <button
       type="button"
-      className="header-login-btn"
+      className="icon-button"
       onClick={handleLoginClick}
       aria-label="Login"
     >
-      Login
+      <User size={20} />
     </button>
   );
 }

@@ -371,10 +371,35 @@
   color: #b42318;
 }
 
+.mobile-nav-backdrop {
+  display: none;
+}
+
 .mobile-nav-panel {
-  display: block;
-  border-top: 1px solid var(--header-border);
-  padding: 1rem 0;
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  .mobile-nav-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    border: 0;
+    background: rgba(17, 17, 17, 0.35);
+    cursor: pointer;
+  }
+
+  .mobile-nav-panel {
+    display: block;
+    position: relative;
+    z-index: 45;
+    border-top: 1px solid var(--header-border, #e5e5e5);
+    background: var(--header-bg, #ffffff);
+    padding: 0.75rem 0 1.25rem;
+    max-height: min(70vh, 520px);
+    overflow-y: auto;
+  }
 }
 
 .mobile-nav-panel .nav-button {

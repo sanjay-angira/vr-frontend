@@ -1,8 +1,6 @@
 import { AnnouncementBar } from "@/components/website/header/AnnouncementBar";
-import { DesktopNavigation } from "@/components/website/header/DesktopNavigation";
-import { HeaderStaticActions } from "@/components/website/header/HeaderStaticActions";
+import { WebsiteHeaderBar } from "@/components/website/header/WebsiteHeaderBar";
 import type { WebsiteHeaderData } from "@/types/header";
-import { HeaderLogo } from "../website/header/HeaderLogo";
 
 type WebsiteHeaderViewProps = {
   data: WebsiteHeaderData;
@@ -26,17 +24,7 @@ export function WebsiteHeaderView({ data }: WebsiteHeaderViewProps) {
         }}
       >
         <div className="container">
-          <div className="header-content">
-            <HeaderLogo
-              logoUrl={header.logoUrl}
-              mobileLogoUrl={header.mobileLogoUrl}
-              textColor={header.textColor}
-            />
-            <DesktopNavigation items={menu} textColor={header.textColor} />
-            <div className="header-actions">
-              <HeaderStaticActions settings={header} />
-            </div>
-          </div>
+          <WebsiteHeaderBar header={header} menu={menu} />
         </div>
       </header>
     </>
