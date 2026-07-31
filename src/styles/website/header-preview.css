@@ -157,6 +157,32 @@
   filter: none;
 }
 
+.logo-image--mobile,
+.logo-fallback--mobile {
+  display: none;
+}
+
+.logo-image--desktop,
+.logo-fallback--desktop {
+  display: block;
+}
+
+@media (max-width: 767px) {
+  .logo-image--desktop,
+  .logo-fallback--desktop {
+    display: none;
+  }
+
+  .logo-image--mobile,
+  .logo-fallback--mobile {
+    display: block;
+  }
+
+  .logo-fallback--mobile .logo-text {
+    font-size: 1.25rem;
+  }
+}
+
 .logo:hover,
 .logo:focus,
 .logo:active {

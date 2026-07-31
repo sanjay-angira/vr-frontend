@@ -84,6 +84,7 @@ export function buildHeaderPreviewData(
     announcementBar: pickActiveAnnouncementBar(bars),
     header: {
       logoUrl: headerSettings.logoUrl ?? null,
+      mobileLogoUrl: headerSettings.mobileLogoUrl ?? null,
       stickyHeader: headerSettings.stickyHeader,
       showSearch: headerSettings.showSearch,
       showCart: headerSettings.showCart,

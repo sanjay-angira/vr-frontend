@@ -70,6 +70,7 @@ function Toggle({
 
 const defaultHeaderSettings: AdminHeaderSettings = {
   logoUrl: null,
+  mobileLogoUrl: null,
   stickyHeader: true,
   showSearch: true,
   showCart: true,
@@ -582,6 +583,20 @@ export function HeaderSettingsPage() {
                     }))
                   }
                 />
+                <ImageUploadField
+                  label="Mobile logo"
+                  value={headerSettings.mobileLogoUrl ?? ""}
+                  uploadPath={UPLOAD_PATHS.banners}
+                  onChange={(value) =>
+                    setHeaderSettings((current) => ({
+                      ...current,
+                      mobileLogoUrl: value || null,
+                    }))
+                  }
+                />
+                <p className="-mt-2 text-xs text-zinc-500">
+                  Optional. Shown on mobile screens. Falls back to the main logo if empty.
+                </p>
                 <FormDropdown
                   label="Active navigation menu"
                   value={

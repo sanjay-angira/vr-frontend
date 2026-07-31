@@ -2,9 +2,6 @@ import { AnnouncementBar } from "@/components/website/header/AnnouncementBar";
 import { DesktopNavigation } from "@/components/website/header/DesktopNavigation";
 import { HeaderStaticActions } from "@/components/website/header/HeaderStaticActions";
 import type { WebsiteHeaderData } from "@/types/header";
-import Link from "next/link";
-import { resolveImageUrl } from "../admin/forms/shared/resolveImageUrl";
-import Image from "next/image";
 import { HeaderLogo } from "../website/header/HeaderLogo";
 
 type WebsiteHeaderViewProps = {
@@ -13,7 +10,6 @@ type WebsiteHeaderViewProps = {
 
 export function WebsiteHeaderView({ data }: WebsiteHeaderViewProps) {
   const { announcementBar, header, menu } = data;
-  const logoSrc = header.logoUrl ? resolveImageUrl(header.logoUrl) : "";
 
   return (
     <>
@@ -31,7 +27,11 @@ export function WebsiteHeaderView({ data }: WebsiteHeaderViewProps) {
       >
         <div className="container">
           <div className="header-content">
-            <HeaderLogo logoUrl={header.logoUrl} textColor={header.textColor} />
+            <HeaderLogo
+              logoUrl={header.logoUrl}
+              mobileLogoUrl={header.mobileLogoUrl}
+              textColor={header.textColor}
+            />
             <DesktopNavigation items={menu} textColor={header.textColor} />
             <div className="header-actions">
               <HeaderStaticActions settings={header} />

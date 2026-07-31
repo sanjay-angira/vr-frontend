@@ -1,8 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import { ChevronDown, Heart, Search, ShoppingCart, User } from "lucide-react";
-import { resolveImageUrl } from "@/components/admin/forms/shared/resolveImageUrl";
+import { HeaderLogo } from "@/components/website/header/HeaderLogo";
 import type { MenuItemNode, WebsiteHeaderData } from "@/types/header";
 
 type HeaderPreviewContentProps = {
@@ -43,7 +42,6 @@ function PreviewNavItem({
 
 export function HeaderPreviewContent({ data }: HeaderPreviewContentProps) {
   const { announcementBar, header, menu } = data;
-  const logoSrc = header.logoUrl ? resolveImageUrl(header.logoUrl) : "";
 
   return (
     <div className="website-header-preview border border-zinc-200">
@@ -96,24 +94,11 @@ export function HeaderPreviewContent({ data }: HeaderPreviewContentProps) {
       >
         <div className="container">
           <div className="header-content">
-            <div className="logo" style={{ color: header.textColor }}>
-              {logoSrc ? (
-                <Image
-                  src={logoSrc}
-                  alt="Store logo"
-                  width={140}
-                  height={40}
-                  className="h-10 w-auto object-contain"
-                />
-              ) : (
-                <>
-                  <div className="logo-icon">🕉</div>
-                  <span className="logo-text" style={{ color: header.textColor }}>
-                    Vrindavan Rasa
-                  </span>
-                </>
-              )}
-            </div>
+            <HeaderLogo
+              logoUrl={header.logoUrl}
+              mobileLogoUrl={header.mobileLogoUrl}
+              textColor={header.textColor}
+            />
 
             {menu.length > 0 ? (
               <nav className="nav">
