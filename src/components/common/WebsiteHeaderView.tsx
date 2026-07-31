@@ -23,9 +23,7 @@ export function WebsiteHeaderView({ data }: WebsiteHeaderViewProps) {
           ["--header-text" as string]: header.textColor,
         }}
       >
-        <div className="container">
-          <WebsiteHeaderBar header={header} menu={menu} />
-        </div>
+        <WebsiteHeaderBar header={header} menu={menu} />
       </header>
     </>
   );

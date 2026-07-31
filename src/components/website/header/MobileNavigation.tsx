@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ChevronDown } from "lucide-react";
 import type { MenuItemNode } from "@/types/header";
 
 type MobileNavigationProps = {
@@ -20,9 +20,11 @@ export function MobileNavigation({
 }: MobileNavigationProps) {
   const [expandedIds, setExpandedIds] = useState<number[]>([]);
 
-  if (!isOpen) {
-    return null;
-  }
+  useEffect(() => {
+    if (!isOpen) {
+      setExpandedIds([]);
+    }
+  }, [isOpen]);
 
   const toggleExpanded = (id: number) => {
     setExpandedIds((current) =>
@@ -33,54 +35,64 @@ export function MobileNavigation({
   };
 
   return (
-    <div className="mobile-nav-panel">
-      <nav className="flex flex-col vr-gap-s">
-        {items.map((item) => {
-          const hasChildren = item.children.length > 0;
-          const isExpanded = expandedIds.includes(item.id);
+    <nav className="mobile-nav-list" aria-label="Mobile navigation">
+      {items.map((item, index) => {
+        const hasChildren = item.children.length > 0;
+        const isExpanded = expandedIds.includes(item.id);
 
-          return (
-            <div key={item.id}>
-              <div className="flex items-center justify-between vr-gap-s">
-                <Link
-                  href={item.url}
-                  className="nav-button flex-1 justify-start"
-                  style={{ color: textColor }}
-                  onClick={onClose}
+        return (
+          <div
+            key={item.id}
+            className="mobile-nav-item"
+            style={{ ["--nav-i" as string]: index }}
+          >
+            <div className="mobile-nav-row">
+              <Link
+                href={item.url}
+                className="nav-button mobile-nav-link"
+                style={{ color: textColor }}
+                tabIndex={isOpen ? 0 : -1}
+                onClick={onClose}
+              >
+                {item.label}
+              </Link>
+              {hasChildren ? (
+                <button
+                  type="button"
+                  className={`icon-button mobile-nav-expand${isExpanded ? " is-expanded" : ""}`}
+                  aria-label={isExpanded ? "Collapse submenu" : "Expand submenu"}
+                  aria-expanded={isExpanded}
+                  tabIndex={isOpen ? 0 : -1}
+                  onClick={() => toggleExpanded(item.id)}
                 >
-                  {item.label}
-                </Link>
-                {hasChildren ? (
-                  <button
-                    type="button"
-                    className="icon-button"
-                    aria-label={isExpanded ? "Collapse submenu" : "Expand submenu"}
-                    onClick={() => toggleExpanded(item.id)}
-                  >
-                    {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-                  </button>
-                ) : null}
-              </div>
+                  <ChevronDown size={18} />
+                </button>
+              ) : null}
+            </div>
 
-              {hasChildren && isExpanded ? (
-                <div className="mt-1 flex flex-col vr-gap-s pl-4">
+            {hasChildren ? (
+              <div
+                className={`mobile-nav-submenu${isExpanded ? " is-open" : ""}`}
+              >
+                <div className="mobile-nav-submenu-inner">
                   {item.children.map((child) => (
                     <Link
                       key={child.id}
                       href={child.url}
-                      className="nav-button is-sub justify-start"
+                      className="nav-button is-sub mobile-nav-link"
                       style={{ color: textColor }}
+                      tabIndex={isOpen && isExpanded ? 0 : -1}
                       onClick={onClose}
                     >
                       {child.label}
                     </Link>
                   ))}
                 </div>
-              ) : null}
-            </div>
-          );
-        })}
-      </nav>
-    </div>
+              </div>
+            ) : null}
+          </div>
+        );
+      })}
+    </nav>
   );
 }

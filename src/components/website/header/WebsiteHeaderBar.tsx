@@ -25,12 +25,22 @@ export function WebsiteHeaderBar({ header, menu }: WebsiteHeaderBarProps) {
       }
     };
 
-    document.addEventListener("keydown", onKeyDown);
+    const scrollbarWidth =
+      window.innerWidth - document.documentElement.clientWidth;
+    const previousOverflow = document.body.style.overflow;
+    const previousPaddingRight = document.body.style.paddingRight;
+
     document.body.style.overflow = "hidden";
+    if (scrollbarWidth > 0) {
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+    }
+
+    document.addEventListener("keydown", onKeyDown);
 
     return () => {
       document.removeEventListener("keydown", onKeyDown);
-      document.body.style.overflow = "";
+      document.body.style.overflow = previousOverflow;
+      document.body.style.paddingRight = previousPaddingRight;
     };
   }, [menuOpen]);
 
@@ -47,49 +57,59 @@ export function WebsiteHeaderBar({ header, menu }: WebsiteHeaderBarProps) {
 
   return (
     <>
-      <div className="header-content">
-        <HeaderLogo
-          logoUrl={header.logoUrl}
-          mobileLogoUrl={header.mobileLogoUrl}
-          textColor={header.textColor}
-        />
+      <div className="container">
+        <div className="header-content">
+          <HeaderLogo
+            logoUrl={header.logoUrl}
+            mobileLogoUrl={header.mobileLogoUrl}
+            textColor={header.textColor}
+          />
 
-        <DesktopNavigation items={menu} textColor={header.textColor} />
+          <DesktopNavigation items={menu} textColor={header.textColor} />
 
-        <div className="header-actions">
-          <HeaderStaticActions settings={header} />
-          {menu.length > 0 ? (
-            <button
-              type="button"
-              className="icon-button header-menu-toggle"
-              aria-label={menuOpen ? "Close menu" : "Open menu"}
-              aria-expanded={menuOpen}
-              aria-controls="mobile-navigation"
-              onClick={() => setMenuOpen((open) => !open)}
-            >
-              {menuOpen ? <X size={22} /> : <Menu size={22} />}
-            </button>
-          ) : null}
+          <div className="header-actions">
+            <HeaderStaticActions settings={header} />
+            {menu.length > 0 ? (
+              <button
+                type="button"
+                className="icon-button header-menu-toggle"
+                aria-label={menuOpen ? "Close menu" : "Open menu"}
+                aria-expanded={menuOpen}
+                aria-controls="mobile-navigation"
+                onClick={() => setMenuOpen((open) => !open)}
+              >
+                {menuOpen ? <X size={22} /> : <Menu size={22} />}
+              </button>
+            ) : null}
+          </div>
         </div>
       </div>
 
-      {menuOpen ? (
-        <button
-          type="button"
-          className="mobile-nav-backdrop"
-          aria-label="Close menu"
-          onClick={() => setMenuOpen(false)}
-        />
+      {menu.length > 0 ? (
+        <div
+          id="mobile-navigation"
+          className={`mobile-nav-overlay${menuOpen ? " is-open" : ""}`}
+          aria-hidden={!menuOpen}
+        >
+          <button
+            type="button"
+            className="mobile-nav-backdrop"
+            tabIndex={menuOpen ? 0 : -1}
+            aria-label="Close menu"
+            onClick={() => setMenuOpen(false)}
+          />
+          <div className="mobile-nav-panel">
+            <div className="container">
+              <MobileNavigation
+                items={menu}
+                textColor={header.textColor}
+                isOpen={menuOpen}
+                onClose={() => setMenuOpen(false)}
+              />
+            </div>
+          </div>
+        </div>
       ) : null}
-
-      <div id="mobile-navigation">
-        <MobileNavigation
-          items={menu}
-          textColor={header.textColor}
-          isOpen={menuOpen}
-          onClose={() => setMenuOpen(false)}
-        />
-      </div>
     </>
   );
 }
