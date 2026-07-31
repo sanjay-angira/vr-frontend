@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { Eye, Heart, ShoppingCart, Star } from "lucide-react";
+import { Heart, ShoppingCart, Star } from "lucide-react";
+import { resolveImageUrl } from "@/components/admin/forms/shared/resolveImageUrl";
 import { useAppDispatch } from "@/services/redux/hooks";
 import {
   addWebsiteCartItem,
@@ -38,8 +39,14 @@ export interface ProductCardProps {
   category?: string;
   reviewCount?: number;
   inStock?: boolean;
+  isNew?: boolean;
   className?: string;
   href?: string;
+}
+
+function resolveCardImage(value: string | { src?: string } | undefined): string {
+  const raw = typeof value === "string" ? value : value?.src ?? "";
+  return resolveImageUrl(raw.trim()) || "";
 }
 
 export function ProductCard({
@@ -54,6 +61,7 @@ export function ProductCard({
   category,
   reviewCount,
   inStock,
+  isNew,
   className,
   href,
 }: ProductCardProps) {
@@ -62,26 +70,35 @@ export function ProductCard({
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [wishBusy, setWishBusy] = useState(false);
 
-  const normalizedProduct: WebsiteProductCardData = product ?? {
-    id: id ?? "",
-    name: title ?? "",
-    description: description ?? "",
-    price: typeof price === "number" ? price : Number(price ?? 0),
-    originalPrice:
-      typeof originalPrice === "number"
-        ? originalPrice
-        : originalPrice !== undefined
-          ? Number(originalPrice)
-          : undefined,
-    image: typeof image === "string" ? image : image?.src ?? "",
-    category: category ?? "",
-    rating: rating ?? 0,
-    reviewCount: reviewCount ?? 0,
-    inStock: inStock ?? true,
-  };
+  const normalizedProduct: WebsiteProductCardData = product
+    ? {
+        ...product,
+        image: resolveCardImage(product.image),
+      }
+    : {
+        id: id ?? "",
+        name: title ?? "",
+        description: description ?? "",
+        price: typeof price === "number" ? price : Number(price ?? 0),
+        originalPrice:
+          typeof originalPrice === "number"
+            ? originalPrice
+            : originalPrice !== undefined
+              ? Number(originalPrice)
+              : undefined,
+        image: resolveCardImage(image),
+        category: category ?? "",
+        rating: rating ?? 0,
+        reviewCount: reviewCount ?? 0,
+        inStock: inStock ?? true,
+        isNew,
+      };
 
   const variationId = Number(normalizedProduct.id);
   const wished = isWished(variationId);
+  const productHref =
+    href ??
+    (normalizedProduct.slug ? `/product/${normalizedProduct.slug}` : undefined);
 
   const currentPrice = Number(normalizedProduct.price || 0);
   const listPrice = Number(normalizedProduct.originalPrice || 0);
@@ -126,7 +143,7 @@ export function ProductCard({
     }
   };
 
-  const imageElement = normalizedProduct.image?.trim() ? (
+  const imageElement = normalizedProduct.image ? (
     <img
       src={normalizedProduct.image}
       alt={normalizedProduct.name}
@@ -141,10 +158,10 @@ export function ProductCard({
   );
 
   return (
-    <div className={`product-card-1 ${className || ""}`}>
+    <article className={`product-card ${className || ""}`.trim()}>
       <div className="image-container">
-        {href ? (
-          <Link href={href} aria-label={normalizedProduct.name}>
+        {productHref ? (
+          <Link href={productHref} aria-label={normalizedProduct.name}>
             {imageElement}
           </Link>
         ) : (
@@ -152,10 +169,12 @@ export function ProductCard({
         )}
 
         <div className="badges">
-          {normalizedProduct.isNew && <span className="badge new">New</span>}
-          {hasDiscount && (
-            <span className="badge sale">{discountPercentage}% OFF</span>
-          )}
+          {hasDiscount ? (
+            <span className="badge badge--sale">
+              <span className="badge__value">{discountPercentage}%</span>
+              <span className="badge__label">OFF</span>
+            </span>
+          ) : null}
         </div>
 
         <div className="quick-actions">
@@ -169,18 +188,13 @@ export function ProductCard({
           >
             <Heart fill={wished ? "currentColor" : "none"} />
           </button>
-          {href && (
-            <Link href={href} className="action-btn" aria-label="Quick view">
-              <Eye />
-            </Link>
-          )}
         </div>
 
         <div className="add-to-cart-container">
           <button
             type="button"
             className="add-to-cart-btn"
-            onClick={handleAddToCart}
+            onClick={() => void handleAddToCart()}
             disabled={!normalizedProduct.inStock || isAddingToCart}
           >
             <ShoppingCart />
@@ -195,10 +209,12 @@ export function ProductCard({
       </div>
 
       <div className="content">
-        <div className="category">{normalizedProduct.category}</div>
+        {normalizedProduct.category ? (
+          <div className="category">{normalizedProduct.category}</div>
+        ) : null}
         <h3 className="product-name">
-          {href ? (
-            <Link href={href}>{normalizedProduct.name}</Link>
+          {productHref ? (
+            <Link href={productHref}>{normalizedProduct.name}</Link>
           ) : (
             normalizedProduct.name
           )}
@@ -221,11 +237,11 @@ export function ProductCard({
             <span className="current-price">
               Rs. {priceFormatter.format(currentPrice)}
             </span>
-            {hasDiscount && (
+            {hasDiscount ? (
               <span className="original-price">
                 Rs. {priceFormatter.format(listPrice)}
               </span>
-            )}
+            ) : null}
           </div>
           <div
             className={`stock-status ${
@@ -236,6 +252,6 @@ export function ProductCard({
           </div>
         </div>
       </div>
-    </div>
+    </article>
   );
 }

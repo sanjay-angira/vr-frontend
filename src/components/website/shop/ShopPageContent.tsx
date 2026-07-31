@@ -29,7 +29,7 @@ import { useSearchParams } from "next/navigation";
 const STORE_GRID_STYLES = `
 .store-catalog__grid {
   display: grid !important;
-  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   gap: var(--gap-m) !important;
   width: 100% !important;
 }
@@ -38,11 +38,21 @@ const STORE_GRID_STYLES = `
   max-width: 100% !important;
   width: auto !important;
   flex: unset !important;
+  height: 100% !important;
 }
-@media (max-width: 900px) {
+@media (max-width: 768px) {
   .store-catalog__grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: var(--gap-s) !important;
+  }
+}
+@media (min-width: 1024px) {
+  .store-catalog__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+@media (min-width: 1280px) {
+  .store-catalog__grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
   }
 }
 `;

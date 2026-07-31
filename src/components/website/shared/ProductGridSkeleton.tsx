@@ -2,7 +2,7 @@ type ProductGridSkeletonProps = {
   count?: number;
 };
 
-/** Product card grid skeleton — matches `.home-product-grid` / `.product-card-1` footprint. */
+/** Product card grid skeleton — matches `.home-product-grid` / `.product-card` footprint. */
 export function ProductGridSkeleton({ count = 8 }: ProductGridSkeletonProps) {
   return (
     <div

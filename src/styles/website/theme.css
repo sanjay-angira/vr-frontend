@@ -58,7 +58,7 @@
   --footer-border: rgba(197, 157, 95, 0.22);
 
   /* Layout — shared page / header / footer width */
-  --container-max: 1400px;
+  --container-max: 1600px;
   --container-padding-x: 1.5rem;
 
   /* Spacing scale */
