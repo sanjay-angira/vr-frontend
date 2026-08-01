@@ -126,9 +126,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
   const categorySlug = product.category?.categorySlug?.trim();
   const categoryShopSeed = categorySlug
     ? { categorySlugs: [categorySlug] }
-    : Number.isFinite(categoryId) && categoryId > 0
-      ? { categoryIds: [categoryId] }
-      : undefined;
+    : undefined;
 
   return (
     <>

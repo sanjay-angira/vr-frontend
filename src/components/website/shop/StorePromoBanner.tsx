@@ -29,39 +29,31 @@ export function StorePromoBanner({ banners }: StorePromoBannerProps) {
     return () => window.clearInterval(timer);
   }, [banners.length]);
 
-  if (!banners.length) {
-    return (
-      <div className="store-promo store-promo--fallback">
-        <div className="store-promo__copy">
-          <p className="store-promo__eyebrow">Vrindavan Rasa</p>
-          <h2>Authentic flavours for every ritual &amp; kitchen</h2>
-          <p>Discover handcrafted spices, offerings, and essentials.</p>
-        </div>
-      </div>
-    );
-  }
+  if (!banners.length) return null;
 
   const current = banners[index];
   const image = resolveImageUrl(current.image || current.mobileImage || "");
+  if (!image) return null;
+
+  const media = (
+    <img
+      src={image}
+      alt={current.title || "Banner"}
+      className="store-promo__image"
+    />
+  );
+
+  const href = current.link?.trim();
 
   return (
-    <div className="store-promo">
-      {image && (
-        <img
-          src={image}
-          alt={current.title}
-          className="store-promo__image"
-        />
-      )}
-      <div className="store-promo__overlay" />
-      <div className="store-promo__copy">
-        <p className="store-promo__eyebrow">Featured</p>
-        <h2>{current.title}</h2>
-        {current.subtitle && <p>{current.subtitle}</p>}
-        <Link href={current.link || "/shop"} className="store-promo__cta">
-          Shop Now
+    <div className="store-promo store-promo--image-only">
+      {href ? (
+        <Link href={href} className="store-promo__media-link" aria-label={current.title || "Banner"}>
+          {media}
         </Link>
-      </div>
+      ) : (
+        media
+      )}
 
       {banners.length > 1 && (
         <>

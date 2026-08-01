@@ -13,6 +13,81 @@
   gap: var(--gap-m);
 }
 
+.store-catalog__category-head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-bottom: 0.25rem;
+}
+
+.store-catalog__breadcrumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.85rem;
+  color: var(--vr-text-muted);
+}
+
+.store-catalog__breadcrumbs a {
+  color: var(--vr-forest);
+  text-decoration: none;
+}
+
+.store-catalog__breadcrumbs a:hover {
+  text-decoration: underline;
+}
+
+.store-catalog__breadcrumbs .is-current {
+  color: var(--vr-text);
+}
+
+.store-catalog__category-title {
+  margin: 0;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: clamp(1.75rem, 3vw, 2.35rem);
+  font-weight: 600;
+  color: var(--vr-forest);
+  line-height: 1.15;
+}
+
+.store-catalog__category-description {
+  margin-top: 0.5rem;
+  padding: 1.75rem 1.5rem;
+  border-top: 1px solid color-mix(in srgb, var(--vr-forest) 14%, transparent);
+  background: #fff;
+  color: var(--vr-text);
+  font-size: 0.98rem;
+  line-height: 1.7;
+}
+
+.store-catalog__category-description h1,
+.store-catalog__category-description h2,
+.store-catalog__category-description h3 {
+  margin: 0 0 0.75rem;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  color: var(--vr-forest);
+  line-height: 1.25;
+}
+
+.store-catalog__category-description p {
+  margin: 0 0 0.9rem;
+}
+
+.store-catalog__category-description p:last-child {
+  margin-bottom: 0;
+}
+
+.store-catalog__category-description ul,
+.store-catalog__category-description ol {
+  margin: 0 0 0.9rem;
+  padding-left: 1.25rem;
+}
+
+.store-catalog__category-description a {
+  color: var(--vr-forest);
+}
+
 .store-promo {
   position: relative;
   overflow: hidden;
@@ -22,6 +97,22 @@
   color: var(--vr-cream);
   display: grid;
   align-items: end;
+}
+
+.store-promo--image-only {
+  align-items: stretch;
+  background: transparent;
+}
+
+.store-promo__media-link {
+  display: block;
+  position: absolute;
+  inset: 0;
+}
+
+.store-promo__media-link .store-promo__image {
+  position: absolute;
+  inset: 0;
 }
 
 .store-promo--fallback {
@@ -36,17 +127,6 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-}
-
-.store-promo__overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    90deg,
-    rgba(5, 26, 16, 0.88) 0%,
-    rgba(5, 26, 16, 0.55) 48%,
-    rgba(5, 26, 16, 0.2) 100%
-  );
 }
 
 .store-promo__copy {

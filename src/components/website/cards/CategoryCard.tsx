@@ -39,14 +39,13 @@ function resolveCategoryIcon(name?: string): LucideIcon {
 export function CategoryCard({ category }: { category: Category }) {
   const Icon = resolveCategoryIcon(category.name);
   const slug = category.slug?.trim();
-  const seed = slug
-    ? { categorySlugs: [slug] }
-    : category.id && Number.isFinite(category.id) && category.id > 0
-      ? { categoryIds: [category.id] }
-      : undefined;
+  const seed = slug ? { categorySlugs: [slug] } : undefined;
+  const href =
+    category.href ||
+    (slug ? `/category/${encodeURIComponent(slug)}` : "/products");
 
   return (
-    <ShopSeedLink seed={seed} className="category-card">
+    <ShopSeedLink href={href} seed={seed} className="category-card">
       <div className="category-card-media">
         {category.image ? (
           <img

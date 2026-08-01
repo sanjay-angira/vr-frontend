@@ -30,6 +30,9 @@ import {
   normalizeQueryString,
   parseShopSearchParams,
 } from "@/utils/shopFilterUrl";
+import { categorySlugsToExpandedIds } from "@/utils/categoryFilterHelpers";
+import { notFound } from "next/navigation";
+import Link from "next/link";
 
 const STORE_GRID_STYLES = `
 .store-catalog__grid {
@@ -107,17 +110,25 @@ function buildDefaultFilters(
   };
 }
 
-export function ShopPageContent() {
+type ShopPageContentProps = {
+  /** When set, this is a `/category/[slug]` page — same layout as store */
+  categorySlug?: string;
+};
+
+export function ShopPageContent({ categorySlug }: ShopPageContentProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const skipUrlWriteRef = useRef(true);
+  const isCategoryPage = Boolean(categorySlug?.trim());
+  const pathCategorySlug = categorySlug?.trim().toLowerCase() || "";
 
   const [products, setProducts] = useState<StoreListProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [filtersLoading, setFiltersLoading] = useState(true);
   const [error, setError] = useState("");
+  const [categoryMissing, setCategoryMissing] = useState(false);
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
   const [pageNumber, setPageNumber] = useState(1);
@@ -135,8 +146,19 @@ export function ShopPageContent() {
   const [filters, setFilters] = useState<StoreFilterState>(() =>
     buildDefaultFilters({ min: 0, max: 100000 })
   );
+  const [categoryDescription, setCategoryDescription] = useState("");
 
   const searchParamsKey = searchParams.toString();
+
+  const activeCategory = categories.find(
+    (category) => category.slug?.trim().toLowerCase() === pathCategorySlug
+  );
+
+  const resolvedCategoryDescription = (
+    categoryDescription ||
+    activeCategory?.description ||
+    ""
+  ).trim();
 
   const applyUrlToState = useCallback(
     (
@@ -145,8 +167,17 @@ export function ShopPageContent() {
       bounds: { min: number; max: number }
     ) => {
       const parsed = parseShopSearchParams(params, nextCategories);
+
+      const pathCategoryIds =
+        pathCategorySlug && nextCategories.length
+          ? categorySlugsToExpandedIds([pathCategorySlug], nextCategories)
+          : [];
+
       const nextFilters = buildDefaultFilters(bounds, {
         ...parsed.filters,
+        categoryIds: isCategoryPage
+          ? pathCategoryIds
+          : parsed.filters.categoryIds,
         minPrice:
           parsed.minPrice != null
             ? Math.max(bounds.min, parsed.minPrice)
@@ -161,10 +192,9 @@ export function ShopPageContent() {
       setFilters(nextFilters);
       setSearch(parsed.search);
       setSearchInput(parsed.search);
-      // Load-more pagination is client-only; always restart at page 1 from URL
       setPageNumber(1);
     },
-    []
+    [isCategoryPage, pathCategorySlug]
   );
 
   useEffect(() => {
@@ -191,6 +221,20 @@ export function ShopPageContent() {
 
         const nextCategories = response.data.categories || [];
 
+        if (isCategoryPage && pathCategorySlug) {
+          const exists = nextCategories.some(
+            (category) =>
+              category.slug?.trim().toLowerCase() === pathCategorySlug
+          );
+          if (!exists) {
+            setCategoryMissing(true);
+            setCategories(nextCategories);
+            setPriceBounds(bounds);
+            return;
+          }
+        }
+
+        setCategoryMissing(false);
         setCategories(nextCategories);
         setProductSections(response.data.productSections || []);
         setBanners(response.data.banners || []);
@@ -216,9 +260,8 @@ export function ShopPageContent() {
     return () => {
       cancelled = true;
     };
-    // Initial meta load only — URL changes handled below
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- searchParams applied in separate effect
+  }, [applyUrlToState, isCategoryPage, pathCategorySlug]);
 
   // Browser back/forward (and external URL changes)
   useEffect(() => {
@@ -250,6 +293,7 @@ export function ShopPageContent() {
       pageNumber: 1,
       priceBounds,
       categories,
+      omitCategory: isCategoryPage,
     });
     const currentQuery = normalizeQueryString(searchParamsKey);
     const normalizedNext = normalizeQueryString(nextQuery);
@@ -267,7 +311,54 @@ export function ShopPageContent() {
     pathname,
     router,
     searchParamsKey,
+    isCategoryPage,
   ]);
+
+  useEffect(() => {
+    if (!filtersLoading && categoryMissing) {
+      notFound();
+    }
+  }, [filtersLoading, categoryMissing]);
+
+  // Category description comes from customer/categories (available on production).
+  // store-filters may not include it until backend is deployed.
+  useEffect(() => {
+    if (!isCategoryPage || !pathCategorySlug) {
+      setCategoryDescription("");
+      return;
+    }
+
+    let cancelled = false;
+
+    async function loadCategoryDescription() {
+      try {
+        const response = (await getData(
+          API_ENDPOINTS.CUSTOMER.CATEGORIES,
+          undefined,
+          { auth: false }
+        )) as {
+          success?: boolean;
+          data?: {
+            rows?: Array<{ slug?: string | null; description?: string | null }>;
+          };
+        };
+
+        if (cancelled || !response?.success) return;
+
+        const match = (response.data?.rows || []).find(
+          (row) => row.slug?.trim().toLowerCase() === pathCategorySlug
+        );
+        setCategoryDescription(String(match?.description || "").trim());
+      } catch {
+        if (!cancelled) setCategoryDescription("");
+      }
+    }
+
+    loadCategoryDescription();
+    return () => {
+      cancelled = true;
+    };
+  }, [isCategoryPage, pathCategorySlug]);
 
   const fetchStoreProducts = useCallback(
     async (page: number, append: boolean) => {
@@ -360,6 +451,16 @@ export function ShopPageContent() {
 
   const handleFiltersChange = (next: StoreFilterState) => {
     setPageNumber(1);
+    if (isCategoryPage && pathCategorySlug) {
+      setFilters({
+        ...next,
+        categoryIds: categorySlugsToExpandedIds(
+          [pathCategorySlug],
+          categories
+        ),
+      });
+      return;
+    }
     setFilters(next);
   };
 
@@ -367,7 +468,15 @@ export function ShopPageContent() {
     setPageNumber(1);
     setSearch("");
     setSearchInput("");
-    setFilters(buildDefaultFilters(priceBounds));
+    const lockedCategoryIds =
+      isCategoryPage && pathCategorySlug
+        ? categorySlugsToExpandedIds([pathCategorySlug], categories)
+        : [];
+    setFilters(
+      buildDefaultFilters(priceBounds, {
+        categoryIds: lockedCategoryIds,
+      })
+    );
   };
 
   return (
@@ -375,6 +484,21 @@ export function ShopPageContent() {
       <style dangerouslySetInnerHTML={{ __html: STORE_GRID_STYLES }} />
       <div className="container store-catalog__inner">
         <StorePromoBanner banners={banners} />
+
+        {isCategoryPage && activeCategory && (
+          <div className="store-catalog__category-head">
+            <nav className="store-catalog__breadcrumbs" aria-label="Breadcrumb">
+              <Link href="/">Home</Link>
+              <span aria-hidden>›</span>
+              <Link href="/products">Shop</Link>
+              <span aria-hidden>›</span>
+              <span className="is-current">{activeCategory.name}</span>
+            </nav>
+            <h1 className="store-catalog__category-title">
+              {activeCategory.name}
+            </h1>
+          </div>
+        )}
 
         <div className="store-catalog__layout">
           <StoreFiltersSidebar
@@ -387,6 +511,7 @@ export function ShopPageContent() {
             onClear={handleClearFilters}
             mobileOpen={mobileFiltersOpen}
             onCloseMobile={() => setMobileFiltersOpen(false)}
+            hideCategories={isCategoryPage}
           />
 
           <div className="store-catalog__main">
@@ -476,6 +601,24 @@ export function ShopPageContent() {
             )}
           </div>
         </div>
+
+        {isCategoryPage &&
+          resolvedCategoryDescription.replace(/<[^>]*>/g, "").trim() && (
+            <article
+              className="store-catalog__category-description"
+              aria-label={`${activeCategory?.name || "Category"} description`}
+            >
+              {/<[a-z][\s\S]*>/i.test(resolvedCategoryDescription) ? (
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: resolvedCategoryDescription,
+                  }}
+                />
+              ) : (
+                <p>{resolvedCategoryDescription}</p>
+              )}
+            </article>
+          )}
       </div>
     </section>
   );

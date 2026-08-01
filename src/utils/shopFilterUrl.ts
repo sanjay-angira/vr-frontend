@@ -119,6 +119,8 @@ type BuildShopQueryArgs = {
   pageNumber: number;
   priceBounds: { min: number; max: number };
   categories: FlatCategoryOption[];
+  /** When true, category lives in the path (`/category/[slug]`) — omit from query */
+  omitCategory?: boolean;
 };
 
 /** Build query string for the shop page (omits defaults). */
@@ -128,15 +130,18 @@ export function buildShopQueryString({
   pageNumber,
   priceBounds,
   categories,
+  omitCategory = false,
 }: BuildShopQueryArgs): string {
   const params = new URLSearchParams();
 
-  const categorySlugs = categoryIdsToTopLevelSlugs(
-    filters.categoryIds,
-    categories
-  );
-  if (categorySlugs.length) {
-    params.set("category", categorySlugs.join(","));
+  if (!omitCategory) {
+    const categorySlugs = categoryIdsToTopLevelSlugs(
+      filters.categoryIds,
+      categories
+    );
+    if (categorySlugs.length) {
+      params.set("category", categorySlugs.join(","));
+    }
   }
 
   if (filters.sectionSlugs.length) {
@@ -163,24 +168,19 @@ export function buildShopQueryString({
   return params.toString();
 }
 
-/** Build `/products?...` href from a filter seed (for links). */
+/**
+ * Build shop href from a filter seed.
+ * Single category → `/category/{slug}` (tid-web style).
+ * Multi / no category → `/products?...`
+ */
 export function buildShopHref(seed?: ShopFilterSeed): string {
   if (!seed) return "/products";
 
-  const params = new URLSearchParams();
+  const categorySlugs = (seed.categorySlugs || [])
+    .map((slug) => slug.trim().toLowerCase())
+    .filter(Boolean);
 
-  if (seed.categorySlugs?.length) {
-    params.set(
-      "category",
-      seed.categorySlugs
-        .map((slug) => slug.trim().toLowerCase())
-        .filter(Boolean)
-        .join(",")
-    );
-  } else if (seed.categoryIds?.length) {
-    // Fallback only when slug is unavailable (prefer updating callers to use slugs)
-    params.set("categoryIds", seed.categoryIds.join(","));
-  }
+  const params = new URLSearchParams();
 
   if (seed.sectionSlugs?.length) {
     params.set("sectionSlugs", seed.sectionSlugs.join(","));
@@ -202,7 +202,22 @@ export function buildShopHref(seed?: ShopFilterSeed): string {
   }
 
   const qs = params.toString();
-  return qs ? `/products?${qs}` : "/products";
+
+  // Dedicated category page (same layout as store)
+  if (categorySlugs.length === 1 && !seed.categoryIds?.length) {
+    return qs
+      ? `/category/${encodeURIComponent(categorySlugs[0])}?${qs}`
+      : `/category/${encodeURIComponent(categorySlugs[0])}`;
+  }
+
+  if (categorySlugs.length) {
+    params.set("category", categorySlugs.join(","));
+  } else if (seed.categoryIds?.length) {
+    params.set("categoryIds", seed.categoryIds.join(","));
+  }
+
+  const fullQs = params.toString();
+  return fullQs ? `/products?${fullQs}` : "/products";
 }
 
 /** Normalize query strings for equality checks (order-independent). */

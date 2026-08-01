@@ -21,6 +21,7 @@ export type StoreCategoryOption = {
   name: string;
   slug: string;
   parentId?: number | null;
+  description?: string | null;
 };
 
 export type StoreProductSectionOption = {
@@ -47,6 +48,8 @@ type StoreFiltersSidebarProps = {
   onClear: () => void;
   mobileOpen: boolean;
   onCloseMobile: () => void;
+  /** Hide category checkboxes on `/category/[slug]` (path is the category) */
+  hideCategories?: boolean;
 };
 
 function CategoryTreeChecks({
@@ -99,6 +102,7 @@ export function StoreFiltersSidebar({
   onClear,
   mobileOpen,
   onCloseMobile,
+  hideCategories = false,
 }: StoreFiltersSidebarProps) {
   const priceId = useId();
   const [draftMin, setDraftMin] = useState(value.minPrice);
@@ -116,13 +120,15 @@ export function StoreFiltersSidebar({
 
   const activeCount = useMemo(() => {
     let count = 0;
-    count += countTopLevelCategorySelections(value.categoryIds, categories);
+    if (!hideCategories) {
+      count += countTopLevelCategorySelections(value.categoryIds, categories);
+    }
     if (value.sectionSlugs.length) count += value.sectionSlugs.length;
     if (value.minPrice > priceBounds.min || value.maxPrice < priceBounds.max)
       count += 1;
     if (value.sortBy && value.sortBy !== "newest") count += 1;
     return count;
-  }, [value, priceBounds, categories]);
+  }, [value, priceBounds, categories, hideCategories]);
 
   const commitPrice = () => {
     const min = Math.min(draftMin, draftMax);
@@ -272,23 +278,25 @@ export function StoreFiltersSidebar({
         ))}
       </section>
 
-      <section className="store-filters__section">
-        <h3>
-          <Grid2X2 size={16} />
-          Product Categories
-        </h3>
-        <div className="store-filters__categories">
-          {categoryTree.length === 0 && (
-            <p className="store-filters__empty">No categories available.</p>
-          )}
-          <CategoryTreeChecks
-            nodes={categoryTree}
-            depth={0}
-            selectedIds={value.categoryIds}
-            onToggle={toggleCategory}
-          />
-        </div>
-      </section>
+      {!hideCategories && (
+        <section className="store-filters__section">
+          <h3>
+            <Grid2X2 size={16} />
+            Product Categories
+          </h3>
+          <div className="store-filters__categories">
+            {categoryTree.length === 0 && (
+              <p className="store-filters__empty">No categories available.</p>
+            )}
+            <CategoryTreeChecks
+              nodes={categoryTree}
+              depth={0}
+              selectedIds={value.categoryIds}
+              onToggle={toggleCategory}
+            />
+          </div>
+        </section>
+      )}
     </aside>
   );
 

@@ -40,7 +40,7 @@ export async function fetchAllCategories(): Promise<Category[]> {
       image: resolveImageUrl(row.image || ""),
       productCount: Number(row.productCount) || 0,
       href: row.slug
-        ? `/products?category=${encodeURIComponent(row.slug)}`
+        ? `/category/${encodeURIComponent(row.slug)}`
         : "/products",
     }));
   } catch {
