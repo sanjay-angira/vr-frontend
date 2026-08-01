@@ -9,11 +9,18 @@ import {
   Tag,
   X,
 } from "lucide-react";
+import {
+  buildCategoryTree,
+  countTopLevelCategorySelections,
+  toggleCategorySelection,
+  type CategoryFilterNode,
+} from "@/utils/categoryFilterHelpers";
 
 export type StoreCategoryOption = {
   id: number;
   name: string;
   slug: string;
+  parentId?: number | null;
 };
 
 export type StoreProductSectionOption = {
@@ -42,6 +49,46 @@ type StoreFiltersSidebarProps = {
   onCloseMobile: () => void;
 };
 
+function CategoryTreeChecks({
+  nodes,
+  depth,
+  selectedIds,
+  onToggle,
+}: {
+  nodes: CategoryFilterNode[];
+  depth: number;
+  selectedIds: number[];
+  onToggle: (id: number) => void;
+}) {
+  return (
+    <>
+      {nodes.map((node) => (
+        <div key={node.id} className="store-filters__category-node">
+          <label
+            className="store-filters__check"
+            style={{ paddingLeft: depth * 1.1 + "rem" }}
+          >
+            <input
+              type="checkbox"
+              checked={selectedIds.includes(node.id)}
+              onChange={() => onToggle(node.id)}
+            />
+            <span>{node.name}</span>
+          </label>
+          {node.children.length > 0 && (
+            <CategoryTreeChecks
+              nodes={node.children}
+              depth={depth + 1}
+              selectedIds={selectedIds}
+              onToggle={onToggle}
+            />
+          )}
+        </div>
+      ))}
+    </>
+  );
+}
+
 export function StoreFiltersSidebar({
   categories,
   productSections,
@@ -62,14 +109,20 @@ export function StoreFiltersSidebar({
     setDraftMax(value.maxPrice);
   }, [value.minPrice, value.maxPrice]);
 
+  const categoryTree = useMemo(
+    () => buildCategoryTree(categories),
+    [categories]
+  );
+
   const activeCount = useMemo(() => {
     let count = 0;
-    if (value.categoryIds.length) count += value.categoryIds.length;
+    count += countTopLevelCategorySelections(value.categoryIds, categories);
     if (value.sectionSlugs.length) count += value.sectionSlugs.length;
-    if (value.minPrice > priceBounds.min || value.maxPrice < priceBounds.max) count += 1;
+    if (value.minPrice > priceBounds.min || value.maxPrice < priceBounds.max)
+      count += 1;
     if (value.sortBy && value.sortBy !== "newest") count += 1;
     return count;
-  }, [value, priceBounds]);
+  }, [value, priceBounds, categories]);
 
   const commitPrice = () => {
     const min = Math.min(draftMin, draftMax);
@@ -82,12 +135,9 @@ export function StoreFiltersSidebar({
   };
 
   const toggleCategory = (id: number) => {
-    const exists = value.categoryIds.includes(id);
     onChange({
       ...value,
-      categoryIds: exists
-        ? value.categoryIds.filter((item) => item !== id)
-        : [...value.categoryIds, id],
+      categoryIds: toggleCategorySelection(id, value.categoryIds, categories),
     });
   };
 
@@ -107,11 +157,17 @@ export function StoreFiltersSidebar({
         <div className="store-filters__title-row">
           <SlidersHorizontal size={18} />
           <h2>Filters</h2>
-          {activeCount > 0 && <span className="store-filters__count">{activeCount}</span>}
+          {activeCount > 0 && (
+            <span className="store-filters__count">{activeCount}</span>
+          )}
         </div>
         <div className="store-filters__head-actions">
           {activeCount > 0 && (
-            <button type="button" className="store-filters__clear" onClick={onClear}>
+            <button
+              type="button"
+              className="store-filters__clear"
+              onClick={onClear}
+            >
               Clear
             </button>
           )}
@@ -182,7 +238,9 @@ export function StoreFiltersSidebar({
         <div className="store-filters__select-wrap">
           <select
             value={value.sortBy}
-            onChange={(event) => onChange({ ...value, sortBy: event.target.value })}
+            onChange={(event) =>
+              onChange({ ...value, sortBy: event.target.value })
+            }
           >
             {sortOptions.map((option) => (
               <option key={option.value} value={option.value}>
@@ -220,19 +278,15 @@ export function StoreFiltersSidebar({
           Product Categories
         </h3>
         <div className="store-filters__categories">
-          {categories.length === 0 && (
+          {categoryTree.length === 0 && (
             <p className="store-filters__empty">No categories available.</p>
           )}
-          {categories.map((category) => (
-            <label key={category.id} className="store-filters__check">
-              <input
-                type="checkbox"
-                checked={value.categoryIds.includes(category.id)}
-                onChange={() => toggleCategory(category.id)}
-              />
-              <span>{category.name}</span>
-            </label>
-          ))}
+          <CategoryTreeChecks
+            nodes={categoryTree}
+            depth={0}
+            selectedIds={value.categoryIds}
+            onToggle={toggleCategory}
+          />
         </div>
       </section>
     </aside>

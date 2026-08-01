@@ -1,4 +1,3 @@
-import Link from "next/link";
 import {
   SectionHeading,
   type SectionHeadingProps,
@@ -7,17 +6,21 @@ import {
   ProductCard,
   type WebsiteProductCardData,
 } from "@/components/website/cards/ProductCard";
+import { ShopSeedLink } from "@/components/website/shop/ShopSeedLink";
+import type { ShopFilterSeed } from "@/utils/shopFilterUrl";
 
 interface ProductSectionProps {
   heading: SectionHeadingProps;
   products: WebsiteProductCardData[];
   viewAllLink?: string;
+  viewAllSeed?: ShopFilterSeed;
 }
 
 export function ProductSection({
   heading,
   products,
   viewAllLink,
+  viewAllSeed,
 }: ProductSectionProps) {
   return (
     <section className="section home-section home-product-section">
@@ -32,11 +35,15 @@ export function ProductSection({
             />
           ))}
         </div>
-        {viewAllLink ? (
+        {(viewAllLink || viewAllSeed) ? (
           <div className="home-section__actions">
-            <Link href={viewAllLink} className="btn btn-outline btn-lg">
+            <ShopSeedLink
+              href={viewAllLink}
+              seed={viewAllSeed}
+              className="btn btn-outline btn-lg"
+            >
               View All {heading.title}
-            </Link>
+            </ShopSeedLink>
           </div>
         ) : null}
       </div>

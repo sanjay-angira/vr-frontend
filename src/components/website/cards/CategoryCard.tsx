@@ -1,4 +1,5 @@
-import Link from "next/link";
+"use client";
+
 import {
   ArrowRight,
   Cookie,
@@ -10,10 +11,12 @@ import {
   Wheat,
   type LucideIcon,
 } from "lucide-react";
+import { ShopSeedLink } from "@/components/website/shop/ShopSeedLink";
 
 export interface Category {
   id: number;
   name?: string;
+  slug?: string;
   description?: string;
   image?: string;
   productCount?: number;
@@ -34,13 +37,16 @@ function resolveCategoryIcon(name?: string): LucideIcon {
 }
 
 export function CategoryCard({ category }: { category: Category }) {
-  const href =
-    category.href ||
-    (category.id ? `/products?categoryIds=${category.id}` : "/products");
   const Icon = resolveCategoryIcon(category.name);
+  const slug = category.slug?.trim();
+  const seed = slug
+    ? { categorySlugs: [slug] }
+    : category.id && Number.isFinite(category.id) && category.id > 0
+      ? { categoryIds: [category.id] }
+      : undefined;
 
   return (
-    <Link href={href} className="category-card">
+    <ShopSeedLink seed={seed} className="category-card">
       <div className="category-card-media">
         {category.image ? (
           <img
@@ -70,6 +76,6 @@ export function CategoryCard({ category }: { category: Category }) {
           <ArrowRight size={15} className="category-card-cta-icon" />
         </span>
       </div>
-    </Link>
+    </ShopSeedLink>
   );
 }

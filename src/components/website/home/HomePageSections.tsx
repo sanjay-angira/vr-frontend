@@ -38,6 +38,7 @@ function mapCategories(categories: HomepageSection["categories"]): Category[] {
   return categories.map((category) => ({
     id: category.id,
     name: category.name,
+    slug: category.slug,
     description: category.description,
     image: resolveImageUrl(category.image),
     href: category.href,
@@ -101,10 +102,9 @@ export function HomePageSections({ sections }: HomePageSectionsProps) {
                 key={key}
                 heading={heading}
                 products={mapProducts(section.products)}
-                viewAllLink={
-                  section.slug
-                    ? `/products?section=${encodeURIComponent(section.slug)}`
-                    : "/products"
+                viewAllLink="/products"
+                viewAllSeed={
+                  section.slug ? { sectionSlugs: [section.slug] } : undefined
                 }
               />
             );
@@ -183,10 +183,11 @@ export function HomePageSections({ sections }: HomePageSectionsProps) {
                   <ProductSection
                     heading={heading}
                     products={mapProducts(section.products)}
-                    viewAllLink={
+                    viewAllLink="/products"
+                    viewAllSeed={
                       section.slug
-                        ? `/products?section=${encodeURIComponent(section.slug)}`
-                        : "/products"
+                        ? { sectionSlugs: [section.slug] }
+                        : undefined
                     }
                   />
                 )}

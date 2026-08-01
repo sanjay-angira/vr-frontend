@@ -4531,6 +4531,16 @@ body {
   gap: var(--gap-m);
 }
 
+.store-page__load-more {
+  margin-top: 1.75rem;
+  display: flex;
+  justify-content: center;
+}
+
+.store-page__load-more .btn {
+  min-width: 10rem;
+}
+
 .store-skeleton-card {
   border: 1px solid #ede3d6;
   border-radius: 0;

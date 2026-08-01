@@ -3,11 +3,12 @@
 import {
   useCallback,
   useEffect,
-  useMemo,
+  useRef,
   useState,
   type FormEvent,
 } from "react";
 import { Search, SlidersHorizontal } from "lucide-react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { API_ENDPOINTS } from "@/services/api/API_ENDPOINT";
 import { getData } from "@/services/api/apiService";
 import {
@@ -24,7 +25,11 @@ import {
   StorePromoBanner,
   type StoreBanner,
 } from "@/components/website/shop/StorePromoBanner";
-import { useSearchParams } from "next/navigation";
+import {
+  buildShopQueryString,
+  normalizeQueryString,
+  parseShopSearchParams,
+} from "@/utils/shopFilterUrl";
 
 const STORE_GRID_STYLES = `
 .store-catalog__grid {
@@ -88,54 +93,29 @@ const DEFAULT_SORT_OPTIONS = [
   { value: "discount_desc", label: "Best Discount" },
 ];
 
-function parseSectionSlugsFromSearch(searchParams: URLSearchParams): string[] {
-  const multi = searchParams.get("sectionSlugs");
-  const single =
-    searchParams.get("section") || searchParams.get("sectionSlug") || "";
-  const raw = multi || single || "";
-  if (!raw.trim()) return [];
-  return raw
-    .split(",")
-    .map((slug) => slug.trim().toLowerCase())
-    .filter(Boolean);
-}
-
-function parseCategoryIdsFromSearch(searchParams: URLSearchParams): number[] {
-  const raw = searchParams.get("categoryIds") || "";
-  if (!raw.trim()) return [];
-  return raw
-    .split(",")
-    .map((id) => Number(id.trim()))
-    .filter((id) => Number.isFinite(id) && id > 0);
-}
-
 function buildDefaultFilters(
   bounds: { min: number; max: number },
-  sectionSlugs: string[] = [],
-  categoryIds: number[] = []
+  overrides: Partial<StoreFilterState> = {}
 ): StoreFilterState {
   return {
     minPrice: bounds.min,
     maxPrice: bounds.max,
     sortBy: "newest",
-    categoryIds,
-    sectionSlugs,
+    categoryIds: [],
+    sectionSlugs: [],
+    ...overrides,
   };
 }
 
 export function ShopPageContent() {
+  const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
-  const initialSectionSlugs = useMemo(
-    () => parseSectionSlugsFromSearch(searchParams),
-    [searchParams]
-  );
-  const initialCategoryIds = useMemo(
-    () => parseCategoryIdsFromSearch(searchParams),
-    [searchParams]
-  );
+  const skipUrlWriteRef = useRef(true);
 
   const [products, setProducts] = useState<StoreListProduct[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [filtersLoading, setFiltersLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchInput, setSearchInput] = useState("");
@@ -153,16 +133,38 @@ export function ShopPageContent() {
   const [sortOptions, setSortOptions] = useState(DEFAULT_SORT_OPTIONS);
   const [priceBounds, setPriceBounds] = useState({ min: 0, max: 100000 });
   const [filters, setFilters] = useState<StoreFilterState>(() =>
-    buildDefaultFilters(
-      { min: 0, max: 100000 },
-      initialSectionSlugs,
-      initialCategoryIds
-    )
+    buildDefaultFilters({ min: 0, max: 100000 })
   );
 
-  const totalPages = useMemo(
-    () => Math.max(1, Math.ceil(count / pageSize)),
-    [count, pageSize]
+  const searchParamsKey = searchParams.toString();
+
+  const applyUrlToState = useCallback(
+    (
+      params: URLSearchParams,
+      nextCategories: StoreCategoryOption[],
+      bounds: { min: number; max: number }
+    ) => {
+      const parsed = parseShopSearchParams(params, nextCategories);
+      const nextFilters = buildDefaultFilters(bounds, {
+        ...parsed.filters,
+        minPrice:
+          parsed.minPrice != null
+            ? Math.max(bounds.min, parsed.minPrice)
+            : bounds.min,
+        maxPrice:
+          parsed.maxPrice != null
+            ? Math.min(bounds.max, parsed.maxPrice)
+            : bounds.max,
+      });
+
+      skipUrlWriteRef.current = true;
+      setFilters(nextFilters);
+      setSearch(parsed.search);
+      setSearchInput(parsed.search);
+      // Load-more pagination is client-only; always restart at page 1 from URL
+      setPageNumber(1);
+    },
+    []
   );
 
   useEffect(() => {
@@ -187,7 +189,9 @@ export function ShopPageContent() {
           ),
         };
 
-        setCategories(response.data.categories || []);
+        const nextCategories = response.data.categories || [];
+
+        setCategories(nextCategories);
         setProductSections(response.data.productSections || []);
         setBanners(response.data.banners || []);
         setSortOptions(
@@ -196,8 +200,10 @@ export function ShopPageContent() {
             : DEFAULT_SORT_OPTIONS
         );
         setPriceBounds(bounds);
-        setFilters(
-          buildDefaultFilters(bounds, initialSectionSlugs, initialCategoryIds)
+        applyUrlToState(
+          new URLSearchParams(searchParamsKey),
+          nextCategories,
+          bounds
         );
       } catch {
         // Keep defaults if filters fail
@@ -210,67 +216,141 @@ export function ShopPageContent() {
     return () => {
       cancelled = true;
     };
-  }, [initialSectionSlugs, initialCategoryIds]);
+    // Initial meta load only — URL changes handled below
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  const fetchStoreProducts = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError("");
+  // Browser back/forward (and external URL changes)
+  useEffect(() => {
+    if (filtersLoading) return;
+    applyUrlToState(
+      new URLSearchParams(searchParamsKey),
+      categories,
+      priceBounds
+    );
+  }, [
+    searchParamsKey,
+    filtersLoading,
+    categories,
+    priceBounds,
+    applyUrlToState,
+  ]);
 
-      const query = new URLSearchParams({
-        pageNumber: String(pageNumber),
-        pageSize: String(pageSize),
-        sortBy: filters.sortBy || "newest",
-      });
-
-      // Only send price bounds when the user narrowed the default range
-      const priceFilterActive =
-        filters.minPrice > priceBounds.min || filters.maxPrice < priceBounds.max;
-      if (priceFilterActive) {
-        query.set("minPrice", String(filters.minPrice));
-        query.set("maxPrice", String(filters.maxPrice));
-      }
-
-      if (search.trim()) query.set("search", search.trim());
-      if (filters.categoryIds.length) {
-        query.set("categoryIds", filters.categoryIds.join(","));
-      }
-      if (filters.sectionSlugs.length) {
-        query.set("sectionSlugs", filters.sectionSlugs.join(","));
-      }
-
-      const response = (await getData(
-        `${API_ENDPOINTS.CUSTOMER.STORE_PRODUCTS}?${query.toString()}`,
-        undefined,
-        { auth: false }
-      )) as StoreProductsApiResponse;
-
-      if (!response?.success || !response.data) {
-        setProducts([]);
-        setCount(0);
-        setError(response?.message || "Failed to load store products.");
-        return;
-      }
-
-      setProducts(response.data.rows || []);
-      setCount(response.data.count || 0);
-    } catch (err: unknown) {
-      setProducts([]);
-      setCount(0);
-      const message =
-        err && typeof err === "object" && "message" in err
-          ? String((err as { message: string }).message)
-          : "Unable to fetch products. Please try again.";
-      setError(message);
-    } finally {
-      setLoading(false);
+  // Sync state → URL
+  useEffect(() => {
+    if (filtersLoading) return;
+    if (skipUrlWriteRef.current) {
+      skipUrlWriteRef.current = false;
+      return;
     }
-  }, [pageNumber, pageSize, search, filters, priceBounds.min, priceBounds.max]);
+
+    const nextQuery = buildShopQueryString({
+      filters,
+      search,
+      pageNumber: 1,
+      priceBounds,
+      categories,
+    });
+    const currentQuery = normalizeQueryString(searchParamsKey);
+    const normalizedNext = normalizeQueryString(nextQuery);
+
+    if (normalizedNext === currentQuery) return;
+
+    const href = normalizedNext ? `${pathname}?${normalizedNext}` : pathname;
+    router.replace(href, { scroll: false });
+  }, [
+    filters,
+    search,
+    priceBounds,
+    categories,
+    filtersLoading,
+    pathname,
+    router,
+    searchParamsKey,
+  ]);
+
+  const fetchStoreProducts = useCallback(
+    async (page: number, append: boolean) => {
+      try {
+        if (append) {
+          setLoadingMore(true);
+        } else {
+          setLoading(true);
+        }
+        setError("");
+
+        const query = new URLSearchParams({
+          pageNumber: String(page),
+          pageSize: String(pageSize),
+          sortBy: filters.sortBy || "newest",
+        });
+
+        const priceFilterActive =
+          filters.minPrice > priceBounds.min ||
+          filters.maxPrice < priceBounds.max;
+        if (priceFilterActive) {
+          query.set("minPrice", String(filters.minPrice));
+          query.set("maxPrice", String(filters.maxPrice));
+        }
+
+        if (search.trim()) query.set("search", search.trim());
+        if (filters.categoryIds.length) {
+          query.set("categoryIds", filters.categoryIds.join(","));
+        }
+        if (filters.sectionSlugs.length) {
+          query.set("sectionSlugs", filters.sectionSlugs.join(","));
+        }
+
+        const response = (await getData(
+          `${API_ENDPOINTS.CUSTOMER.STORE_PRODUCTS}?${query.toString()}`,
+          undefined,
+          { auth: false }
+        )) as StoreProductsApiResponse;
+
+        if (!response?.success || !response.data) {
+          if (!append) {
+            setProducts([]);
+            setCount(0);
+          }
+          setError(response?.message || "Failed to load store products.");
+          return;
+        }
+
+        const rows = response.data.rows || [];
+        setCount(response.data.count || 0);
+        setProducts((prev) => (append ? [...prev, ...rows] : rows));
+      } catch (err: unknown) {
+        if (!append) {
+          setProducts([]);
+          setCount(0);
+        }
+        const message =
+          err && typeof err === "object" && "message" in err
+            ? String((err as { message: string }).message)
+            : "Unable to fetch products. Please try again.";
+        setError(message);
+      } finally {
+        setLoading(false);
+        setLoadingMore(false);
+      }
+    },
+    [pageSize, search, filters, priceBounds.min, priceBounds.max]
+  );
 
   useEffect(() => {
     if (filtersLoading) return;
-    fetchStoreProducts();
+    setPageNumber(1);
+    fetchStoreProducts(1, false);
   }, [fetchStoreProducts, filtersLoading]);
+
+  const hasMore = products.length < count;
+
+  const handleLoadMore = () => {
+    if (loading || loadingMore || !hasMore) return;
+    const nextPage = pageNumber + 1;
+    setPageNumber(nextPage);
+    fetchStoreProducts(nextPage, true);
+  };
 
   const handleSearchSubmit = (event: FormEvent) => {
     event.preventDefault();
@@ -311,7 +391,10 @@ export function ShopPageContent() {
 
           <div className="store-catalog__main">
             <div className="store-catalog__toolbar">
-              <form className="store-catalog__search" onSubmit={handleSearchSubmit}>
+              <form
+                className="store-catalog__search"
+                onSubmit={handleSearchSubmit}
+              >
                 <Search size={18} aria-hidden />
                 <input
                   type="search"
@@ -334,11 +417,15 @@ export function ShopPageContent() {
               </button>
 
               <p className="store-catalog__count">
-                {loading ? "Loading…" : `${count} product${count === 1 ? "" : "s"}`}
+                {loading && products.length === 0
+                  ? "Loading…"
+                  : products.length > 0
+                    ? `Showing ${products.length} of ${count}`
+                    : `${count} product${count === 1 ? "" : "s"}`}
               </p>
             </div>
 
-            {loading && (
+            {loading && products.length === 0 && (
               <div className="store-catalog__grid" aria-busy="true">
                 {Array.from({ length: 8 }).map((_, index) => (
                   <div className="store-skeleton-card" key={`skeleton-${index}`}>
@@ -352,8 +439,10 @@ export function ShopPageContent() {
               </div>
             )}
 
-            {!loading && error && (
-              <p className="store-page__message store-page__message--error">{error}</p>
+            {!loading && error && products.length === 0 && (
+              <p className="store-page__message store-page__message--error">
+                {error}
+              </p>
             )}
 
             {!loading && !error && products.length === 0 && (
@@ -362,7 +451,7 @@ export function ShopPageContent() {
               </p>
             )}
 
-            {!loading && !error && products.length > 0 && (
+            {products.length > 0 && (
               <div className="store-catalog__grid">
                 {products.map((item) => (
                   <StoreProductCard
@@ -373,31 +462,18 @@ export function ShopPageContent() {
               </div>
             )}
 
-            <div className="store-page__pagination">
-              <p className="store-page__pagination-meta">
-                Page {pageNumber} of {totalPages}
-              </p>
-              <div className="store-page__pagination-actions">
+            {hasMore && products.length > 0 && (
+              <div className="store-page__load-more">
                 <button
                   type="button"
-                  className="btn btn-outline btn-sm"
-                  onClick={() => setPageNumber((prev) => Math.max(1, prev - 1))}
-                  disabled={pageNumber <= 1 || loading}
+                  className="btn btn-outline"
+                  onClick={handleLoadMore}
+                  disabled={loading || loadingMore}
                 >
-                  Previous
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-outline btn-sm"
-                  onClick={() =>
-                    setPageNumber((prev) => Math.min(totalPages, prev + 1))
-                  }
-                  disabled={pageNumber >= totalPages || loading}
-                >
-                  Next
+                  {loadingMore ? "Loading…" : "Load More"}
                 </button>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>

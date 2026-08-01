@@ -12,6 +12,7 @@ import {
   toNumber,
 } from "@/components/website/product/productApi";
 import { fetchWebsiteCoupons } from "@/services/website/couponService";
+import { ShopSeedLink } from "@/components/website/shop/ShopSeedLink";
 import { ScrollToTopOnMount } from "@/components/website/shared/ScrollToTopOnMount";
 import { resolveImageUrl } from "@/components/admin/forms/shared/resolveImageUrl";
 
@@ -122,10 +123,12 @@ export default async function ProductDetailPage({ params }: PageProps) {
     inStock: item.inStock,
   }));
 
-  const categoryShopLink =
-    Number.isFinite(categoryId) && categoryId > 0
-      ? `/products?categoryIds=${categoryId}`
-      : "/products";
+  const categorySlug = product.category?.categorySlug?.trim();
+  const categoryShopSeed = categorySlug
+    ? { categorySlugs: [categorySlug] }
+    : Number.isFinite(categoryId) && categoryId > 0
+      ? { categoryIds: [categoryId] }
+      : undefined;
 
   return (
     <>
@@ -135,9 +138,9 @@ export default async function ProductDetailPage({ params }: PageProps) {
         <div className="product-breadcrumbs">
           <Link href="/">Home</Link>
           <span>›</span>
-          <Link href={categoryShopLink}>
+          <ShopSeedLink seed={categoryShopSeed}>
             {product.category?.categoryName || "Shop"}
-          </Link>
+          </ShopSeedLink>
           <span>›</span>
           <span className="is-current">{product.productName}</span>
         </div>
@@ -188,7 +191,8 @@ export default async function ProductDetailPage({ params }: PageProps) {
               : "Products from the same category",
           }}
           products={recommendedCards}
-          viewAllLink={categoryShopLink}
+          viewAllLink="/products"
+          viewAllSeed={categoryShopSeed}
         />
       )}
     </>

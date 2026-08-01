@@ -35,10 +35,13 @@ export async function fetchAllCategories(): Promise<Category[]> {
     return (response.data.rows || []).map((row) => ({
       id: row.id,
       name: row.name,
+      slug: row.slug || undefined,
       description: row.description || "",
       image: resolveImageUrl(row.image || ""),
       productCount: Number(row.productCount) || 0,
-      href: row.href || `/products?categoryIds=${row.id}`,
+      href: row.slug
+        ? `/products?category=${encodeURIComponent(row.slug)}`
+        : "/products",
     }));
   } catch {
     return [];

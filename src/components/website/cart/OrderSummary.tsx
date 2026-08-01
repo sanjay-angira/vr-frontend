@@ -7,6 +7,7 @@
  */
 
 import Link from "next/link";
+import { ShopSeedLink } from "@/components/website/shop/ShopSeedLink";
 import {
   ArrowLeft,
   Heart,
@@ -137,12 +138,13 @@ export function OrderSummary() {
               <Link href="/products" className="cart-btn cart-btn-secondary">
                 New Arrivals
               </Link>
-              <Link
-                href="/products?sort=discount_desc"
+              <ShopSeedLink
+                href="/products"
+                seed={{ sortBy: "discount_desc" }}
                 className="cart-btn cart-btn-secondary"
               >
                 Best Deals
-              </Link>
+              </ShopSeedLink>
             </div>
           </div>
         </aside>
