@@ -22,6 +22,7 @@ export type StoreCategoryOption = {
   slug: string;
   parentId?: number | null;
   description?: string | null;
+  image?: string | null;
 };
 
 export type StoreProductSectionOption = {

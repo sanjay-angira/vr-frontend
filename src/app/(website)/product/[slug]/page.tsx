@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Accordion } from "@/components/website/shared/Accordion";
@@ -14,11 +15,47 @@ import {
 import { fetchWebsiteCoupons } from "@/services/website/couponService";
 import { ShopSeedLink } from "@/components/website/shop/ShopSeedLink";
 import { ScrollToTopOnMount } from "@/components/website/shared/ScrollToTopOnMount";
+import { JsonLd } from "@/components/website/seo/JsonLd";
 import { resolveImageUrl } from "@/components/admin/forms/shared/resolveImageUrl";
+import {
+  getBreadcrumbSchema,
+  getFaqPageSchema,
+  getProductSchema,
+} from "@/lib/schema";
+import { getProductPageMetadata } from "@/lib/seo";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
 };
+
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const product = await fetchProductBySlug(slug);
+
+  if (!product) {
+    return { title: "Product not found | Vrindavan Rasa" };
+  }
+
+  const name = product.productName?.trim() || "Product";
+  const image =
+    product.images
+      ?.slice()
+      .sort((a, b) => a.sortOrder - b.sortOrder)
+      .map((item) => item.url)
+      .find((url) => typeof url === "string" && url.trim()) || null;
+
+  const description =
+    product.shortDescription?.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim() ||
+    undefined;
+
+  return getProductPageMetadata(name, {
+    slug: product.productSlug || slug,
+    description,
+    image,
+  });
+}
 
 export default async function ProductDetailPage({ params }: PageProps) {
   const { slug } = await params;
@@ -128,8 +165,60 @@ export default async function ProductDetailPage({ params }: PageProps) {
     ? { categorySlugs: [categorySlug] }
     : undefined;
 
+  const primaryVariant =
+    (requestedVariantSlug
+      ? normalizedVariants.find((v) => v.slug === requestedVariantSlug)
+      : null) ||
+    normalizedVariants[0] ||
+    null;
+
+  const productPath = `/product/${product.productSlug || slug}`;
+  const plainDescription =
+    product.shortDescription?.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim() ||
+    product.description?.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim() ||
+    undefined;
+
+  const offerPrice =
+    primaryVariant?.pricing.finalPrice ??
+    primaryVariant?.pricing.sellingPrice ??
+    primaryVariant?.price ??
+    null;
+
+  const schemas: Array<Record<string, unknown>> = [
+    getProductSchema({
+      name: product.productName,
+      description: plainDescription,
+      images: baseImages,
+      sku: primaryVariant?.sku,
+      brandName: product.brand?.brandName,
+      price: offerPrice,
+      inStock: primaryVariant ? Number(primaryVariant.stock) > 0 : undefined,
+      path: productPath,
+      ratingValue: averageRating,
+      reviewCount: reviewList.length,
+    }),
+    getBreadcrumbSchema([
+      { name: "Home", path: "/" },
+      ...(categorySlug && product.category?.categoryName
+        ? [
+            {
+              name: product.category.categoryName,
+              path: `/category/${categorySlug}`,
+            },
+          ]
+        : [{ name: "Shop", path: "/products" }]),
+      { name: product.productName, path: productPath },
+    ]),
+  ];
+
+  const productFaqSchema = getFaqPageSchema(
+    faqItems.map((item) => ({ question: item.question, answer: item.answer }))
+  );
+  if (productFaqSchema) schemas.push(productFaqSchema);
+
   return (
     <>
+      <JsonLd data={schemas} />
       <div className="container product-page-shell">
         <ScrollToTopOnMount />
 

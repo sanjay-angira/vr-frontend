@@ -1,9 +1,14 @@
 import { Suspense } from "react";
+import type { Metadata } from "next";
 import { OrderSuccessContent } from "@/components/website/cart/OrderSuccessContent";
+import { NOINDEX_ROBOTS, buildPageMetadata } from "@/lib/seo";
 
-export const metadata = {
-  title: "Thank you | Vrindavan Rasa",
-};
+export const metadata: Metadata = buildPageMetadata({
+  title: "Thank You | Vrindavan Rasa",
+  description: "Thank you for your order with Vrindavan Rasa.",
+  path: "/thank-you",
+  robots: NOINDEX_ROBOTS,
+});
 
 export default function ThankYouPage() {
   return (

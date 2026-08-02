@@ -33,6 +33,7 @@ import {
 import { categorySlugsToExpandedIds } from "@/utils/categoryFilterHelpers";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import type { CategoryShopInitialData } from "@/services/website/shopCatalogApi";
 
 const STORE_GRID_STYLES = `
 .store-catalog__grid {
@@ -113,9 +114,20 @@ function buildDefaultFilters(
 type ShopPageContentProps = {
   /** When set, this is a `/category/[slug]` page — same layout as store */
   categorySlug?: string;
+  /** Server-fetched catalog payload (category pages) */
+  initialData?: CategoryShopInitialData;
+  /** Header/description rendered by the RSC category page */
+  hideCategoryChrome?: boolean;
+  /** Skip outer section/container when wrapped by a server page shell */
+  embedded?: boolean;
 };
 
-export function ShopPageContent({ categorySlug }: ShopPageContentProps) {
+export function ShopPageContent({
+  categorySlug,
+  initialData,
+  hideCategoryChrome = false,
+  embedded = false,
+}: ShopPageContentProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -123,30 +135,46 @@ export function ShopPageContent({ categorySlug }: ShopPageContentProps) {
   const isCategoryPage = Boolean(categorySlug?.trim());
   const pathCategorySlug = categorySlug?.trim().toLowerCase() || "";
 
-  const [products, setProducts] = useState<StoreListProduct[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [products, setProducts] = useState<StoreListProduct[]>(
+    () => initialData?.products || []
+  );
+  const [loading, setLoading] = useState(() => !initialData);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [filtersLoading, setFiltersLoading] = useState(true);
+  const [filtersLoading, setFiltersLoading] = useState(() => !initialData);
   const [error, setError] = useState("");
   const [categoryMissing, setCategoryMissing] = useState(false);
-  const [searchInput, setSearchInput] = useState("");
-  const [search, setSearch] = useState("");
+  const [searchInput, setSearchInput] = useState(
+    () => initialData?.search || ""
+  );
+  const [search, setSearch] = useState(() => initialData?.search || "");
   const [pageNumber, setPageNumber] = useState(1);
   const pageSize = 48;
-  const [count, setCount] = useState(0);
+  const [count, setCount] = useState(() => initialData?.count || 0);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
-  const [categories, setCategories] = useState<StoreCategoryOption[]>([]);
+  const [categories, setCategories] = useState<StoreCategoryOption[]>(
+    () => initialData?.categories || []
+  );
   const [productSections, setProductSections] = useState<
     StoreProductSectionOption[]
-  >([]);
-  const [banners, setBanners] = useState<StoreBanner[]>([]);
-  const [sortOptions, setSortOptions] = useState(DEFAULT_SORT_OPTIONS);
-  const [priceBounds, setPriceBounds] = useState({ min: 0, max: 100000 });
-  const [filters, setFilters] = useState<StoreFilterState>(() =>
-    buildDefaultFilters({ min: 0, max: 100000 })
+  >(() => initialData?.productSections || []);
+  const [banners, setBanners] = useState<StoreBanner[]>(
+    () => initialData?.banners || []
   );
-  const [categoryDescription, setCategoryDescription] = useState("");
+  const [sortOptions, setSortOptions] = useState(
+    () => initialData?.sortOptions || DEFAULT_SORT_OPTIONS
+  );
+  const [priceBounds, setPriceBounds] = useState(
+    () => initialData?.priceBounds || { min: 0, max: 100000 }
+  );
+  const [filters, setFilters] = useState<StoreFilterState>(() =>
+    initialData
+      ? initialData.filters
+      : buildDefaultFilters({ min: 0, max: 100000 })
+  );
+  const [categoryDescription, setCategoryDescription] = useState(
+    () => initialData?.category.description || ""
+  );
 
   const searchParamsKey = searchParams.toString();
 
@@ -159,6 +187,17 @@ export function ShopPageContent({ categorySlug }: ShopPageContentProps) {
     activeCategory?.description ||
     ""
   ).trim();
+
+  const categoryDisplay =
+    activeCategory ||
+    (initialData?.category
+      ? {
+          id: initialData.category.id,
+          name: initialData.category.name,
+          slug: initialData.category.slug,
+          description: initialData.category.description,
+        }
+      : undefined);
 
   const applyUrlToState = useCallback(
     (
@@ -198,6 +237,11 @@ export function ShopPageContent({ categorySlug }: ShopPageContentProps) {
   );
 
   useEffect(() => {
+    if (initialData) {
+      setFiltersLoading(false);
+      return;
+    }
+
     let cancelled = false;
 
     async function loadFilters() {
@@ -261,11 +305,16 @@ export function ShopPageContent({ categorySlug }: ShopPageContentProps) {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- searchParams applied in separate effect
-  }, [applyUrlToState, isCategoryPage, pathCategorySlug]);
+  }, [applyUrlToState, isCategoryPage, pathCategorySlug, initialData]);
 
   // Browser back/forward (and external URL changes)
+  const skipFirstUrlSyncRef = useRef(Boolean(initialData));
   useEffect(() => {
     if (filtersLoading) return;
+    if (skipFirstUrlSyncRef.current) {
+      skipFirstUrlSyncRef.current = false;
+      return;
+    }
     applyUrlToState(
       new URLSearchParams(searchParamsKey),
       categories,
@@ -320,11 +369,14 @@ export function ShopPageContent({ categorySlug }: ShopPageContentProps) {
     }
   }, [filtersLoading, categoryMissing]);
 
-  // Category description comes from customer/categories (available on production).
-  // store-filters may not include it until backend is deployed.
+  // Category description — skip client fetch when SSR already provided it
   useEffect(() => {
     if (!isCategoryPage || !pathCategorySlug) {
       setCategoryDescription("");
+      return;
+    }
+    if (initialData?.category.description) {
+      setCategoryDescription(initialData.category.description);
       return;
     }
 
@@ -358,7 +410,7 @@ export function ShopPageContent({ categorySlug }: ShopPageContentProps) {
     return () => {
       cancelled = true;
     };
-  }, [isCategoryPage, pathCategorySlug]);
+  }, [isCategoryPage, pathCategorySlug, initialData?.category.description]);
 
   const fetchStoreProducts = useCallback(
     async (page: number, append: boolean) => {
@@ -428,8 +480,13 @@ export function ShopPageContent({ categorySlug }: ShopPageContentProps) {
     [pageSize, search, filters, priceBounds.min, priceBounds.max]
   );
 
+  const skipInitialProductFetchRef = useRef(Boolean(initialData));
   useEffect(() => {
     if (filtersLoading) return;
+    if (skipInitialProductFetchRef.current) {
+      skipInitialProductFetchRef.current = false;
+      return;
+    }
     setPageNumber(1);
     fetchStoreProducts(1, false);
   }, [fetchStoreProducts, filtersLoading]);
@@ -479,147 +536,156 @@ export function ShopPageContent({ categorySlug }: ShopPageContentProps) {
     );
   };
 
-  return (
-    <section className="store-catalog">
+  const catalogBody = (
+    <>
       <style dangerouslySetInnerHTML={{ __html: STORE_GRID_STYLES }} />
-      <div className="container store-catalog__inner">
-        <StorePromoBanner banners={banners} />
+      <StorePromoBanner banners={banners} />
 
-        {isCategoryPage && activeCategory && (
-          <div className="store-catalog__category-head">
-            <nav className="store-catalog__breadcrumbs" aria-label="Breadcrumb">
-              <Link href="/">Home</Link>
-              <span aria-hidden>›</span>
-              <Link href="/products">Shop</Link>
-              <span aria-hidden>›</span>
-              <span className="is-current">{activeCategory.name}</span>
-            </nav>
-            <h1 className="store-catalog__category-title">
-              {activeCategory.name}
-            </h1>
+      {!hideCategoryChrome && isCategoryPage && categoryDisplay && (
+        <div className="store-catalog__category-head">
+          <nav className="store-catalog__breadcrumbs" aria-label="Breadcrumb">
+            <Link href="/">Home</Link>
+            <span aria-hidden>›</span>
+            <Link href="/products">Shop</Link>
+            <span aria-hidden>›</span>
+            <span className="is-current">{categoryDisplay.name}</span>
+          </nav>
+          <h1 className="store-catalog__category-title">
+            {categoryDisplay.name}
+          </h1>
+        </div>
+      )}
+
+      <div className="store-catalog__layout">
+        <StoreFiltersSidebar
+          categories={categories}
+          productSections={productSections}
+          priceBounds={priceBounds}
+          sortOptions={sortOptions}
+          value={filters}
+          onChange={handleFiltersChange}
+          onClear={handleClearFilters}
+          mobileOpen={mobileFiltersOpen}
+          onCloseMobile={() => setMobileFiltersOpen(false)}
+          hideCategories={isCategoryPage}
+        />
+
+        <div className="store-catalog__main">
+          <div className="store-catalog__toolbar">
+            <form
+              className="store-catalog__search"
+              onSubmit={handleSearchSubmit}
+            >
+              <Search size={18} aria-hidden />
+              <input
+                type="search"
+                placeholder="Search products..."
+                value={searchInput}
+                onChange={(event) => setSearchInput(event.target.value)}
+              />
+              <button type="submit" className="btn btn-outline btn-sm">
+                Search
+              </button>
+            </form>
+
+            <button
+              type="button"
+              className="store-catalog__filter-btn"
+              onClick={() => setMobileFiltersOpen(true)}
+            >
+              <SlidersHorizontal size={16} />
+              Filters
+            </button>
+
+            <p className="store-catalog__count">
+              {loading && products.length === 0
+                ? "Loading…"
+                : products.length > 0
+                  ? `Showing ${products.length} of ${count}`
+                  : `${count} product${count === 1 ? "" : "s"}`}
+            </p>
           </div>
-        )}
 
-        <div className="store-catalog__layout">
-          <StoreFiltersSidebar
-            categories={categories}
-            productSections={productSections}
-            priceBounds={priceBounds}
-            sortOptions={sortOptions}
-            value={filters}
-            onChange={handleFiltersChange}
-            onClear={handleClearFilters}
-            mobileOpen={mobileFiltersOpen}
-            onCloseMobile={() => setMobileFiltersOpen(false)}
-            hideCategories={isCategoryPage}
-          />
+          {loading && products.length === 0 && (
+            <div className="store-catalog__grid" aria-busy="true">
+              {Array.from({ length: 8 }).map((_, index) => (
+                <div className="store-skeleton-card" key={`skeleton-${index}`}>
+                  <div className="store-skeleton-image store-skeleton-shimmer" />
+                  <div className="store-skeleton-content">
+                    <div className="store-skeleton-line store-skeleton-shimmer" />
+                    <div className="store-skeleton-line store-skeleton-shimmer medium" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
 
-          <div className="store-catalog__main">
-            <div className="store-catalog__toolbar">
-              <form
-                className="store-catalog__search"
-                onSubmit={handleSearchSubmit}
-              >
-                <Search size={18} aria-hidden />
-                <input
-                  type="search"
-                  placeholder="Search products..."
-                  value={searchInput}
-                  onChange={(event) => setSearchInput(event.target.value)}
+          {!loading && error && products.length === 0 && (
+            <p className="store-page__message store-page__message--error">
+              {error}
+            </p>
+          )}
+
+          {!loading && !error && products.length === 0 && (
+            <p className="store-page__message">
+              No products match your filters. Try clearing filters.
+            </p>
+          )}
+
+          {products.length > 0 && (
+            <div className="store-catalog__grid">
+              {products.map((item) => (
+                <StoreProductCard
+                  key={`${item.productId}-${item.variantId}`}
+                  product={item}
                 />
-                <button type="submit" className="btn btn-outline btn-sm">
-                  Search
-                </button>
-              </form>
+              ))}
+            </div>
+          )}
 
+          {hasMore && products.length > 0 && (
+            <div className="store-page__load-more">
               <button
                 type="button"
-                className="store-catalog__filter-btn"
-                onClick={() => setMobileFiltersOpen(true)}
+                className="btn btn-outline"
+                onClick={handleLoadMore}
+                disabled={loading || loadingMore}
               >
-                <SlidersHorizontal size={16} />
-                Filters
+                {loadingMore ? "Loading…" : "Load More"}
               </button>
-
-              <p className="store-catalog__count">
-                {loading && products.length === 0
-                  ? "Loading…"
-                  : products.length > 0
-                    ? `Showing ${products.length} of ${count}`
-                    : `${count} product${count === 1 ? "" : "s"}`}
-              </p>
             </div>
-
-            {loading && products.length === 0 && (
-              <div className="store-catalog__grid" aria-busy="true">
-                {Array.from({ length: 8 }).map((_, index) => (
-                  <div className="store-skeleton-card" key={`skeleton-${index}`}>
-                    <div className="store-skeleton-image store-skeleton-shimmer" />
-                    <div className="store-skeleton-content">
-                      <div className="store-skeleton-line store-skeleton-shimmer" />
-                      <div className="store-skeleton-line store-skeleton-shimmer medium" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {!loading && error && products.length === 0 && (
-              <p className="store-page__message store-page__message--error">
-                {error}
-              </p>
-            )}
-
-            {!loading && !error && products.length === 0 && (
-              <p className="store-page__message">
-                No products match your filters. Try clearing filters.
-              </p>
-            )}
-
-            {products.length > 0 && (
-              <div className="store-catalog__grid">
-                {products.map((item) => (
-                  <StoreProductCard
-                    key={`${item.productId}-${item.variantId}`}
-                    product={item}
-                  />
-                ))}
-              </div>
-            )}
-
-            {hasMore && products.length > 0 && (
-              <div className="store-page__load-more">
-                <button
-                  type="button"
-                  className="btn btn-outline"
-                  onClick={handleLoadMore}
-                  disabled={loading || loadingMore}
-                >
-                  {loadingMore ? "Loading…" : "Load More"}
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {isCategoryPage &&
-          resolvedCategoryDescription.replace(/<[^>]*>/g, "").trim() && (
-            <article
-              className="store-catalog__category-description"
-              aria-label={`${activeCategory?.name || "Category"} description`}
-            >
-              {/<[a-z][\s\S]*>/i.test(resolvedCategoryDescription) ? (
-                <div
-                  dangerouslySetInnerHTML={{
-                    __html: resolvedCategoryDescription,
-                  }}
-                />
-              ) : (
-                <p>{resolvedCategoryDescription}</p>
-              )}
-            </article>
           )}
+        </div>
       </div>
+
+      {!hideCategoryChrome &&
+        isCategoryPage &&
+        resolvedCategoryDescription.replace(/<[^>]*>/g, "").trim() && (
+          <article
+            className="store-catalog__category-description"
+            aria-label={`${categoryDisplay?.name || "Category"} description`}
+          >
+            {/<[a-z][\s\S]*>/i.test(resolvedCategoryDescription) ? (
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: resolvedCategoryDescription,
+                }}
+              />
+            ) : (
+              <p>{resolvedCategoryDescription}</p>
+            )}
+          </article>
+        )}
+    </>
+  );
+
+  if (embedded) {
+    return catalogBody;
+  }
+
+  return (
+    <section className="store-catalog">
+      <div className="container store-catalog__inner">{catalogBody}</div>
     </section>
   );
 }
