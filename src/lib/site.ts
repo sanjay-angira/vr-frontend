@@ -5,7 +5,7 @@ export function getSiteUrl(): string {
   const raw =
     process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
     process.env.SITE_URL?.trim() ||
-    "https://vrindavanrasa.com";
+    "https://www.vrindavanrasa.com";
 
   return raw.replace(/\/+$/, "");
 }
