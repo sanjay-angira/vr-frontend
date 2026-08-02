@@ -8,6 +8,7 @@ export type RecentlyViewedProduct = {
   id: string;
   productId?: number;
   slug: string;
+  variantSlug?: string | null;
   name: string;
   description: string;
   price: number;
@@ -44,6 +45,7 @@ export function mapRecentlyViewedToCard(
   return {
     id: String(product.id),
     slug: product.slug,
+    variantSlug: product.variantSlug ?? undefined,
     name: product.name,
     description: product.description || "",
     price: Number(product.price) || 0,

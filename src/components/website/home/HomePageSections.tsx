@@ -19,6 +19,7 @@ function mapProducts(products: HomepageSection["products"]): WebsiteProductCardD
   return products.map((product) => ({
     id: product.id,
     slug: product.slug,
+    variantSlug: product.variantSlug ?? undefined,
     name: product.name,
     description: product.description,
     price: product.price,

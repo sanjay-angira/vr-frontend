@@ -66,7 +66,6 @@ export function RecentlyViewedPageContent() {
               <ProductCard
                 key={`recently-viewed-${product.slug || "product"}-${product.id}-${index}`}
                 product={product}
-                href={product.slug ? `/product/${product.slug}` : undefined}
               />
             ))}
           </div>

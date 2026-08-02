@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { Accordion } from "@/components/website/shared/Accordion";
 import ReviewSection from "@/components/website/product/ReviewSection";
 import ProductDetail from "@/components/website/product/ProductDetail";
@@ -23,10 +23,23 @@ import {
   getProductSchema,
 } from "@/lib/schema";
 import { getProductPageMetadata } from "@/lib/seo";
+import { buildProductVariantUrl } from "@/components/website/product/productVariantUtils";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
+  searchParams?: Promise<{ variant?: string | string[] }>;
 };
+
+function pickVariantParam(
+  value: string | string[] | undefined,
+): string | null {
+  if (typeof value === "string" && value.trim()) return value.trim();
+  if (Array.isArray(value)) {
+    const first = value.find((item) => typeof item === "string" && item.trim());
+    return first?.trim() || null;
+  }
+  return null;
+}
 
 export async function generateMetadata({
   params,
@@ -57,8 +70,13 @@ export async function generateMetadata({
   });
 }
 
-export default async function ProductDetailPage({ params }: PageProps) {
+export default async function ProductDetailPage({
+  params,
+  searchParams,
+}: PageProps) {
   const { slug } = await params;
+  const query = searchParams ? await searchParams : undefined;
+  const variantFromQuery = pickVariantParam(query?.variant);
   const [product, availableCoupons] = await Promise.all([
     fetchProductBySlug(slug),
     fetchWebsiteCoupons(),
@@ -66,6 +84,12 @@ export default async function ProductDetailPage({ params }: PageProps) {
 
   if (!product) {
     notFound();
+  }
+
+  // Cards / bookmarks may hit /product/{variantSlug}. Canonicalize immediately
+  // so the address bar does not jump after client hydrate.
+  if (product.productSlug && slug !== product.productSlug) {
+    redirect(buildProductVariantUrl(product.productSlug, slug));
   }
 
   const categoryId = Number(product.category?.id);
@@ -82,10 +106,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
     product.variants as Parameters<typeof normalizeVariants>[0]
   );
 
-  const requestedVariantSlug =
-    slug !== product.productSlug
-      ? slug
-      : null;
+  const requestedVariantSlug = variantFromQuery;
 
   const baseImages =
     product.images

@@ -105,20 +105,6 @@ export default function ProductDetail({
   );
 
   useEffect(() => {
-    const variant =
-      product.variants.find((item) => item.id === selectedVariantId) ??
-      product.variants[0] ??
-      null;
-
-    if (!variant?.slug) return;
-
-    const currentSlug = getVariantSlugFromWindow();
-    if (currentSlug !== variant.slug) {
-      replaceProductVariantInUrl(product.slug, variant.slug);
-    }
-  }, [product.slug, product.variants, selectedVariantId]);
-
-  useEffect(() => {
     const syncFromUrl = () => {
       const slug = getVariantSlugFromWindow();
       const matched = slug

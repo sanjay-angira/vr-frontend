@@ -28,11 +28,7 @@ export function ProductSection({
         <SectionHeading {...heading} />
         <div className="home-product-grid">
           {products.map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              href={product.slug ? `/product/${product.slug}` : undefined}
-            />
+            <ProductCard key={product.id} product={product} />
           ))}
         </div>
         {(viewAllLink || viewAllSeed) ? (

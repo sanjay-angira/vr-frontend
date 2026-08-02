@@ -19,6 +19,7 @@ export type HomepageCategory = {
 export type HomepageProduct = {
   id: string;
   slug: string;
+  variantSlug?: string | null;
   name: string;
   description: string;
   price: number;

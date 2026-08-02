@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Heart, ShoppingCart, Star } from "lucide-react";
 import { resolveImageUrl } from "@/components/admin/forms/shared/resolveImageUrl";
+import { buildProductVariantUrl } from "@/components/website/product/productVariantUtils";
 import { useAppDispatch } from "@/services/redux/hooks";
 import {
   addWebsiteCartItem,
@@ -24,7 +25,10 @@ export interface WebsiteProductCardData {
   inStock: boolean;
   isNew?: boolean;
   isFeatured?: boolean;
+  /** Canonical product slug for /product/[slug] */
   slug?: string;
+  /** Optional variant slug → ?variant= deep link */
+  variantSlug?: string | null;
 }
 
 export interface ProductCardProps {
@@ -98,7 +102,15 @@ export function ProductCard({
   const wished = isWished(variationId);
   const productHref =
     href ??
-    (normalizedProduct.slug ? `/product/${normalizedProduct.slug}` : undefined);
+    (normalizedProduct.slug
+      ? buildProductVariantUrl(
+          normalizedProduct.slug,
+          normalizedProduct.variantSlug &&
+            normalizedProduct.variantSlug !== normalizedProduct.slug
+            ? normalizedProduct.variantSlug
+            : null,
+        )
+      : undefined);
 
   const currentPrice = Number(normalizedProduct.price || 0);
   const listPrice = Number(normalizedProduct.originalPrice || 0);
