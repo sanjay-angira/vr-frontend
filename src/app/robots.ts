@@ -4,6 +4,7 @@ import { getSiteUrl } from "@/lib/site";
 /**
  * Public storefront crawl rules.
  * Blocks admin, account, and checkout flows that should not be indexed.
+ * Google ignores the non-standard Host directive, so it is omitted.
  */
 export default function robots(): MetadataRoute.Robots {
   const site = getSiteUrl();
@@ -32,6 +33,5 @@ export default function robots(): MetadataRoute.Robots {
       },
     ],
     sitemap: `${site}/sitemap.xml`,
-    host: site,
   };
 }
