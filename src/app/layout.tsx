@@ -10,6 +10,7 @@ import type { Metadata } from "next";
 import { StoreProvider } from "@/services/redux/provider";
 import "./globals.css";
 
+
 const home = SEO_PAGES.home;
 const siteUrl = getSiteUrl();
 
