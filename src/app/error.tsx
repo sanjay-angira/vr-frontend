@@ -13,4 +13,5 @@ export default function Error({
       <button onClick={reset}>Try again</button>
     </div>
   );
+  
 }
