@@ -1,8 +1,5 @@
 import type { MetadataRoute } from "next";
 import { getApiBaseUrl, getSiteUrl } from "@/lib/site";
-import { applySystemCaCertificates } from "@/lib/nodeTls";
-
-applySystemCaCertificates();
 
 /** Refresh sitemap about hourly so new products/blogs appear for crawlers. */
 export const revalidate = 3600;
