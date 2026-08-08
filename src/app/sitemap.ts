@@ -131,8 +131,9 @@ async function fetchJson<T>(
     const res = await fetch(url, {
       headers: { Accept: "application/json" },
       signal: controller.signal,
-      // Sitemap must not reuse a failed/empty Next data cache from a prior run.
-      cache: "no-store",
+      // Match route revalidate so sitemap can be generated/ISR'd without
+      // throwing Dynamic server usage errors from cache: "no-store".
+      next: { revalidate: 3600 },
     });
     if (!res.ok) {
       return { data: null, error: `HTTP ${res.status} for ${url}` };
