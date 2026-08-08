@@ -7,6 +7,12 @@ const nextConfig: NextConfig = {
     root: path.join(__dirname),
   },
   images: {
+    // Local Windows SSL interception breaks Next's optimizer fetches to S3.
+    // Browser loads S3 directly in dev; production deploys keep optimization.
+    // Set NEXT_IMAGE_UNOPTIMIZED=1 for local `next start` if images 500.
+    unoptimized:
+      process.env.NEXT_IMAGE_UNOPTIMIZED === "1" ||
+      process.env.NODE_ENV === "development",
     remotePatterns: [
       {
         protocol: "https",
@@ -15,6 +21,14 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "api.vrindavanrasa.com",
+      },
+      {
+        protocol: "http",
+        hostname: "localhost",
+      },
+      {
+        protocol: "http",
+        hostname: "127.0.0.1",
       },
       {
         protocol: "https",

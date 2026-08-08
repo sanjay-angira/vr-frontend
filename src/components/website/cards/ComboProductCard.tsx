@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { ShoppingCart, Star } from "lucide-react";
 
 export interface ComboProduct {
@@ -27,7 +28,13 @@ export function ComboProductCard({ combo }: { combo: ComboProduct }) {
     <article className="combo-card">
       <div className="combo-card-image-wrap">
         {combo.image?.trim() ? (
-          <img src={combo.image} alt={combo.name} className="combo-card-image" />
+          <Image
+            src={combo.image}
+            alt={combo.name}
+            fill
+            sizes="(max-width: 768px) 50vw, 25vw"
+            className="combo-card-image"
+          />
         ) : (
           <div className="combo-card-image combo-card-image--placeholder" aria-hidden />
         )}

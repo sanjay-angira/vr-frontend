@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { resolveImageUrl } from "@/components/admin/forms/shared/resolveImageUrl";
@@ -36,10 +37,13 @@ export function StorePromoBanner({ banners }: StorePromoBannerProps) {
   if (!image) return null;
 
   const media = (
-    <img
+    <Image
       src={image}
       alt={current.title || "Banner"}
+      fill
+      sizes="100vw"
       className="store-promo__image"
+      priority
     />
   );
 

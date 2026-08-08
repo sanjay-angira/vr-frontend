@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Accordion } from "@/components/website/shared/Accordion";
 import { ScrollToTopOnMount } from "@/components/website/shared/ScrollToTopOnMount";
@@ -8,8 +9,13 @@ function RelatedCard({ post }: { post: BlogListCard }) {
     <article className="blog-card">
       <Link href={post.href} className="blog-card-media">
         {post.image ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={post.image} alt={post.imageAlt || post.title} className="blog-card-image" />
+          <Image
+            src={post.image}
+            alt={post.imageAlt || post.title}
+            fill
+            sizes="(max-width: 768px) 100vw, 33vw"
+            className="blog-card-image"
+          />
         ) : (
           <div className="blog-card-image blog-card-image--placeholder" aria-hidden />
         )}
@@ -80,8 +86,15 @@ export function BlogDetailContent({ blog }: { blog: BlogDetail }) {
 
         {blog.image && (
           <div className="blog-detail__hero">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={blog.image} alt={blog.imageAlt || blog.title} />
+            <Image
+              src={blog.image}
+              alt={blog.imageAlt || blog.title}
+              width={1200}
+              height={640}
+              sizes="(max-width: 768px) 100vw, 960px"
+              style={{ width: "100%", height: "auto", maxHeight: 480, objectFit: "cover" }}
+              priority
+            />
           </div>
         )}
 

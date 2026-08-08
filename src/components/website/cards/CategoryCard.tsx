@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import {
   ArrowRight,
   Cookie,
@@ -48,9 +49,11 @@ export function CategoryCard({ category }: { category: Category }) {
     <ShopSeedLink href={href} seed={seed} className="category-card">
       <div className="category-card-media">
         {category.image ? (
-          <img
+          <Image
             src={category.image}
             alt={category.name || "Category"}
+            fill
+            sizes="(max-width: 768px) 100vw, 33vw"
             className="category-card-image"
           />
         ) : (

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Mail, MapPin, Phone } from "lucide-react";
 import { resolveImageUrl } from "@/components/admin/forms/shared/resolveImageUrl";
@@ -71,8 +72,14 @@ function IconTile({
 }) {
   const safeIconUrl = iconUrl.trim();
   const content = safeIconUrl ? (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img src={safeIconUrl} alt={label} className={imageClassName} />
+    <Image
+      src={safeIconUrl}
+      alt={label}
+      width={150}
+      height={100}
+      className={imageClassName}
+      unoptimized
+    />
   ) : (
     <span className="footer-payment-label">{label}</span>
   );

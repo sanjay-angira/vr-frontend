@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import type { WebsiteCoupon } from "@/services/website/couponService";
 import { addOrUpdateCartItem } from "@/services/website/cartService";
@@ -48,11 +49,14 @@ function CouponBannerCard({
       onClick={() => void handleClick()}
       aria-label={`Apply coupon ${coupon.couponCode}`}
     >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
+      <Image
         src={image}
         alt={coupon.couponCode}
+        width={1200}
+        height={300}
         className="product-coupon-banner__full-image"
+        sizes="(max-width: 768px) 100vw, 720px"
+        style={{ width: "100%", height: "auto" }}
       />
     </button>
   );

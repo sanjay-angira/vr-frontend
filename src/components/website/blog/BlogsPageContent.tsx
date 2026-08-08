@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
@@ -16,8 +17,13 @@ function BlogCard({ post }: { post: BlogListCard }) {
     <article className="blog-card">
       <Link href={post.href} className="blog-card-media">
         {post.image ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={post.image} alt={post.imageAlt || post.title} className="blog-card-image" />
+          <Image
+            src={post.image}
+            alt={post.imageAlt || post.title}
+            fill
+            sizes="(max-width: 768px) 100vw, 33vw"
+            className="blog-card-image"
+          />
         ) : (
           <div className="blog-card-image blog-card-image--placeholder" aria-hidden />
         )}

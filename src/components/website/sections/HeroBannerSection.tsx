@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
+import Image from "next/image";
 import Link from "next/link";
 import type { Settings } from "react-slick";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -154,19 +155,45 @@ function HeroSlide({ banner }: { banner: HomepageBanner }) {
   const media = (
     <div className="cms-hero-banner__media">
       {desktopSrc ? (
-        <picture>
-          {hasDistinctMobile ? (
-            <source media="(max-width: 899px)" srcSet={mobileSrc} />
-          ) : null}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+        hasDistinctMobile ? (
+          <>
+            <div className="cms-hero-banner__variant cms-hero-banner__variant--mobile">
+              <Image
+                src={mobileSrc}
+                alt={alt}
+                width={900}
+                height={900}
+                className="cms-hero-banner__image"
+                sizes="100vw"
+                priority
+                style={{ width: "100%", height: "auto" }}
+              />
+            </div>
+            <div className="cms-hero-banner__variant cms-hero-banner__variant--desktop">
+              <Image
+                src={desktopSrc}
+                alt={alt}
+                width={1920}
+                height={700}
+                className="cms-hero-banner__image"
+                sizes="100vw"
+                priority
+                style={{ width: "100%", height: "auto" }}
+              />
+            </div>
+          </>
+        ) : (
+          <Image
             src={desktopSrc}
             alt={alt}
+            width={1920}
+            height={700}
             className="cms-hero-banner__image"
-            decoding="async"
-            fetchPriority="high"
+            sizes="100vw"
+            priority
+            style={{ width: "100%", height: "auto" }}
           />
-        </picture>
+        )
       ) : (
         <div className="cms-hero-banner__fallback" aria-hidden />
       )}

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import {
   SectionHeading,
@@ -19,7 +20,13 @@ function BlogCard({ post }: { post: BlogPost }) {
     <article className="blog-card">
       <div className="blog-card-media">
         {post.image ? (
-          <img src={post.image} alt={post.title} className="blog-card-image" />
+          <Image
+            src={post.image}
+            alt={post.title}
+            fill
+            sizes="(max-width: 768px) 100vw, 33vw"
+            className="blog-card-image"
+          />
         ) : (
           <div className="blog-card-image blog-card-image--placeholder" />
         )}

@@ -911,17 +911,23 @@
 }
 
 .account-wishlist-media {
+  position: relative;
   width: 88px;
   height: 88px;
   overflow: hidden;
   background: rgba(10, 42, 27, 0.04);
+  flex-shrink: 0;
 }
 
-.account-wishlist-media img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.account-wishlist-media a {
   display: block;
+  position: absolute;
+  inset: 0;
+}
+
+.account-wishlist-media img,
+.account-wishlist-thumb {
+  object-fit: cover;
 }
 
 .account-wishlist-body {
