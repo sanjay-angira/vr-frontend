@@ -209,6 +209,7 @@ export const API_ENDPOINTS = {
 
   CUSTOMER: {
     HOMEPAGE: "customer/homepage",
+    SITEMAP: "customer/sitemap",
     STORE_PRODUCTS: "customer/all-products",
     PRODUCT_DETAILS: (slug: string) => `customer/product/${slug}`,
     STORE_FILTERS: "customer/store-filters",

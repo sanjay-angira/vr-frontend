@@ -4,8 +4,8 @@ import { getApiBaseUrl, getSiteUrl } from "@/lib/site";
 /** Refresh sitemap about hourly so new products/blogs appear for crawlers. */
 export const revalidate = 3600;
 
-const FETCH_TIMEOUT_MS = 8_000;
-const DEFAULT_PAGE_SIZE = 100;
+const FETCH_TIMEOUT_MS = 25_000;
+const DEFAULT_PAGE_SIZE = 48;
 const DEFAULT_MAX_PAGES = 50;
 
 type PaginatedRows = {
@@ -15,6 +15,20 @@ type PaginatedRows = {
     count?: number;
     pageNumber?: number;
     pageSize?: number;
+  };
+};
+
+type SitemapSlugRow = {
+  slug?: unknown;
+  lastModified?: unknown;
+};
+
+type SitemapApiPayload = {
+  success?: boolean;
+  data?: {
+    products?: SitemapSlugRow[];
+    blogs?: SitemapSlugRow[];
+    categories?: SitemapSlugRow[];
   };
 };
 
@@ -65,7 +79,6 @@ function parseLastModified(value: unknown): Date | undefined {
   const trimmed = value.trim();
   if (!trimmed) return undefined;
 
-  // Prefer unambiguous ISO-like values; reject human display dates.
   const looksIso =
     /^\d{4}-\d{2}-\d{2}/.test(trimmed) || /^\d{4}\/\d{2}\/\d{2}/.test(trimmed);
   if (!looksIso) return undefined;
@@ -81,20 +94,54 @@ function normalizeSlug(value: unknown): string | null {
   return slug;
 }
 
-async function fetchJson<T>(path: string): Promise<T | null> {
+function mapSlugRows(
+  rows: SitemapSlugRow[] | undefined,
+  slugKeys: string[] = ["slug"],
+): SlugEntry[] {
+  if (!Array.isArray(rows)) return [];
+
+  const seen = new Set<string>();
+  const out: SlugEntry[] = [];
+
+  for (const row of rows) {
+    let slug: string | null = null;
+    for (const key of slugKeys) {
+      slug = normalizeSlug((row as Record<string, unknown>)[key]);
+      if (slug) break;
+    }
+    if (!slug || seen.has(slug)) continue;
+    seen.add(slug);
+    out.push({
+      slug,
+      lastModified: parseLastModified(row.lastModified),
+    });
+  }
+
+  return out;
+}
+
+async function fetchJson<T>(
+  path: string,
+): Promise<{ data: T | null; error?: string }> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  const url = `${getApiBaseUrl()}/${path.replace(/^\//, "")}`;
 
   try {
-    const res = await fetch(`${getApiBaseUrl()}/${path.replace(/^\//, "")}`, {
+    const res = await fetch(url, {
       headers: { Accept: "application/json" },
       signal: controller.signal,
-      next: { revalidate: 3600 },
+      // Sitemap must not reuse a failed/empty Next data cache from a prior run.
+      cache: "no-store",
     });
-    if (!res.ok) return null;
-    return (await res.json()) as T;
-  } catch {
-    return null;
+    if (!res.ok) {
+      return { data: null, error: `HTTP ${res.status} for ${url}` };
+    }
+    return { data: (await res.json()) as T };
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Unknown fetch error";
+    return { data: null, error: `${message} (${url})` };
   } finally {
     clearTimeout(timeout);
   }
@@ -118,12 +165,16 @@ async function collectPaginatedSlugs(options: {
       pageNumber: String(page),
       pageSize: String(pageSize),
     });
-    const payload = await fetchJson<PaginatedRows>(
+    const { data: payload, error } = await fetchJson<PaginatedRows>(
       `${options.endpoint}?${query.toString()}`,
     );
 
-    // Null payload usually means timeout / API down — stop early.
-    if (!payload) break;
+    if (!payload) {
+      if (error) {
+        console.error("[sitemap] Paginated fetch failed:", error);
+      }
+      break;
+    }
 
     const rows = Array.isArray(payload.data?.rows) ? payload.data.rows : [];
     if (rows.length === 0) break;
@@ -159,7 +210,6 @@ async function collectPaginatedSlugs(options: {
 }
 
 function toAbsolutePath(site: string, path: string, slug: string): string {
-  // Keep path separators readable; encode only unsafe characters per segment.
   const safeSlug = slug
     .split("/")
     .map((segment) => encodeURIComponent(segment))
@@ -167,9 +217,77 @@ function toAbsolutePath(site: string, path: string, slug: string): string {
   return `${site}${path}/${safeSlug}`;
 }
 
+function toSitemapRoutes(
+  site: string,
+  path: string,
+  items: SlugEntry[],
+  now: Date,
+  changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"],
+  priority: number,
+): MetadataRoute.Sitemap {
+  return items.map((item) => ({
+    url: toAbsolutePath(site, path, item.slug),
+    lastModified: item.lastModified ?? now,
+    changeFrequency,
+    priority,
+  }));
+}
+
+async function loadFromSitemapApi(): Promise<{
+  products: SlugEntry[];
+  blogs: SlugEntry[];
+  categories: SlugEntry[];
+} | null> {
+  const { data: payload, error } =
+    await fetchJson<SitemapApiPayload>("customer/sitemap");
+
+  if (!payload?.data) {
+    if (error) {
+      console.error("[sitemap] Lightweight sitemap API failed:", error);
+    }
+    return null;
+  }
+
+  return {
+    products: mapSlugRows(payload.data.products, ["slug"]),
+    blogs: mapSlugRows(payload.data.blogs, ["slug"]),
+    categories: mapSlugRows(payload.data.categories, ["slug"]),
+  };
+}
+
+async function loadFromLegacyEndpoints(): Promise<{
+  products: SlugEntry[];
+  blogs: SlugEntry[];
+  categories: SlugEntry[];
+}> {
+  const [products, blogs, categories] = await Promise.all([
+    collectPaginatedSlugs({
+      endpoint: "customer/all-products",
+      slugKeys: ["productSlug"],
+      dateKeys: ["updatedAt", "createdAt"],
+      pageSize: DEFAULT_PAGE_SIZE,
+    }),
+    collectPaginatedSlugs({
+      endpoint: "customer/blogs",
+      slugKeys: ["slug"],
+      dateKeys: ["updatedAt", "createdAt", "publishedAt"],
+      pageSize: DEFAULT_PAGE_SIZE,
+    }),
+    collectPaginatedSlugs({
+      endpoint: "customer/categories",
+      slugKeys: ["slug", "categorySlug"],
+      dateKeys: ["updatedAt", "createdAt"],
+      pageSize: DEFAULT_PAGE_SIZE,
+    }),
+  ]);
+
+  return { products, blogs, categories };
+}
+
 /**
  * Dynamic sitemap for Google / Bing.
- * Always returns at least static routes so /sitemap.xml never 500s when the API is slow or down.
+ * Prefers lightweight `customer/sitemap` (slugs only). Falls back to store/blog
+ * list endpoints. Always returns at least static routes if the API is down.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const site = getSiteUrl();
@@ -177,38 +295,44 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes = buildStaticRoutes(site, now);
 
   try {
-    const [products, blogs] = await Promise.all([
-      collectPaginatedSlugs({
-        endpoint: "customer/all-products",
-        slugKeys: ["productSlug"],
-        dateKeys: ["updatedAt", "createdAt"],
-        pageSize: DEFAULT_PAGE_SIZE,
-      }),
-      collectPaginatedSlugs({
-        endpoint: "customer/blogs",
-        slugKeys: ["slug"],
-        dateKeys: ["updatedAt", "createdAt", "publishedAt"],
-        pageSize: DEFAULT_PAGE_SIZE,
-      }),
-    ]);
+    const fromApi = await loadFromSitemapApi();
+    const sources =
+      fromApi &&
+      (fromApi.products.length > 0 ||
+        fromApi.blogs.length > 0 ||
+        fromApi.categories.length > 0)
+        ? fromApi
+        : await loadFromLegacyEndpoints();
 
-    const productRoutes: MetadataRoute.Sitemap = products.map((item) => ({
-      url: toAbsolutePath(site, "/product", item.slug),
-      lastModified: item.lastModified ?? now,
-      changeFrequency: "weekly" as const,
-      priority: 0.8,
-    }));
+    if (
+      sources.products.length === 0 &&
+      sources.blogs.length === 0 &&
+      sources.categories.length === 0
+    ) {
+      console.error(
+        "[sitemap] No dynamic slugs from API; serving static routes only.",
+      );
+      return staticRoutes;
+    }
 
-    const blogRoutes: MetadataRoute.Sitemap = blogs.map((item) => ({
-      url: toAbsolutePath(site, "/blog", item.slug),
-      lastModified: item.lastModified ?? now,
-      changeFrequency: "weekly" as const,
-      priority: 0.6,
-    }));
-
-    return [...staticRoutes, ...productRoutes, ...blogRoutes];
+    return [
+      ...staticRoutes,
+      ...toSitemapRoutes(site, "/product", sources.products, now, "weekly", 0.8),
+      ...toSitemapRoutes(
+        site,
+        "/category",
+        sources.categories,
+        now,
+        "weekly",
+        0.75,
+      ),
+      ...toSitemapRoutes(site, "/blog", sources.blogs, now, "weekly", 0.6),
+    ];
   } catch (error) {
-    console.error("[sitemap] Failed to build dynamic entries; serving static routes only.", error);
+    console.error(
+      "[sitemap] Failed to build dynamic entries; serving static routes only.",
+      error,
+    );
     return staticRoutes;
   }
 }
