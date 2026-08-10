@@ -304,51 +304,43 @@ export default function ProductDetail({
           />
         )}
 
-        <div className="product-quantity-block">
-          <label className="product-quantity-label">Quantity</label>
-          <div className="product-quantity-control">
-            <div className="product-quantity-stepper">
-              <button
-                type="button"
-                onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                disabled={quantity <= 1 || !inStock}
-                className="product-quantity-button"
-                aria-label="Decrease quantity"
-              >
-                −
-              </button>
-              <input
-                type="number"
-                min="1"
-                max={selectedVariant?.stock ?? 100}
-                value={quantity}
-                onChange={(event) =>
-                  setQuantity(Math.max(1, parseInt(event.target.value, 10) || 1))
-                }
-                disabled={!inStock}
-                className="product-quantity-input"
-                aria-label="Quantity"
-              />
-              <button
-                type="button"
-                onClick={() => setQuantity(quantity + 1)}
-                disabled={
-                  !inStock ||
-                  (selectedVariant?.stock ? quantity >= selectedVariant.stock : false)
-                }
-                className="product-quantity-button"
-                aria-label="Increase quantity"
-              >
-                +
-              </button>
-            </div>
-            <span className="product-quantity-hint">
-              {selectedVariant?.stock ? `${selectedVariant.stock} in stock` : "In stock"}
-            </span>
-          </div>
-        </div>
-
         <div className="product-action-row">
+          <div className="product-quantity-stepper" aria-label="Quantity">
+            <button
+              type="button"
+              onClick={() => setQuantity(Math.max(1, quantity - 1))}
+              disabled={quantity <= 1 || !inStock}
+              className="product-quantity-button"
+              aria-label="Decrease quantity"
+            >
+              −
+            </button>
+            <input
+              type="number"
+              min="1"
+              max={selectedVariant?.stock ?? 100}
+              value={quantity}
+              onChange={(event) =>
+                setQuantity(Math.max(1, parseInt(event.target.value, 10) || 1))
+              }
+              disabled={!inStock}
+              className="product-quantity-input"
+              aria-label="Quantity"
+            />
+            <button
+              type="button"
+              onClick={() => setQuantity(quantity + 1)}
+              disabled={
+                !inStock ||
+                (selectedVariant?.stock ? quantity >= selectedVariant.stock : false)
+              }
+              className="product-quantity-button"
+              aria-label="Increase quantity"
+            >
+              +
+            </button>
+          </div>
+
           <button
             type="button"
             className={`btn btn-primary btn-lg product-cta-button${

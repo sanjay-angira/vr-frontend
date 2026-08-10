@@ -891,7 +891,6 @@ body {
   gap: 0.85rem;
   padding: clamp(1.15rem, 2.4vw, 1.85rem);
   border-radius: 0;
-  background: #ffffff;
   border: none;
   box-shadow: none;
 }
@@ -2105,7 +2104,9 @@ body {
 
 .product-quantity-stepper {
   display: inline-flex;
-  align-items: center;
+  align-items: stretch;
+  flex: 0 0 auto;
+  height: 52px;
   border: 1px solid rgba(10, 42, 27, 0.14);
   border-radius: 10px;
   background: #fff;
@@ -2113,9 +2114,14 @@ body {
   box-shadow: none;
 }
 
+.product-action-row .product-quantity-stepper {
+  align-self: stretch;
+}
+
 .product-quantity-button {
   width: 44px;
-  height: 44px;
+  height: auto;
+  min-height: 100%;
   border: none;
   border-radius: 0;
   background: transparent;
@@ -2136,8 +2142,9 @@ body {
 }
 
 .product-quantity-input {
-  width: 56px;
-  height: 44px;
+  width: 48px;
+  height: auto;
+  min-height: 100%;
   border: none;
   border-left: 1px solid rgba(10, 42, 27, 0.08);
   border-right: 1px solid rgba(10, 42, 27, 0.08);
@@ -2660,12 +2667,16 @@ body {
   }
 
   .product-action-row {
-    flex-direction: column;
+    flex-wrap: wrap;
+  }
+
+  .product-action-row .product-quantity-stepper {
+    flex: 0 0 auto;
   }
 
   .product-action-row .btn {
-    width: 100%;
-    flex: 1 1 auto;
+    flex: 1 1 calc(50% - 2.5rem);
+    min-width: 9.5rem;
   }
 
   .product-trust-row {
