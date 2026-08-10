@@ -4,12 +4,12 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import {
   Heart,
-  Leaf,
-  PackageCheck,
+  RefreshCw,
+  Repeat2,
   ShieldCheck,
   ShoppingCart,
   Star,
-  Truck,
+  Zap,
 } from "lucide-react";
 import ProductImageGallery from "@/components/website/product/ProductImageGallery";
 import GroupedVariantPicker from "@/components/website/product/GroupedVariantPicker";
@@ -366,7 +366,7 @@ export default function ProductDetail({
             disabled={!inStock || !selectedVariant || isAdding}
             onClick={handleBuyNow}
           >
-            <PackageCheck size={18} aria-hidden="true" />
+            <Zap size={18} aria-hidden="true" />
             Buy Now
           </button>
         </div>
@@ -378,16 +378,16 @@ export default function ProductDetail({
 
         <ul className="product-trust-row" aria-label="Purchase benefits">
           <li>
-            <Truck size={16} aria-hidden="true" />
-            <span>Fast dispatch</span>
-          </li>
-          <li>
             <ShieldCheck size={16} aria-hidden="true" />
-            <span>Secure checkout</span>
+            <span>Secure Payment</span>
           </li>
           <li>
-            <Leaf size={16} aria-hidden="true" />
-            <span>Curated quality</span>
+            <RefreshCw size={16} aria-hidden="true" />
+            <span>7 Days Return</span>
+          </li>
+          <li>
+            <Repeat2 size={16} aria-hidden="true" />
+            <span>Easy Replacement</span>
           </li>
         </ul>
 

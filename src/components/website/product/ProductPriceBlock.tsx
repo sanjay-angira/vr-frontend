@@ -73,7 +73,10 @@ export default function ProductPriceBlock({ pricing, inStock }: ProductPriceBloc
 
       {!inStock && <span className="product-detail-price-stock is-out">Out of stock</span>}
       {inStock && pricing.sellingPrice !== null && (
-        <span className="product-detail-price-stock is-in">In stock</span>
+        <span className="product-detail-price-stock is-in">
+          <Check size={14} strokeWidth={2.5} aria-hidden />
+          In stock
+        </span>
       )}
 
       {offers.length > 0 && (

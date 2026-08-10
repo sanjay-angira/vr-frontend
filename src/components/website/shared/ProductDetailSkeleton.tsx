@@ -60,6 +60,20 @@ export function ProductDetailSkeleton() {
         <div className="product-detail-skeleton__copy store-skeleton-shimmer" />
         <div className="product-detail-skeleton__copy product-detail-skeleton__copy--short store-skeleton-shimmer" />
       </div>
+
+      <div className="product-detail-skeleton__section">
+        <div className="product-detail-skeleton__section-heading store-skeleton-shimmer" />
+        <div className="product-detail-skeleton__faq-row store-skeleton-shimmer" />
+        <div className="product-detail-skeleton__faq-row store-skeleton-shimmer" />
+        <div className="product-detail-skeleton__faq-row store-skeleton-shimmer" />
+      </div>
+
+      <div className="product-detail-skeleton__section">
+        <div className="product-detail-skeleton__section-heading store-skeleton-shimmer" />
+        <div className="product-detail-skeleton__review-summary store-skeleton-shimmer" />
+        <div className="product-detail-skeleton__review-card store-skeleton-shimmer" />
+        <div className="product-detail-skeleton__review-card store-skeleton-shimmer" />
+      </div>
     </div>
   );
 }
