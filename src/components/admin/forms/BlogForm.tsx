@@ -31,7 +31,6 @@ type Values = {
   excerpt: string;
   categoryId: string;
   blogImage: string;
-  thumbnailImage: string;
   blogImageAlt: string;
   tagIds: number[];
   status: string;
@@ -48,7 +47,6 @@ const initialValues: Values = {
   excerpt: "",
   categoryId: "",
   blogImage: "",
-  thumbnailImage: "",
   blogImageAlt: "",
   tagIds: [],
   status: "draft",
@@ -65,7 +63,6 @@ const schema = Yup.object({
   excerpt: Yup.string().max(300),
   categoryId: Yup.string().required("Category is required"),
   blogImage: requiredString("Blog image", 1),
-  thumbnailImage: Yup.string(),
   blogImageAlt: Yup.string(),
   tagIds: Yup.array().of(Yup.number()),
   status: Yup.string().required(),
@@ -97,6 +94,8 @@ export function BlogForm({ module, recordId }: AdminFormProps) {
         : Array.isArray(r.tagIds)
           ? (r.tagIds as number[])
           : [];
+      const images = Array.isArray(r.images) ? r.images : [];
+      const primary = images[0] as { originalUrl?: string; altText?: string } | undefined;
 
       return {
         title: String(r.title ?? ""),
@@ -104,9 +103,8 @@ export function BlogForm({ module, recordId }: AdminFormProps) {
         content: String(r.content ?? ""),
         excerpt: String(r.excerpt ?? ""),
         categoryId: String(r.categoryId ?? (r.category as { id?: number })?.id ?? ""),
-        blogImage: String(r.blogImage ?? r.featuredImage ?? ""),
-        thumbnailImage: String(r.thumbnailImage ?? ""),
-        blogImageAlt: String(r.blogImageAlt ?? ""),
+        blogImage: String(r.blogImage ?? r.featuredImage ?? primary?.originalUrl ?? ""),
+        blogImageAlt: String(r.blogImageAlt ?? primary?.altText ?? ""),
         tagIds,
         status: String(r.status ?? r.publishStatus ?? "draft"),
         isActive: Boolean(r.isActive ?? true),
@@ -122,7 +120,6 @@ export function BlogForm({ module, recordId }: AdminFormProps) {
       excerpt: v.excerpt,
       categoryId: Number(v.categoryId),
       blogImage: v.blogImage,
-      thumbnailImage: v.thumbnailImage || null,
       blogImageAlt: v.blogImageAlt || null,
       tagIds: v.tagIds,
       status: v.status,
@@ -157,8 +154,14 @@ export function BlogForm({ module, recordId }: AdminFormProps) {
           <FormFullWidth>
             <FormTextarea formik={formik} name="excerpt" label="Excerpt" rows={3} />
           </FormFullWidth>
-          <FormImageUpload formik={formik} name="blogImage" label="Blog Image" required uploadPath={UPLOAD_PATHS.blogs} />
-          <FormImageUpload formik={formik} name="thumbnailImage" label="Thumbnail Image" uploadPath={UPLOAD_PATHS.blogs} />
+          <FormImageUpload
+            formik={formik}
+            name="blogImage"
+            label="Blog Image"
+            required
+            uploadPath={UPLOAD_PATHS.blogs}
+            imageType="blog"
+          />
           <FormInput formik={formik} name="blogImageAlt" label="Image Alt Text" />
           <FormFullWidth>
             <FormMultiSelect formik={formik} name="tagIds" label="Tags" options={tags} />

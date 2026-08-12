@@ -101,6 +101,8 @@ export function CategoryForm({ module, recordId }: AdminFormProps) {
     validationSchema: schema,
     mapRecordToValues: (r) => {
       const seo = (r.seo ?? {}) as Record<string, unknown>;
+      const images = Array.isArray(r.images) ? r.images : [];
+      const primary = images[0] as Record<string, unknown> | undefined;
       return {
         categoryName: String(r.categoryName ?? ""),
         categorySlug: String(r.categorySlug ?? ""),
@@ -115,11 +117,11 @@ export function CategoryForm({ module, recordId }: AdminFormProps) {
         publishStatus: String(r.publishStatus ?? "draft"),
         isActive: Boolean(r.isActive ?? true),
         showOnHomePage: Boolean(r.showOnHomePage ?? false),
-        image: String(r.image ?? ""),
-        image3d: String(r.image3d ?? ""),
-        video: String(r.video ?? ""),
+        image: String(r.image ?? primary?.originalUrl ?? ""),
+        image3d: String(r.image3d ?? primary?.image3d ?? ""),
+        video: String(r.video ?? primary?.video ?? ""),
         icon: String(r.icon ?? ""),
-        imageAltText: String(r.imageAltText ?? ""),
+        imageAltText: String(r.imageAltText ?? primary?.altText ?? ""),
         metaTitle: String(seo.metaTitle ?? r.metaTitle ?? ""),
         metaDescription: String(seo.metaDescription ?? r.metaDescription ?? ""),
         metaKeywords: String(seo.metaKeywords ?? r.metaKeywords ?? ""),
@@ -186,7 +188,13 @@ export function CategoryForm({ module, recordId }: AdminFormProps) {
         </FormSection>
 
         <FormSection title="Media">
-          <FormImageUpload formik={formik} name="image" label="Image" uploadPath={UPLOAD_PATHS.categories.image} />
+          <FormImageUpload
+            formik={formik}
+            name="image"
+            label="Image"
+            uploadPath={UPLOAD_PATHS.categories.image}
+            imageType="category"
+          />
           <FormImageUpload formik={formik} name="image3d" label="3D Image" uploadPath={UPLOAD_PATHS.categories.image3d} />
           <FormImageUpload formik={formik} name="video" label="Video" uploadPath={UPLOAD_PATHS.categories.video} mediaType="video" />
           <FormImageUpload formik={formik} name="icon" label="Icon" uploadPath={UPLOAD_PATHS.categories.icon} />
@@ -194,19 +202,17 @@ export function CategoryForm({ module, recordId }: AdminFormProps) {
         </FormSection>
 
         <FormSection title="SEO">
-          <FormFullWidth>
-            <FormInput formik={formik} name="metaTitle" label="Meta Title" required />
-          </FormFullWidth>
+          <FormInput formik={formik} name="metaTitle" label="Meta Title" required />
           <FormFullWidth>
             <FormTextarea formik={formik} name="metaDescription" label="Meta Description" required rows={3} />
           </FormFullWidth>
-          <FormFullWidth>
-            <FormInput formik={formik} name="metaKeywords" label="Meta Keywords" />
-          </FormFullWidth>
+          <FormInput formik={formik} name="metaKeywords" label="Meta Keywords" />
         </FormSection>
 
-        <FormToggle formik={formik} name="isActive" label="Active Status" />
-        <FormCheckbox formik={formik} name="showOnHomePage" label="Show on homepage" />
+        <FormSection title="Visibility">
+          <FormToggle formik={formik} name="isActive" label="Active" />
+          <FormCheckbox formik={formik} name="showOnHomePage" label="Show on home page" />
+        </FormSection>
 
         <FormActions
           isEdit={isEdit}

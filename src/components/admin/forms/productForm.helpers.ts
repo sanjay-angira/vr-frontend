@@ -1,6 +1,7 @@
 import type { FormikErrors } from "formik";
 import { getIn } from "formik";
 import { generateSlug } from "./shared/generateSlug";
+import { rememberImageSizes } from "@/utils/imageSizesCache";
 
 export { buildVariantSlug } from "./shared/generateSlug";
 
@@ -383,7 +384,21 @@ export function normalizeImageArray(value: unknown): string[] {
       if (typeof item === "string") return item.trim();
       if (item && typeof item === "object") {
         const img = item as Record<string, unknown>;
-        return String(img.url ?? img.image ?? img.Location ?? img.imageUrl ?? "").trim();
+        const url = String(
+          img.originalUrl ?? img.url ?? img.image ?? img.Location ?? img.imageUrl ?? ""
+        ).trim();
+        if (url && (img.webp400 || img.webp800 || img.webp1200)) {
+          rememberImageSizes(url, {
+            originalUrl: url,
+            webp400: (img.webp400 as string) ?? null,
+            jpg400: (img.jpg400 as string) ?? null,
+            webp800: (img.webp800 as string) ?? null,
+            jpg800: (img.jpg800 as string) ?? null,
+            webp1200: (img.webp1200 as string) ?? null,
+            jpg1200: (img.jpg1200 as string) ?? null,
+          });
+        }
+        return url;
       }
       return "";
     })
@@ -416,8 +431,9 @@ export function buildProductPayload(
   values: ProductFormValues,
   attributeMetaById: Record<number, AttributeMeta> = {}
 ): Record<string, unknown> {
+  // Sizes are generated on upload; backend derives columns from the original URL path.
   const productImages = normalizeImageArray(values.images).map((url, index) => ({
-    url,
+    originalUrl: url,
     sortOrder: index + 1,
   }));
 
@@ -447,7 +463,7 @@ export function buildProductPayload(
         ...(variant.sku ? { sku: variant.sku } : {}),
       };
       const variantImages = normalizeImageArray(variant.images).map((url, idx) => ({
-        url,
+        originalUrl: url,
         sortOrder: idx + 1,
       }));
       // Always send images/offers/attributes so clearing them on edit reaches the API.

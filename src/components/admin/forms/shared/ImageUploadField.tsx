@@ -11,6 +11,13 @@ import {
 } from "@/services/api/uploadService";
 import { resolveImageUrl } from "./resolveImageUrl";
 import { FormLabel } from "./FormLabel";
+import type { ImageOptimizationType, OptimizedImageColumns } from "@/utils/optimizedImage";
+import { columnsFromUploadResult } from "@/utils/optimizedImage";
+import {
+  forgetImageSizes,
+  getRememberedImageSizes,
+  rememberImageSizes,
+} from "@/utils/imageSizesCache";
 
 const UPLOAD_TRIGGER_CLASS =
   "flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-admin-primary/40 bg-admin-primary/5 px-3.5 py-2.5 text-sm font-medium text-admin-primary transition-colors hover:bg-admin-primary/10";
@@ -33,6 +40,8 @@ type ImageUploadModalProps = {
   uploadPath: string;
   accept: string;
   mediaType: "image" | "video";
+  imageType?: ImageOptimizationType;
+  entityId?: string | number;
   onClose: () => void;
   onUploaded: (result: S3UploadResult) => void;
 };
@@ -41,6 +50,8 @@ function ImageUploadModal({
   uploadPath,
   accept,
   mediaType,
+  imageType,
+  entityId,
   onClose,
   onUploaded,
 }: ImageUploadModalProps) {
@@ -115,7 +126,12 @@ function ImageUploadModal({
     setProgress(0);
 
     try {
-      const result = await uploadFile(selectedFile, uploadPath, setProgress);
+      const result = await uploadFile(selectedFile, {
+        path: uploadPath,
+        imageType: mediaType === "image" ? imageType : undefined,
+        entityId,
+        onProgress: setProgress,
+      });
       onUploaded(result);
       resetModalState();
       window.setTimeout(() => onClose(), 0);
@@ -239,6 +255,11 @@ type BaseUploadFieldProps = {
   mediaType?: "image" | "video";
   /** Matches admin Input / dropdown height (42px) for inline form grids */
   variant?: "default" | "compact";
+  /** Enables Sharp optimization pipeline on upload. */
+  imageType?: ImageOptimizationType;
+  entityId?: string | number;
+  /** Optional companion field callback for flat optimized columns. */
+  onSizesChange?: (sizes: OptimizedImageColumns | null) => void;
 };
 
 const COMPACT_FIELD_HEIGHT = "h-[42px]";
@@ -261,6 +282,9 @@ export function ImageUploadField({
   className,
   mediaType = "image",
   variant = "default",
+  imageType,
+  entityId,
+  onSizesChange,
 }: SingleImageUploadFieldProps) {
   const inputId = useId();
   const uploadKeysRef = useRef<Record<string, string>>({});
@@ -289,12 +313,15 @@ export function ImageUploadField({
 
     try {
       const objectKey = uploadKeysRef.current[value];
+      const sizes = getRememberedImageSizes(value);
       if (mediaType === "video") {
         await deleteUploadedVideo(value, uploadPath, objectKey);
       } else {
-        await deleteUploadedFile(value, uploadPath, objectKey);
+        await deleteUploadedFile(value, uploadPath, objectKey, sizes);
       }
       forgetUploadKey(value);
+      forgetImageSizes(value);
+      onSizesChange?.(null);
       onChange("");
     } catch (deleteError) {
       setActionError(
@@ -309,6 +336,9 @@ export function ImageUploadField({
 
   function handleUploaded(result: S3UploadResult) {
     rememberUploadKey(result.Location, result.Key);
+    const columns = columnsFromUploadResult(result);
+    rememberImageSizes(result.Location, columns);
+    onSizesChange?.(columns);
     onChange(result.Location);
   }
 
@@ -464,6 +494,8 @@ export function ImageUploadField({
           uploadPath={uploadPath}
           accept={accept}
           mediaType={mediaType}
+          imageType={imageType}
+          entityId={entityId}
           onClose={closeModal}
           onUploaded={handleUploaded}
         />
@@ -486,6 +518,8 @@ export function MultiImageUploadField({
   error,
   hint,
   className,
+  imageType,
+  entityId,
 }: MultiImageUploadFieldProps) {
   const uploadKeysRef = useRef<Record<string, string>>({});
   const [modalOpen, setModalOpen] = useState(false);
@@ -508,8 +542,14 @@ export function MultiImageUploadField({
     setActionError("");
 
     try {
-      await deleteUploadedFile(url, uploadPath, uploadKeysRef.current[url]);
+      await deleteUploadedFile(
+        url,
+        uploadPath,
+        uploadKeysRef.current[url],
+        getRememberedImageSizes(url)
+      );
       forgetUploadKey(url);
+      forgetImageSizes(url);
       onChange(values.filter((item) => item !== url));
     } catch (deleteError) {
       setActionError(
@@ -534,6 +574,7 @@ export function MultiImageUploadField({
 
   function handleAdd(result: S3UploadResult) {
     rememberUploadKey(result.Location, result.Key);
+    rememberImageSizes(result.Location, columnsFromUploadResult(result));
     onChange([...values, result.Location]);
   }
 
@@ -588,6 +629,8 @@ export function MultiImageUploadField({
           uploadPath={uploadPath}
           accept="image/*"
           mediaType="image"
+          imageType={imageType}
+          entityId={entityId}
           onClose={closeModal}
           onUploaded={(result) => {
             handleAdd(result);

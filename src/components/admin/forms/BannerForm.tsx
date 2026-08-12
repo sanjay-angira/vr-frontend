@@ -56,15 +56,40 @@ export function BannerForm({ module, recordId }: AdminFormProps) {
     recordId,
     initialValues,
     validationSchema: schema,
-    mapRecordToValues: (r) => ({
-      title: String(r.title ?? ""),
-      subtitle: String(r.subtitle ?? ""),
-      image: String(r.image ?? ""),
-      mobileImage: String(r.mobileImage ?? ""),
-      bannerLink: String(r.bannerLink ?? r.buttonLink ?? ""),
-      position: Number(r.position ?? 1),
-      status: Boolean(r.status ?? true),
-      sectionId: Number(r.sectionId ?? 1),
+    mapRecordToValues: (r) => {
+      const images = Array.isArray(r.images) ? r.images : [];
+      const desktop = images.find(
+        (item) =>
+          item &&
+          typeof item === "object" &&
+          (item as { role?: string }).role === "desktop"
+      ) as { originalUrl?: string } | undefined;
+      const mobile = images.find(
+        (item) =>
+          item &&
+          typeof item === "object" &&
+          (item as { role?: string }).role === "mobile"
+      ) as { originalUrl?: string } | undefined;
+      return {
+        title: String(r.title ?? ""),
+        subtitle: String(r.subtitle ?? ""),
+        image: String(r.image ?? desktop?.originalUrl ?? ""),
+        mobileImage: String(r.mobileImage ?? mobile?.originalUrl ?? ""),
+        bannerLink: String(r.bannerLink ?? r.buttonLink ?? ""),
+        position: Number(r.position ?? 1),
+        status: Boolean(r.status ?? true),
+        sectionId: Number(r.sectionId ?? 1),
+      };
+    },
+    mapValuesToPayload: (v) => ({
+      title: v.title,
+      subtitle: v.subtitle,
+      image: v.image,
+      mobileImage: v.mobileImage,
+      bannerLink: v.bannerLink,
+      position: v.position,
+      status: v.status,
+      sectionId: v.sectionId,
     }),
   });
 
@@ -80,8 +105,22 @@ export function BannerForm({ module, recordId }: AdminFormProps) {
         <FormSection title="Banner details">
           <FormInput formik={formik} name="title" label="Title" required />
           <FormInput formik={formik} name="subtitle" label="Subtitle" required />
-          <FormImageUpload formik={formik} name="image" label="Desktop Image" required uploadPath={UPLOAD_PATHS.banners} />
-          <FormImageUpload formik={formik} name="mobileImage" label="Mobile Image" required uploadPath={UPLOAD_PATHS.banners} />
+          <FormImageUpload
+            formik={formik}
+            name="image"
+            label="Desktop Image"
+            required
+            uploadPath={UPLOAD_PATHS.banners}
+            imageType="banner"
+          />
+          <FormImageUpload
+            formik={formik}
+            name="mobileImage"
+            label="Mobile Image"
+            required
+            uploadPath={UPLOAD_PATHS.banners}
+            imageType="banner_mobile"
+          />
           <FormInput formik={formik} name="bannerLink" label="Banner Link" required />
           <FormInput formik={formik} name="position" label="Position" type="number" required />
           <FormInput formik={formik} name="sectionId" label="Section ID" type="number" required />

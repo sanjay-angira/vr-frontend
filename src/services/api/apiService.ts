@@ -11,8 +11,15 @@ type RequestOptions = {
 
 function parseError(error: unknown): ApiErrorResponse {
   if (axios.isAxiosError(error)) {
-    const data = error.response?.data as { message?: string } | undefined;
-    const message = data?.message ?? error.message ?? "Request failed";
+    const data = error.response?.data as
+      | { message?: string | string[] }
+      | undefined;
+    const raw = data?.message;
+    const message = Array.isArray(raw)
+      ? raw.filter(Boolean).join(", ") || error.message || "Request failed"
+      : typeof raw === "string" && raw.trim()
+        ? raw
+        : error.message || "Request failed";
     return { success: false, message, statusCode: error.response?.status };
   }
 
