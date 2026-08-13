@@ -1,6 +1,6 @@
 import { getData } from "@/services/api/apiService";
 import { API_ENDPOINTS } from "@/services/api/API_ENDPOINT";
-import { getOptimizedImageUrl } from "@/utils/optimizedImage";
+import { getProductWebpImageUrl } from "@/utils/optimizedImage";
 
 import { normalizeVariantAttributes, type VariantAttributeView } from "./productVariantUtils";
 
@@ -312,7 +312,7 @@ export function normalizeVariants(
         .slice()
         .sort((a, b) => a.sortOrder - b.sortOrder)
         .map((image) =>
-          getOptimizedImageUrl(
+          getProductWebpImageUrl(
             {
               originalUrl: image.originalUrl || image.url,
               url: image.originalUrl || image.url,
@@ -320,7 +320,7 @@ export function normalizeVariants(
               webp800: image.webp800,
               webp1200: image.webp1200,
             },
-            800
+            1200,
           )
         )
         .filter((url): url is string => typeof url === "string" && url.trim().length > 0),

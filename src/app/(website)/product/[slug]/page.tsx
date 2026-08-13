@@ -24,7 +24,7 @@ import {
 } from "@/lib/schema";
 import { getProductPageMetadata } from "@/lib/seo";
 import { buildProductVariantUrl } from "@/components/website/product/productVariantUtils";
-import { getOptimizedImageUrl } from "@/utils/optimizedImage";
+import { getProductWebpImageUrl } from "@/utils/optimizedImage";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -57,7 +57,18 @@ export async function generateMetadata({
     product.images
       ?.slice()
       .sort((a, b) => a.sortOrder - b.sortOrder)
-      .map((item) => item.originalUrl || item.url)
+      .map((item) =>
+        getProductWebpImageUrl(
+          {
+            originalUrl: item.originalUrl || item.url,
+            url: item.originalUrl || item.url,
+            webp400: item.webp400,
+            webp800: item.webp800,
+            webp1200: item.webp1200,
+          },
+          1200,
+        ),
+      )
       .find((url) => typeof url === "string" && url.trim()) || null;
 
   const description =
@@ -114,7 +125,7 @@ export default async function ProductDetailPage({
       ?.slice()
       .sort((a, b) => a.sortOrder - b.sortOrder)
       .map((image) =>
-        getOptimizedImageUrl(
+        getProductWebpImageUrl(
           {
             originalUrl: image.originalUrl || image.url,
             url: image.originalUrl || image.url,
@@ -122,8 +133,8 @@ export default async function ProductDetailPage({
             webp800: image.webp800,
             webp1200: image.webp1200,
           },
-          800
-        )
+          1200,
+        ),
       )
       .filter((url): url is string => typeof url === "string" && url.trim().length > 0) ?? [];
 
