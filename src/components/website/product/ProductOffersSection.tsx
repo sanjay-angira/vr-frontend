@@ -216,11 +216,9 @@ export function ProductOffersSection({
               {copied ? "Copied" : "Copy"}
             </button>
           </div>
-        ) : (
-          <div />
-        )}
+        ) : null}
 
-        {offers.length > 3 ? (
+        {offers.length > 2 ? (
           <button
             type="button"
             className="product-offers-section__view-all"
