@@ -78,12 +78,12 @@ export function getOptimizedImageUrl(
   return original;
 }
 
-/** Website product cards / PDP — WebP sized variants only. */
+/** Website product cards / PDP — prefer sized WebP, fall back to original. */
 export function getProductWebpImageUrl(
   source: string | OptimizedImageSource | null | undefined,
   preferredWidth: number
 ): string {
-  return getOptimizedImageUrl(source, preferredWidth, { webpOnly: true });
+  return getOptimizedImageUrl(source, preferredWidth);
 }
 
 /** Extract flat columns from an upload API result. */

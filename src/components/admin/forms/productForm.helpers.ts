@@ -1,7 +1,10 @@
 import type { FormikErrors } from "formik";
 import { getIn } from "formik";
 import { generateSlug } from "./shared/generateSlug";
-import { rememberImageSizes } from "@/utils/imageSizesCache";
+import {
+  getRememberedImageSizes,
+  rememberImageSizes,
+} from "@/utils/imageSizesCache";
 
 export { buildVariantSlug } from "./shared/generateSlug";
 
@@ -424,15 +427,25 @@ export function getDeepestCategoryId(values: ProductFormValues): number | "" {
   return values.category ? Number(values.category) : "";
 }
 
+/** Persist remembered WebP columns with the original URL when available. */
+function imagePayloadFromUrl(url: string, sortOrder: number) {
+  const remembered = getRememberedImageSizes(url);
+  return {
+    originalUrl: url,
+    sortOrder,
+    ...(remembered?.webp400 ? { webp400: remembered.webp400 } : {}),
+    ...(remembered?.webp800 ? { webp800: remembered.webp800 } : {}),
+    ...(remembered?.webp1200 ? { webp1200: remembered.webp1200 } : {}),
+  };
+}
+
 export function buildProductPayload(
   values: ProductFormValues,
   attributeMetaById: Record<number, AttributeMeta> = {}
 ): Record<string, unknown> {
-  // Sizes are generated on upload; backend derives columns from the original URL path.
-  const productImages = normalizeImageArray(values.images).map((url, index) => ({
-    originalUrl: url,
-    sortOrder: index + 1,
-  }));
+  const productImages = normalizeImageArray(values.images).map((url, index) =>
+    imagePayloadFromUrl(url, index + 1),
+  );
 
   return {
     productName: values.productName,
@@ -459,10 +472,9 @@ export function buildProductPayload(
         stock: Number(variant.stock),
         ...(variant.sku ? { sku: variant.sku } : {}),
       };
-      const variantImages = normalizeImageArray(variant.images).map((url, idx) => ({
-        originalUrl: url,
-        sortOrder: idx + 1,
-      }));
+      const variantImages = normalizeImageArray(variant.images).map((url, idx) =>
+        imagePayloadFromUrl(url, idx + 1),
+      );
       // Always send images/offers/attributes so clearing them on edit reaches the API.
       // Omitting empty arrays left old ManyToMany / child rows attached.
       variantPayload.images = variantImages;
