@@ -35,7 +35,6 @@ type Values = {
   isActive: boolean;
   showOnHomePage: boolean;
   image: string;
-  image3d: string;
   video: string;
   icon: string;
   imageAltText: string;
@@ -55,7 +54,6 @@ const initialValues: Values = {
   isActive: true,
   showOnHomePage: false,
   image: "",
-  image3d: "",
   video: "",
   icon: "",
   imageAltText: "",
@@ -75,7 +73,6 @@ const schema = Yup.object({
   isActive: activeField,
   showOnHomePage: Yup.boolean(),
   image: Yup.string(),
-  image3d: Yup.string(),
   video: Yup.string(),
   icon: Yup.string(),
   imageAltText: Yup.string(),
@@ -101,8 +98,6 @@ export function CategoryForm({ module, recordId }: AdminFormProps) {
     validationSchema: schema,
     mapRecordToValues: (r) => {
       const seo = (r.seo ?? {}) as Record<string, unknown>;
-      const images = Array.isArray(r.images) ? r.images : [];
-      const primary = images[0] as Record<string, unknown> | undefined;
       return {
         categoryName: String(r.categoryName ?? ""),
         categorySlug: String(r.categorySlug ?? ""),
@@ -117,11 +112,10 @@ export function CategoryForm({ module, recordId }: AdminFormProps) {
         publishStatus: String(r.publishStatus ?? "draft"),
         isActive: Boolean(r.isActive ?? true),
         showOnHomePage: Boolean(r.showOnHomePage ?? false),
-        image: String(r.image ?? primary?.originalUrl ?? ""),
-        image3d: String(r.image3d ?? primary?.image3d ?? ""),
-        video: String(r.video ?? primary?.video ?? ""),
+        image: String(r.image ?? ""),
+        video: String(r.video ?? ""),
         icon: String(r.icon ?? ""),
-        imageAltText: String(r.imageAltText ?? primary?.altText ?? ""),
+        imageAltText: String(r.imageAltText ?? ""),
         metaTitle: String(seo.metaTitle ?? r.metaTitle ?? ""),
         metaDescription: String(seo.metaDescription ?? r.metaDescription ?? ""),
         metaKeywords: String(seo.metaKeywords ?? r.metaKeywords ?? ""),
@@ -138,7 +132,6 @@ export function CategoryForm({ module, recordId }: AdminFormProps) {
       isActive: v.isActive,
       showOnHomePage: v.showOnHomePage,
       image: v.image || null,
-      image3d: v.image3d || null,
       video: v.video || null,
       icon: v.icon || null,
       imageAltText: v.imageAltText || null,
@@ -195,7 +188,6 @@ export function CategoryForm({ module, recordId }: AdminFormProps) {
             uploadPath={UPLOAD_PATHS.categories.image}
             imageType="category"
           />
-          <FormImageUpload formik={formik} name="image3d" label="3D Image" uploadPath={UPLOAD_PATHS.categories.image3d} />
           <FormImageUpload formik={formik} name="video" label="Video" uploadPath={UPLOAD_PATHS.categories.video} mediaType="video" />
           <FormImageUpload formik={formik} name="icon" label="Icon" uploadPath={UPLOAD_PATHS.categories.icon} />
           <FormInput formik={formik} name="imageAltText" label="Image Alt Text" />

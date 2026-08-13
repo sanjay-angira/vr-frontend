@@ -391,11 +391,8 @@ export function normalizeImageArray(value: unknown): string[] {
           rememberImageSizes(url, {
             originalUrl: url,
             webp400: (img.webp400 as string) ?? null,
-            jpg400: (img.jpg400 as string) ?? null,
             webp800: (img.webp800 as string) ?? null,
-            jpg800: (img.jpg800 as string) ?? null,
             webp1200: (img.webp1200 as string) ?? null,
-            jpg1200: (img.jpg1200 as string) ?? null,
           });
         }
         return url;

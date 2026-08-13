@@ -63,11 +63,8 @@ export type ProductPageData = {
     url?: string;
     sortOrder: number;
     webp400?: string | null;
-    jpg400?: string | null;
     webp800?: string | null;
-    jpg800?: string | null;
     webp1200?: string | null;
-    jpg1200?: string | null;
   }>;
   variants?: Array<Record<string, unknown>>;
   attributes?: Array<Record<string, unknown>>;
@@ -262,11 +259,8 @@ export function normalizeVariants(
       url?: string;
       sortOrder: number;
       webp400?: string | null;
-      jpg400?: string | null;
       webp800?: string | null;
-      jpg800?: string | null;
       webp1200?: string | null;
-      jpg1200?: string | null;
     }>;
     variantAttributes?: Array<Record<string, unknown>>;
     pricing?: Record<string, unknown>;
@@ -323,14 +317,10 @@ export function normalizeVariants(
               originalUrl: image.originalUrl || image.url,
               url: image.originalUrl || image.url,
               webp400: image.webp400,
-              jpg400: image.jpg400,
               webp800: image.webp800,
-              jpg800: image.jpg800,
               webp1200: image.webp1200,
-              jpg1200: image.jpg1200,
             },
-            800,
-            "webp"
+            800
           )
         )
         .filter((url): url is string => typeof url === "string" && url.trim().length > 0),

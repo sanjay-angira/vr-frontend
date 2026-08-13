@@ -94,17 +94,14 @@ export function BlogForm({ module, recordId }: AdminFormProps) {
         : Array.isArray(r.tagIds)
           ? (r.tagIds as number[])
           : [];
-      const images = Array.isArray(r.images) ? r.images : [];
-      const primary = images[0] as { originalUrl?: string; altText?: string } | undefined;
-
       return {
         title: String(r.title ?? ""),
         slug: String(r.slug ?? ""),
         content: String(r.content ?? ""),
         excerpt: String(r.excerpt ?? ""),
         categoryId: String(r.categoryId ?? (r.category as { id?: number })?.id ?? ""),
-        blogImage: String(r.blogImage ?? r.featuredImage ?? primary?.originalUrl ?? ""),
-        blogImageAlt: String(r.blogImageAlt ?? primary?.altText ?? ""),
+        blogImage: String(r.blogImage ?? r.featuredImage ?? ""),
+        blogImageAlt: String(r.blogImageAlt ?? ""),
         tagIds,
         status: String(r.status ?? r.publishStatus ?? "draft"),
         isActive: Boolean(r.isActive ?? true),

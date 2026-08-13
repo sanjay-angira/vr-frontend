@@ -119,14 +119,10 @@ export default async function ProductDetailPage({
             originalUrl: image.originalUrl || image.url,
             url: image.originalUrl || image.url,
             webp400: image.webp400,
-            jpg400: image.jpg400,
             webp800: image.webp800,
-            jpg800: image.jpg800,
             webp1200: image.webp1200,
-            jpg1200: image.jpg1200,
           },
-          800,
-          "webp"
+          800
         )
       )
       .filter((url): url is string => typeof url === "string" && url.trim().length > 0) ?? [];
