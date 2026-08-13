@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { getData } from "@/services/api/apiService";
 import { API_ENDPOINTS } from "@/services/api/API_ENDPOINT";
 import { getProductWebpImageUrl } from "@/utils/optimizedImage";
@@ -90,7 +91,7 @@ function toNumber(value: string | number | null | undefined): number | null {
   return null;
 }
 
-export async function fetchProductBySlug(
+export const fetchProductBySlug = cache(async function fetchProductBySlug(
   slug: string
 ): Promise<ProductPageData | null> {
   const safeSlug = encodeURIComponent(slug);
@@ -114,7 +115,7 @@ export async function fetchProductBySlug(
   }
 
   return null;
-}
+});
 
 export type SameCategoryProductCard = {
   id: string;

@@ -89,10 +89,11 @@ export default async function ProductDetailPage({
   const { slug } = await params;
   const query = searchParams ? await searchParams : undefined;
   const variantFromQuery = pickVariantParam(query?.variant);
-  const [product, availableCoupons] = await Promise.all([
-    fetchProductBySlug(slug),
-    fetchWebsiteCoupons(),
-  ]);
+
+  // Start coupons immediately; product fetch is deduped with generateMetadata via cache().
+  const productPromise = fetchProductBySlug(slug);
+  const couponsPromise = fetchWebsiteCoupons();
+  const product = await productPromise;
 
   if (!product) {
     notFound();
@@ -105,14 +106,16 @@ export default async function ProductDetailPage({
   }
 
   const categoryId = Number(product.category?.id);
-  const recommendedProducts =
+  const [availableCoupons, recommendedProducts] = await Promise.all([
+    couponsPromise,
     Number.isFinite(categoryId) && categoryId > 0
-      ? await fetchSameCategoryProducts({
+      ? fetchSameCategoryProducts({
           categoryId,
           excludeProductId: product.id,
           limit: 8,
         })
-      : [];
+      : Promise.resolve([]),
+  ]);
 
   const normalizedVariants = normalizeVariants(
     product.variants as Parameters<typeof normalizeVariants>[0]
