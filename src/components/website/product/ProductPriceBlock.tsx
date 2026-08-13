@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Tag } from "lucide-react";
+import { Check } from "lucide-react";
 import type { VariantPricingView } from "@/components/website/product/productApi";
 
 type ProductPriceBlockProps = {
@@ -19,25 +19,6 @@ function toCurrency(value: number | null | undefined): string | null {
   })}`;
 }
 
-function getOfferPercentage(
-  offer: VariantPricingView["availableOffers"][number]
-): number | null {
-  if (
-    offer.sellingPrice &&
-    offer.sellingPrice > 0 &&
-    offer.totalDiscount > 0
-  ) {
-    return Math.round((offer.totalDiscount / offer.sellingPrice) * 100);
-  }
-
-  const discountType = offer.discountType.toLowerCase();
-  if (discountType === "percentage" || discountType === "percent") {
-    return Math.round(offer.discountValue);
-  }
-
-  return null;
-}
-
 export default function ProductPriceBlock({ pricing, inStock }: ProductPriceBlockProps) {
   const sellingPrice = pricing.sellingPrice;
   const finalPrice = pricing.finalPrice ?? pricing.sellingPrice;
@@ -50,8 +31,6 @@ export default function ProductPriceBlock({ pricing, inStock }: ProductPriceBloc
     hasDiscount && sellingPrice && pricing.totalDiscount > 0
       ? Math.round((pricing.totalDiscount / sellingPrice) * 100)
       : null;
-
-  const offers = pricing.availableOffers ?? [];
 
   if (finalPrice === null && sellingPrice === null) {
     return null;
@@ -77,40 +56,6 @@ export default function ProductPriceBlock({ pricing, inStock }: ProductPriceBloc
           <Check size={14} strokeWidth={2.5} aria-hidden />
           In stock
         </span>
-      )}
-
-      {offers.length > 0 && (
-        <div className="product-detail-offer-list-wrap">
-          <div className="product-detail-offer-list-head">
-            <Tag size={14} className="product-detail-offer-list-icon" />
-            <span className="product-detail-offer-list-title">Available Offers</span>
-          </div>
-          <ul className="product-detail-offer-list">
-            {offers.map((offer) => {
-              const percentage = getOfferPercentage(offer);
-
-              return (
-                <li
-                  key={offer.id}
-                  className={`product-detail-offer-item ${offer.isApplied ? "is-applied" : ""}`}
-                >
-                  <div className="product-detail-offer-item__main">
-                    <span className="product-detail-offer-item__name">{offer.offerName}</span>
-                    {percentage !== null && percentage > 0 && (
-                      <span className="product-detail-offer-item__badge">{percentage}% OFF</span>
-                    )}
-                    {offer.isApplied && (
-                      <span className="product-detail-offer-item__applied">
-                        <Check size={12} strokeWidth={3} />
-                        Applied
-                      </span>
-                    )}
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
       )}
     </div>
   );

@@ -4,6 +4,7 @@ export function ProductDetailSkeleton() {
       className="container product-page-shell product-detail-skeleton"
       aria-busy="true"
       aria-live="polite"
+      aria-label="Loading product"
     >
       <div className="product-detail-skeleton__breadcrumbs">
         <div className="store-skeleton-line store-skeleton-shimmer" />
@@ -34,14 +35,27 @@ export function ProductDetailSkeleton() {
           <div className="product-detail-skeleton__rating store-skeleton-shimmer" />
           <div className="product-detail-skeleton__subtitle store-skeleton-shimmer" />
           <div className="product-detail-skeleton__price-block store-skeleton-shimmer" />
-          <div className="product-detail-skeleton__options store-skeleton-shimmer" />
 
-          <div className="product-detail-skeleton__quantity">
-            <div className="product-detail-skeleton__qty-label store-skeleton-shimmer" />
-            <div className="product-detail-skeleton__qty-control store-skeleton-shimmer" />
+          <div className="product-detail-skeleton__offers" aria-hidden>
+            <div className="product-detail-skeleton__offers-head">
+              <div className="store-skeleton-line store-skeleton-shimmer medium" />
+              <div className="store-skeleton-line store-skeleton-shimmer short" />
+            </div>
+            <div className="product-detail-skeleton__offers-track">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <div
+                  key={`offer-card-${index}`}
+                  className="product-detail-skeleton__offer-card store-skeleton-shimmer"
+                />
+              ))}
+            </div>
+            <div className="product-detail-skeleton__offers-coupon store-skeleton-shimmer" />
           </div>
 
+          <div className="product-detail-skeleton__options store-skeleton-shimmer" />
+
           <div className="product-detail-skeleton__actions">
+            <div className="product-detail-skeleton__qty-control store-skeleton-shimmer" />
             <div className="product-detail-skeleton__cta store-skeleton-shimmer" />
             <div className="product-detail-skeleton__cta store-skeleton-shimmer" />
           </div>

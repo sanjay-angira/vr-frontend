@@ -14,6 +14,7 @@ import {
 import ProductImageGallery from "@/components/website/product/ProductImageGallery";
 import GroupedVariantPicker from "@/components/website/product/GroupedVariantPicker";
 import ProductPriceBlock from "@/components/website/product/ProductPriceBlock";
+import { ProductOffersSection } from "@/components/website/product/ProductOffersSection";
 import { ProductCouponBanner } from "@/components/website/product/ProductCouponBanner";
 import type { ProductVariantView } from "@/components/website/product/productApi";
 import type { WebsiteCoupon } from "@/services/website/couponService";
@@ -292,6 +293,13 @@ export default function ProductDetail({
           <ProductPriceBlock
             pricing={selectedVariant.pricing}
             inStock={inStock}
+          />
+        )}
+
+        {selectedVariant && (
+          <ProductOffersSection
+            pricing={selectedVariant.pricing}
+            coupons={product.availableCoupons ?? []}
           />
         )}
 
