@@ -383,7 +383,7 @@ body {
 
 /* Homepage sections */
 .section {
-  padding: 3.5rem 0;
+  padding: 4.5rem 0;
   width: 100%;
 }
 
@@ -561,8 +561,8 @@ body {
 
 /* Category Section */
 .category-section {
-  padding-top: 3.5rem;
-  padding-bottom: 3.5rem;
+  padding-top: 4.5rem;
+  padding-bottom: 4.5rem;
 }
 
 .category-grid {
@@ -2935,8 +2935,8 @@ body {
 
 /* Product Reviews Showcase (Home) */
 .product-reviews-showcase {
-  padding-top: 3.5rem;
-  padding-bottom: 3.5rem;
+  padding-top: 6.5rem;
+  padding-bottom: 6.5rem;
   background:
     radial-gradient(circle at top right, rgba(197, 157, 95, 0.08), transparent 40%),
     linear-gradient(180deg, rgba(252, 249, 242, 0.65), rgba(255, 255, 255, 0.2));
@@ -3936,12 +3936,12 @@ body {
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  padding: clamp(3.5rem, 6vw, 5.5rem) 0 clamp(3rem, 5vw, 4.5rem);
+  padding: clamp(6.5rem, 6vw, 5.5rem) 0 clamp(3rem, 5vw, 6.5rem);
   background:
     radial-gradient(ellipse 55% 45% at 8% 12%, rgba(79, 119, 45, 0.07), transparent 60%),
     radial-gradient(ellipse 40% 50% at 92% 18%, rgba(197, 157, 95, 0.1), transparent 55%),
     linear-gradient(180deg, #fbf7f0 0%, #f7f1e6 48%, #faf6ef 100%);
-}
+} 
 
 .why-choose-inner {
   position: relative;
