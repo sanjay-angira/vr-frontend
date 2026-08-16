@@ -3,6 +3,7 @@ import {
   SectionHeading,
   type SectionHeadingProps,
 } from "@/components/website/shared/SectionHeading";
+import { SectionCorners } from "@/components/website/shared/SectionCorners";
 import Link from "next/link";
 
 interface CategorySectionProps {
@@ -17,7 +18,8 @@ export function CategorySection({
   viewAllLink = "/categories",
 }: CategorySectionProps) {
   return (
-    <section className="section home-section category-section">
+    <section className="section home-section category-section has-section-corners">
+      <SectionCorners />
       <div className="container">
         <SectionHeading {...heading} />
         <div className="category-grid">

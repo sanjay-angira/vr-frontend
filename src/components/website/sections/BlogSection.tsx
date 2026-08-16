@@ -4,6 +4,7 @@ import {
   SectionHeading,
   type SectionHeadingProps,
 } from "@/components/website/shared/SectionHeading";
+import { SectionCorners } from "@/components/website/shared/SectionCorners";
 
 type BlogPost = {
   id: number;
@@ -56,7 +57,8 @@ export function BlogSection({
   viewAllLink?: string;
 }) {
   return (
-    <section className="section home-section blog-section">
+    <section className="section home-section blog-section has-section-corners">
+      <SectionCorners />
       <div className="container">
         <SectionHeading {...heading} />
         <div className="blog-grid">

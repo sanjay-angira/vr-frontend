@@ -396,12 +396,74 @@ body {
 
 /* Homepage sections */
 .section {
-  padding: 3.5rem 0;
+  padding: 4.5rem 0;
   width: 100%;
 }
 
 .home-section + .home-section {
   border-top: 1px solid rgba(184, 164, 131, 0.14);
+}
+
+/* Diagonal gold corner ornaments (TL + BR) */
+.has-section-corners {
+  position: relative;
+}
+
+.section-corners {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.has-section-corners > .container,
+.has-section-corners > .why-choose-inner {
+  position: relative;
+  z-index: 1;
+}
+
+.section-corners__piece {
+  position: absolute;
+  display: block;
+  width: clamp(50rem, 14vw, 11rem);
+  line-height: 0;
+  opacity: 0.92;
+}
+
+.section-corners__piece--tl {
+  top: 0.35rem;
+  left: 0.35rem;
+}
+
+.section-corners__piece--br {
+  right: 0.35rem;
+  bottom: 0.35rem;
+  transform: scale(-1);
+}
+
+.section-corners__img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: none;
+}
+
+@media (max-width: 640px) {
+  .section-corners__piece {
+    width: clamp(4.5rem, 22vw, 6.75rem);
+    opacity: 0.88;
+  }
+
+  .section-corners__piece--tl {
+    top: 0.2rem;
+    left: 0.15rem;
+  }
+
+  .section-corners__piece--br {
+    right: 0.15rem;
+    bottom: 0.2rem;
+  }
 }
 
 .section-header {
@@ -574,8 +636,8 @@ body {
 
 /* Category Section */
 .category-section {
-  padding-top: 3.5rem;
-  padding-bottom: 3.5rem;
+  padding-top: 4.5rem;
+  padding-bottom: 4.5rem;
 }
 
 .category-grid {
@@ -3366,8 +3428,8 @@ body {
 
 /* Product Reviews Showcase (Home) */
 .product-reviews-showcase {
-  padding-top: 3.5rem;
-  padding-bottom: 3.5rem;
+  padding-top: 6.5rem;
+  padding-bottom: 6.5rem;
   background:
     radial-gradient(circle at top right, rgba(197, 157, 95, 0.08), transparent 40%),
     linear-gradient(180deg, rgba(252, 249, 242, 0.65), rgba(255, 255, 255, 0.2));
@@ -4370,16 +4432,20 @@ body {
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  padding: clamp(3.5rem, 6vw, 5.5rem) 0 clamp(3rem, 5vw, 4.5rem);
+  padding: clamp(6.5rem, 6vw, 5.5rem) 0 clamp(3rem, 5vw, 6.5rem);
   background:
     radial-gradient(ellipse 55% 45% at 8% 12%, rgba(79, 119, 45, 0.07), transparent 60%),
     radial-gradient(ellipse 40% 50% at 92% 18%, rgba(197, 157, 95, 0.1), transparent 55%),
     linear-gradient(180deg, #fbf7f0 0%, #f7f1e6 48%, #faf6ef 100%);
 }
 
+.why-choose-section .section-corners {
+  z-index: 1;
+}
+
 .why-choose-inner {
   position: relative;
-  z-index: 1;
+  z-index: 2;
 }
 
 .why-choose-decor {
