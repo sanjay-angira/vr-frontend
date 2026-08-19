@@ -1,6 +1,10 @@
 import type { FormikErrors } from "formik";
 import { getIn } from "formik";
 import { generateSlug } from "./shared/generateSlug";
+import {
+  getRememberedImageSizes,
+  rememberImageSizes,
+} from "@/utils/imageSizesCache";
 
 export { buildVariantSlug } from "./shared/generateSlug";
 
@@ -383,7 +387,18 @@ export function normalizeImageArray(value: unknown): string[] {
       if (typeof item === "string") return item.trim();
       if (item && typeof item === "object") {
         const img = item as Record<string, unknown>;
-        return String(img.url ?? img.image ?? img.Location ?? img.imageUrl ?? "").trim();
+        const url = String(
+          img.originalUrl ?? img.url ?? img.image ?? img.Location ?? img.imageUrl ?? ""
+        ).trim();
+        if (url && (img.webp400 || img.webp800 || img.webp1200)) {
+          rememberImageSizes(url, {
+            originalUrl: url,
+            webp400: (img.webp400 as string) ?? null,
+            webp800: (img.webp800 as string) ?? null,
+            webp1200: (img.webp1200 as string) ?? null,
+          });
+        }
+        return url;
       }
       return "";
     })
@@ -412,14 +427,25 @@ export function getDeepestCategoryId(values: ProductFormValues): number | "" {
   return values.category ? Number(values.category) : "";
 }
 
+/** Persist remembered WebP columns with the original URL when available. */
+function imagePayloadFromUrl(url: string, sortOrder: number) {
+  const remembered = getRememberedImageSizes(url);
+  return {
+    originalUrl: url,
+    sortOrder,
+    ...(remembered?.webp400 ? { webp400: remembered.webp400 } : {}),
+    ...(remembered?.webp800 ? { webp800: remembered.webp800 } : {}),
+    ...(remembered?.webp1200 ? { webp1200: remembered.webp1200 } : {}),
+  };
+}
+
 export function buildProductPayload(
   values: ProductFormValues,
   attributeMetaById: Record<number, AttributeMeta> = {}
 ): Record<string, unknown> {
-  const productImages = normalizeImageArray(values.images).map((url, index) => ({
-    url,
-    sortOrder: index + 1,
-  }));
+  const productImages = normalizeImageArray(values.images).map((url, index) =>
+    imagePayloadFromUrl(url, index + 1),
+  );
 
   return {
     productName: values.productName,
@@ -446,10 +472,9 @@ export function buildProductPayload(
         stock: Number(variant.stock),
         ...(variant.sku ? { sku: variant.sku } : {}),
       };
-      const variantImages = normalizeImageArray(variant.images).map((url, idx) => ({
-        url,
-        sortOrder: idx + 1,
-      }));
+      const variantImages = normalizeImageArray(variant.images).map((url, idx) =>
+        imagePayloadFromUrl(url, idx + 1),
+      );
       // Always send images/offers/attributes so clearing them on edit reaches the API.
       // Omitting empty arrays left old ManyToMany / child rows attached.
       variantPayload.images = variantImages;

@@ -193,9 +193,16 @@ export function FormImageUpload<T extends Record<string, unknown>>({
   hint,
   className,
   mediaType = "image",
+  imageType,
+  entityId,
+  sizesField,
 }: BaseFieldProps<T> & {
   uploadPath: string;
   mediaType?: "image" | "video";
+  imageType?: import("@/utils/optimizedImage").ImageOptimizationType;
+  entityId?: string | number;
+  /** Optional formik field name for flat optimized image columns alongside the URL. */
+  sizesField?: string;
 }) {
   const error = getError(formik, name);
 
@@ -205,11 +212,18 @@ export function FormImageUpload<T extends Record<string, unknown>>({
       required={required}
       value={String(getIn(formik.values, name) ?? "")}
       onChange={(url) => void formik.setFieldValue(name, url)}
+      onSizesChange={
+        sizesField
+          ? (sizes) => void formik.setFieldValue(sizesField, sizes)
+          : undefined
+      }
       uploadPath={uploadPath}
       error={error}
       hint={hint}
       className={className}
       mediaType={mediaType}
+      imageType={imageType}
+      entityId={entityId}
     />
   );
 }
@@ -222,7 +236,13 @@ export function FormMultiImageUpload<T extends Record<string, unknown>>({
   required,
   hint,
   className,
-}: BaseFieldProps<T> & { uploadPath: string }) {
+  imageType,
+  entityId,
+}: BaseFieldProps<T> & {
+  uploadPath: string;
+  imageType?: import("@/utils/optimizedImage").ImageOptimizationType;
+  entityId?: string | number;
+}) {
   const error = getError(formik, name);
   const values = Array.isArray(getIn(formik.values, name))
     ? (getIn(formik.values, name) as string[])
@@ -238,6 +258,8 @@ export function FormMultiImageUpload<T extends Record<string, unknown>>({
       error={error}
       hint={hint}
       className={className}
+      imageType={imageType}
+      entityId={entityId}
     />
   );
 }

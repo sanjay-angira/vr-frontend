@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import {
   SectionHeading,
@@ -19,7 +20,13 @@ function BlogCard({ post }: { post: BlogPost }) {
     <article className="blog-card">
       <div className="blog-card-media">
         {post.image ? (
-          <img src={post.image} alt={post.title} className="blog-card-image" />
+          <Image
+            src={post.image}
+            alt={post.title}
+            fill
+            sizes="(max-width: 768px) 100vw, 33vw"
+            className="blog-card-image"
+          />
         ) : (
           <div className="blog-card-image blog-card-image--placeholder" />
         )}
@@ -43,11 +50,14 @@ export function BlogSection({
   posts,
   heading,
   viewAllLink = "/blogs",
+  viewAllLabel,
 }: {
   posts: BlogPost[];
   heading: SectionHeadingProps;
   viewAllLink?: string;
+  viewAllLabel?: string;
 }) {
+  const buttonLabel = viewAllLabel?.trim() || "View All Articles";
   return (
     <section className="section home-section blog-section">
       <div className="container">
@@ -60,7 +70,7 @@ export function BlogSection({
         {viewAllLink ? (
           <div className="home-section__actions">
             <Link href={viewAllLink} className="btn btn-outline btn-lg">
-              View All Articles
+              {buttonLabel}
             </Link>
           </div>
         ) : null}

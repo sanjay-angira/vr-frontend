@@ -14,6 +14,7 @@ interface ProductSectionProps {
   products: WebsiteProductCardData[];
   viewAllLink?: string;
   viewAllSeed?: ShopFilterSeed;
+  viewAllLabel?: string;
 }
 
 export function ProductSection({
@@ -21,7 +22,12 @@ export function ProductSection({
   products,
   viewAllLink,
   viewAllSeed,
+  viewAllLabel,
 }: ProductSectionProps) {
+  const buttonLabel =
+    viewAllLabel?.trim() ||
+    `View All ${heading.title}`.trim() ||
+    "View All";
   return (
     <section className="section home-section home-product-section">
       <div className="container">
@@ -38,7 +44,7 @@ export function ProductSection({
               seed={viewAllSeed}
               className="btn btn-outline btn-lg"
             >
-              View All {heading.title}
+              {buttonLabel}
             </ShopSeedLink>
           </div>
         ) : null}

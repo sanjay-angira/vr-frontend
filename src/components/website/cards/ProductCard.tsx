@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Heart, ShoppingCart, Star } from "lucide-react";
@@ -73,6 +74,7 @@ export function ProductCard({
   const { isWished, toggle } = useWishlist();
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [wishBusy, setWishBusy] = useState(false);
+  const [imageFailed, setImageFailed] = useState(false);
 
   const normalizedProduct: WebsiteProductCardData = product
     ? {
@@ -156,14 +158,13 @@ export function ProductCard({
   };
 
   const imageElement = normalizedProduct.image ? (
-    <img
-      src={normalizedProduct.image}
+    <Image
+      src={imageFailed ? "/next.svg" : normalizedProduct.image}
       alt={normalizedProduct.name}
+      fill
+      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
       className="product-image"
-      loading="lazy"
-      onError={(event) => {
-        event.currentTarget.src = "/next.svg";
-      }}
+      onError={() => setImageFailed(true)}
     />
   ) : (
     <div className="product-image product-image--placeholder" aria-hidden />

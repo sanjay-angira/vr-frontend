@@ -300,6 +300,7 @@ function VariantPanel({
               values={variant.images}
               onChange={(urls) => formik.setFieldValue(`${prefix}.images`, urls)}
               uploadPath={UPLOAD_PATHS.variantImages}
+              imageType="product"
             />
 
             {selectedAttributes.length > 0 && (
@@ -858,6 +859,7 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
                   values={formik.values.images}
                   onChange={(urls) => formik.setFieldValue("images", urls)}
                   uploadPath={UPLOAD_PATHS.products}
+                  imageType="product"
                   error={getNestedError(formik.touched, formik.errors, "images")}
                 />
               </FormFullWidth>

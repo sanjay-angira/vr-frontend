@@ -193,7 +193,7 @@ export default function GroupedVariantPicker({
   return (
     <div className="product-grouped-variants product-inline-variants">
       <div className="product-variation-head">
-        <Sparkles size={15} color="var(--text-saffron)" />
+        <Sparkles size={15} color="var(--vr-forest)" />
         <h3 className="product-variation-title">Choose Options</h3>
       </div>
 

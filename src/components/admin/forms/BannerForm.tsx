@@ -66,6 +66,16 @@ export function BannerForm({ module, recordId }: AdminFormProps) {
       status: Boolean(r.status ?? true),
       sectionId: Number(r.sectionId ?? 1),
     }),
+    mapValuesToPayload: (v) => ({
+      title: v.title,
+      subtitle: v.subtitle,
+      image: v.image,
+      mobileImage: v.mobileImage,
+      bannerLink: v.bannerLink,
+      position: v.position,
+      status: v.status,
+      sectionId: v.sectionId,
+    }),
   });
 
   return (
@@ -80,8 +90,22 @@ export function BannerForm({ module, recordId }: AdminFormProps) {
         <FormSection title="Banner details">
           <FormInput formik={formik} name="title" label="Title" required />
           <FormInput formik={formik} name="subtitle" label="Subtitle" required />
-          <FormImageUpload formik={formik} name="image" label="Desktop Image" required uploadPath={UPLOAD_PATHS.banners} />
-          <FormImageUpload formik={formik} name="mobileImage" label="Mobile Image" required uploadPath={UPLOAD_PATHS.banners} />
+          <FormImageUpload
+            formik={formik}
+            name="image"
+            label="Desktop Image"
+            required
+            uploadPath={UPLOAD_PATHS.banners}
+            imageType="banner"
+          />
+          <FormImageUpload
+            formik={formik}
+            name="mobileImage"
+            label="Mobile Image"
+            required
+            uploadPath={UPLOAD_PATHS.banners}
+            imageType="banner_mobile"
+          />
           <FormInput formik={formik} name="bannerLink" label="Banner Link" required />
           <FormInput formik={formik} name="position" label="Position" type="number" required />
           <FormInput formik={formik} name="sectionId" label="Section ID" type="number" required />

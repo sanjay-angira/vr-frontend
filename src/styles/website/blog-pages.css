@@ -202,8 +202,11 @@
     linear-gradient(180deg, var(--vr-cream) 0%, #fff 45%, var(--vr-cream-dark) 100%);
 }
 
-.blog-detail__inner {
-  max-width: 760px;
+.container.blog-detail__inner {
+  width: 100%;
+  max-width: min(56rem, calc(100vw - 2 * var(--container-padding-x, 1.5rem)));
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .blog-detail__breadcrumbs {
@@ -285,22 +288,23 @@
 .blog-detail__hero {
   margin: 0 0 1.75rem;
   border-radius: 0;
-  overflow: hidden;
-  background: var(--vr-cream-dark);
+  background: transparent;
+  line-height: 0;
 }
 
 .blog-detail__hero img {
   display: block;
   width: 100%;
-  max-height: 480px;
-  object-fit: cover;
+  height: auto;
+  max-width: 100%;
+  object-fit: contain;
 }
 
 /* Quill editor HTML body */
 .blog-detail__content {
-  max-width: 42rem;
+  max-width: none;
   width: 100%;
-  margin: 0 auto;
+  margin: 0;
   color: var(--vr-text);
   font-family: var(--font-body);
   font-size: 1.05rem;

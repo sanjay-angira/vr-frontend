@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, X, ZoomIn } from "lucide-react";
 
@@ -16,6 +17,7 @@ export default function ProductImageGallery({ images, alt, topRightSlot }: Props
   const [current, setCurrent] = useState(0);
   const [isZoomed, setIsZoomed] = useState(false);
   const [fadeKey, setFadeKey] = useState(0);
+  const [mounted, setMounted] = useState(false);
 
   const safeImages = images.filter(
     (src): src is string => typeof src === "string" && src.trim().length > 0
@@ -23,6 +25,10 @@ export default function ProductImageGallery({ images, alt, topRightSlot }: Props
   const hasMultiple = safeImages.length > 1;
   const activeIndex = Math.min(current, Math.max(safeImages.length - 1, 0));
   const activeImage = safeImages[activeIndex] ?? null;
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     setCurrent(0);
@@ -75,66 +81,80 @@ export default function ProductImageGallery({ images, alt, topRightSlot }: Props
     );
   }
 
+  const lightbox =
+    isZoomed && mounted
+      ? createPortal(
+          <div
+            className="product-gallery__lightbox"
+            onClick={() => setIsZoomed(false)}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Zoomed product image"
+          >
+            <button
+              type="button"
+              className="product-gallery__lightbox-close"
+              onClick={() => setIsZoomed(false)}
+              aria-label="Close zoom"
+            >
+              <X size={18} />
+            </button>
+
+            {hasMultiple && (
+              <>
+                <button
+                  type="button"
+                  className="product-gallery__lightbox-nav product-gallery__lightbox-nav--prev"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    goPrev();
+                  }}
+                  aria-label="Previous image"
+                >
+                  <ChevronLeft size={22} />
+                </button>
+                <button
+                  type="button"
+                  className="product-gallery__lightbox-nav product-gallery__lightbox-nav--next"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    goNext();
+                  }}
+                  aria-label="Next image"
+                >
+                  <ChevronRight size={22} />
+                </button>
+              </>
+            )}
+
+            <div
+              className="product-gallery__lightbox-stage"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <Image
+                key={`zoom-${activeIndex}-${activeImage}`}
+                src={activeImage}
+                alt={alt}
+                fill
+                sizes="90vw"
+                className="product-gallery__lightbox-image"
+                priority
+              />
+            </div>
+
+            {hasMultiple ? (
+              <div className="product-gallery__lightbox-counter" aria-hidden="true">
+                {activeIndex + 1} / {safeImages.length}
+              </div>
+            ) : null}
+          </div>,
+          document.body,
+        )
+      : null;
+
   return (
     <div className="product-gallery">
-      {isZoomed && (
-        <div
-          className="product-gallery__lightbox"
-          onClick={() => setIsZoomed(false)}
-          role="dialog"
-          aria-modal="true"
-          aria-label="Zoomed product image"
-        >
-          <button
-            type="button"
-            className="product-gallery__lightbox-close"
-            onClick={() => setIsZoomed(false)}
-            aria-label="Close zoom"
-          >
-            <X size={18} />
-          </button>
-
-          {hasMultiple && (
-            <>
-              <button
-                type="button"
-                className="product-gallery__lightbox-nav product-gallery__lightbox-nav--prev"
-                onClick={(event) => {
-                  event.stopPropagation();
-                  goPrev();
-                }}
-                aria-label="Previous image"
-              >
-                <ChevronLeft size={22} />
-              </button>
-              <button
-                type="button"
-                className="product-gallery__lightbox-nav product-gallery__lightbox-nav--next"
-                onClick={(event) => {
-                  event.stopPropagation();
-                  goNext();
-                }}
-                aria-label="Next image"
-              >
-                <ChevronRight size={22} />
-              </button>
-            </>
-          )}
-
-          <div
-            className="product-gallery__lightbox-stage"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <Image
-              src={activeImage}
-              alt={alt}
-              fill
-              sizes="90vw"
-              className="product-gallery__lightbox-image"
-            />
-          </div>
-        </div>
-      )}
+      {lightbox}
 
       <div className="product-gallery__main">
         {topRightSlot && (

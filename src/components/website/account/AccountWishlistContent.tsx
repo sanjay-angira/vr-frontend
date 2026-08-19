@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Heart, ShoppingCart, Trash2 } from "lucide-react";
@@ -125,10 +126,22 @@ export function AccountWishlistContent() {
                   <div className="account-wishlist-media">
                     {href ? (
                       <Link href={href} aria-label={title}>
-                        <img src={image} alt={title} loading="lazy" />
+                        <Image
+                          src={image}
+                          alt={title}
+                          fill
+                          sizes="88px"
+                          className="account-wishlist-thumb"
+                        />
                       </Link>
                     ) : (
-                      <img src={image} alt={title} loading="lazy" />
+                      <Image
+                        src={image}
+                        alt={title}
+                        fill
+                        sizes="88px"
+                        className="account-wishlist-thumb"
+                      />
                     )}
                   </div>
 

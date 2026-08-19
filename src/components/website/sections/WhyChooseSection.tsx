@@ -187,8 +187,6 @@ export function WhyChooseSection({ heading }: { heading: SectionHeadingProps }) 
       className="why-choose-section"
       aria-label="Why Choose Vrindavan Rasa"
     >
-      <BotanicalDecor />
-
       <div className="container why-choose-inner">
         <SectionHeading {...heading} />
 

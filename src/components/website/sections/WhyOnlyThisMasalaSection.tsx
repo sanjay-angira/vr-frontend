@@ -6,6 +6,7 @@ import {
   Search,
   ShieldCheck,
 } from "lucide-react";
+import Image from "next/image";
 import { WEBSITE_IMAGES } from "@/components/website/data/products";
 
 const leftPoints = [
@@ -75,10 +76,13 @@ export function WhyOnlyThisMasalaSection() {
             })}
           </div>
           <div className="why-hathi-center">
-            <img
+            <Image
               src={WEBSITE_IMAGES.rashi}
               alt="Vrindavan Rasa emblem"
+              width={420}
+              height={420}
               className="why-hathi-image"
+              sizes="(max-width: 768px) 80vw, 420px"
             />
           </div>
           <div className="why-hathi-col right">

@@ -1,5 +1,7 @@
+import { cache } from "react";
 import { getData } from "@/services/api/apiService";
 import { API_ENDPOINTS } from "@/services/api/API_ENDPOINT";
+import { getProductWebpImageUrl } from "@/utils/optimizedImage";
 
 import { normalizeVariantAttributes, type VariantAttributeView } from "./productVariantUtils";
 
@@ -56,7 +58,15 @@ export type ProductPageData = {
     categoryName?: string | null;
     categorySlug?: string | null;
   } | null;
-  images?: Array<{ id: number; url: string; sortOrder: number }>;
+  images?: Array<{
+    id: number;
+    originalUrl?: string;
+    url?: string;
+    sortOrder: number;
+    webp400?: string | null;
+    webp800?: string | null;
+    webp1200?: string | null;
+  }>;
   variants?: Array<Record<string, unknown>>;
   attributes?: Array<Record<string, unknown>>;
   productAttributes?: Array<Record<string, unknown>>;
@@ -81,7 +91,7 @@ function toNumber(value: string | number | null | undefined): number | null {
   return null;
 }
 
-export async function fetchProductBySlug(
+export const fetchProductBySlug = cache(async function fetchProductBySlug(
   slug: string
 ): Promise<ProductPageData | null> {
   const safeSlug = encodeURIComponent(slug);
@@ -105,7 +115,7 @@ export async function fetchProductBySlug(
   }
 
   return null;
-}
+});
 
 export type SameCategoryProductCard = {
   id: string;
@@ -244,7 +254,15 @@ export function normalizeVariants(
     stock?: string | number | null;
     sku?: string | null;
     description?: string | null;
-    images?: Array<{ id: number; url: string; sortOrder: number }>;
+    images?: Array<{
+      id: number;
+      originalUrl?: string;
+      url?: string;
+      sortOrder: number;
+      webp400?: string | null;
+      webp800?: string | null;
+      webp1200?: string | null;
+    }>;
     variantAttributes?: Array<Record<string, unknown>>;
     pricing?: Record<string, unknown>;
   }> = []
@@ -294,7 +312,18 @@ export function normalizeVariants(
       images: (variant.images || [])
         .slice()
         .sort((a, b) => a.sortOrder - b.sortOrder)
-        .map((image) => image.url)
+        .map((image) =>
+          getProductWebpImageUrl(
+            {
+              originalUrl: image.originalUrl || image.url,
+              url: image.originalUrl || image.url,
+              webp400: image.webp400,
+              webp800: image.webp800,
+              webp1200: image.webp1200,
+            },
+            1200,
+          )
+        )
         .filter((url): url is string => typeof url === "string" && url.trim().length > 0),
       variantAttributes: normalizeVariantAttributes(variant.variantAttributes || []),
       pricing,

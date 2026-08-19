@@ -16,6 +16,7 @@ export function ProductComboSection({
   heading,
   comboProducts,
   viewAllLink,
+  viewAllLabel,
 }: {
   title?: string;
   subtitle?: string;
@@ -24,6 +25,7 @@ export function ProductComboSection({
   heading?: SectionHeadingProps;
   comboProducts: ComboProduct[];
   viewAllLink?: string;
+  viewAllLabel?: string;
 }) {
   const resolvedHeading: SectionHeadingProps = heading ?? {
     title: title ?? "",
@@ -32,7 +34,10 @@ export function ProductComboSection({
     description,
   };
 
-  const viewAllLabel = resolvedHeading.title.trim() || "Products";
+  const buttonLabel =
+    viewAllLabel?.trim() ||
+    resolvedHeading.title.trim() ||
+    "View All Products";
 
   return (
     <section className="section home-section home-product-section combo-section">
@@ -46,7 +51,7 @@ export function ProductComboSection({
         {viewAllLink ? (
           <div className="home-section__actions">
             <Link href={viewAllLink} className="btn btn-outline btn-lg">
-              View All {viewAllLabel || "Products"}
+              {buttonLabel}
             </Link>
           </div>
         ) : null}

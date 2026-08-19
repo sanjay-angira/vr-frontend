@@ -24,6 +24,7 @@ import {
 } from "@/lib/schema";
 import { getProductPageMetadata } from "@/lib/seo";
 import { buildProductVariantUrl } from "@/components/website/product/productVariantUtils";
+import { getProductWebpImageUrl } from "@/utils/optimizedImage";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -56,7 +57,18 @@ export async function generateMetadata({
     product.images
       ?.slice()
       .sort((a, b) => a.sortOrder - b.sortOrder)
-      .map((item) => item.url)
+      .map((item) =>
+        getProductWebpImageUrl(
+          {
+            originalUrl: item.originalUrl || item.url,
+            url: item.originalUrl || item.url,
+            webp400: item.webp400,
+            webp800: item.webp800,
+            webp1200: item.webp1200,
+          },
+          1200,
+        ),
+      )
       .find((url) => typeof url === "string" && url.trim()) || null;
 
   const description =
@@ -77,10 +89,11 @@ export default async function ProductDetailPage({
   const { slug } = await params;
   const query = searchParams ? await searchParams : undefined;
   const variantFromQuery = pickVariantParam(query?.variant);
-  const [product, availableCoupons] = await Promise.all([
-    fetchProductBySlug(slug),
-    fetchWebsiteCoupons(),
-  ]);
+
+  // Start coupons immediately; product fetch is deduped with generateMetadata via cache().
+  const productPromise = fetchProductBySlug(slug);
+  const couponsPromise = fetchWebsiteCoupons();
+  const product = await productPromise;
 
   if (!product) {
     notFound();
@@ -93,14 +106,16 @@ export default async function ProductDetailPage({
   }
 
   const categoryId = Number(product.category?.id);
-  const recommendedProducts =
+  const [availableCoupons, recommendedProducts] = await Promise.all([
+    couponsPromise,
     Number.isFinite(categoryId) && categoryId > 0
-      ? await fetchSameCategoryProducts({
+      ? fetchSameCategoryProducts({
           categoryId,
           excludeProductId: product.id,
           limit: 8,
         })
-      : [];
+      : Promise.resolve([]),
+  ]);
 
   const normalizedVariants = normalizeVariants(
     product.variants as Parameters<typeof normalizeVariants>[0]
@@ -112,7 +127,18 @@ export default async function ProductDetailPage({
     product.images
       ?.slice()
       .sort((a, b) => a.sortOrder - b.sortOrder)
-      .map((image) => image.url)
+      .map((image) =>
+        getProductWebpImageUrl(
+          {
+            originalUrl: image.originalUrl || image.url,
+            url: image.originalUrl || image.url,
+            webp400: image.webp400,
+            webp800: image.webp800,
+            webp1200: image.webp1200,
+          },
+          1200,
+        ),
+      )
       .filter((url): url is string => typeof url === "string" && url.trim().length > 0) ?? [];
 
   const reviewList = (product.reviews || []).map((review) => ({
