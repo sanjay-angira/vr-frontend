@@ -3,7 +3,6 @@ import {
   SectionHeading,
   type SectionHeadingProps,
 } from "@/components/website/shared/SectionHeading";
-import { SectionCorners } from "@/components/website/shared/SectionCorners";
 
 type ReviewItem = {
   id: number;
@@ -22,8 +21,7 @@ export function ProductReviewsShowcase({
   reviews: ReviewItem[];
 }) {
   return (
-    <section className="section home-section product-reviews-showcase has-section-corners">
-      <SectionCorners variant="ornate" />
+    <section className="section home-section product-reviews-showcase">
       <div className="container">
         <SectionHeading {...heading} />
         <div className="product-reviews-grid">

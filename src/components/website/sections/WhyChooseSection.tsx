@@ -13,7 +13,6 @@ import {
   SectionHeading,
   type SectionHeadingProps,
 } from "@/components/website/shared/SectionHeading";
-import { SectionCorners } from "@/components/website/shared/SectionCorners";
 
 const features = [
   {
@@ -185,11 +184,9 @@ function BotanicalDecor() {
 export function WhyChooseSection({ heading }: { heading: SectionHeadingProps }) {
   return (
     <section
-      className="why-choose-section has-section-corners"
+      className="why-choose-section"
       aria-label="Why Choose Vrindavan Rasa"
     >
-      <SectionCorners variant="ornate" />
-
       <div className="container why-choose-inner">
         <SectionHeading {...heading} />
 

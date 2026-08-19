@@ -2,7 +2,6 @@ import {
   SectionHeading,
   type SectionHeadingProps,
 } from "@/components/website/shared/SectionHeading";
-import { SectionCorners } from "@/components/website/shared/SectionCorners";
 import {
   ProductCard,
   type WebsiteProductCardData,
@@ -24,8 +23,7 @@ export function ProductSection({
   viewAllSeed,
 }: ProductSectionProps) {
   return (
-    <section className="section home-section home-product-section has-section-corners">
-      <SectionCorners />
+    <section className="section home-section home-product-section">
       <div className="container">
         <SectionHeading {...heading} />
         <div className="home-product-grid">
