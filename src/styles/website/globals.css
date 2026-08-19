@@ -3663,7 +3663,7 @@ body {
 
 .blog-card-media {
   position: relative;
-  aspect-ratio: 16 / 10;
+  aspect-ratio: 16 / 9;
   overflow: hidden;
   background: var(--vr-cream-dark);
 }
@@ -4477,7 +4477,7 @@ body {
     radial-gradient(ellipse 55% 45% at 8% 12%, rgba(79, 119, 45, 0.07), transparent 60%),
     radial-gradient(ellipse 40% 50% at 92% 18%, rgba(197, 157, 95, 0.1), transparent 55%),
     linear-gradient(180deg, #fbf7f0 0%, #f7f1e6 48%, #faf6ef 100%);
-}
+} 
 
 .why-choose-inner {
   position: relative;
