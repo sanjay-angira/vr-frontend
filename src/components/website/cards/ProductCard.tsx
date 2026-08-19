@@ -209,6 +209,7 @@ export function ProductCard({
             className="add-to-cart-btn"
             onClick={() => void handleAddToCart()}
             disabled={!normalizedProduct.inStock || isAddingToCart}
+            aria-label={isAddingToCart ? "Adding to cart" : "Add to cart"}
           >
             <ShoppingCart />
             <span className="add-to-cart-btn__label add-to-cart-btn__label--full">
