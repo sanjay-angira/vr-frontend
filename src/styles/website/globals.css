@@ -540,12 +540,20 @@ body {
 @media (max-width: 768px) {
   .home-section__actions {
     width: 100%;
-    margin-top: 1.5rem;
+    margin-top: 0.85rem;
+    padding: 0;
   }
 
-  .home-section__actions .btn {
+  .home-section__actions .btn,
+  .home-section__actions .btn-lg {
     width: 100%;
     max-width: 100%;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    line-height: 1.25;
+    font-weight: 600;
+    border-width: 1px;
+    gap: 0.35rem;
   }
 }
 
