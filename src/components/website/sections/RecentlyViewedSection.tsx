@@ -11,7 +11,13 @@ import { SectionHeadingProps } from "../shared/SectionHeading";
 
 const HOME_LIMIT = 8;
 
-export function RecentlyViewedSection({ heading }: { heading: SectionHeadingProps }) {
+export function RecentlyViewedSection({
+  heading,
+  viewAllLabel,
+}: {
+  heading: SectionHeadingProps;
+  viewAllLabel?: string;
+}) {
   const [products, setProducts] = useState<WebsiteProductCardData[]>([]);
   const [ready, setReady] = useState(false);
 
@@ -46,6 +52,7 @@ export function RecentlyViewedSection({ heading }: { heading: SectionHeadingProp
       heading={heading}
       products={products}
       viewAllLink="/recently-viewed-products"
+      viewAllLabel={viewAllLabel}
     />
   );
 }

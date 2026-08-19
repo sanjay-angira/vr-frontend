@@ -9,13 +9,16 @@ interface CategorySectionProps {
   heading: SectionHeadingProps;
   categories: Category[];
   viewAllLink?: string;
+  viewAllLabel?: string;
 }
 
 export function CategorySection({
   heading,
   categories,
   viewAllLink = "/categories",
+  viewAllLabel,
 }: CategorySectionProps) {
+  const buttonLabel = viewAllLabel?.trim() || "View All Categories";
   return (
     <section className="section home-section category-section">
       <div className="container">
@@ -28,7 +31,7 @@ export function CategorySection({
         {viewAllLink ? (
           <div className="home-section__actions">
             <Link href={viewAllLink} className="btn btn-outline btn-lg">
-              View All Categories
+              {buttonLabel}
             </Link>
           </div>
         ) : null}

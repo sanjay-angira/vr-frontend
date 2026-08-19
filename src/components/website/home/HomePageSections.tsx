@@ -77,6 +77,11 @@ export function getSectionHeadingProps(section: HomepageSection): SectionHeading
   };
 }
 
+function getViewAllLabel(section: HomepageSection): string | undefined {
+  const title = String(section.title || "").trim();
+  return title ? `View All ${title}` : undefined;
+}
+
 export function HomePageSections({ sections }: HomePageSectionsProps) {
   return (
     <>
@@ -104,6 +109,7 @@ export function HomePageSections({ sections }: HomePageSectionsProps) {
                 heading={heading}
                 products={mapProducts(section.products)}
                 viewAllLink="/products"
+                viewAllLabel={getViewAllLabel(section)}
                 viewAllSeed={
                   section.slug ? { sectionSlugs: [section.slug] } : undefined
                 }
@@ -117,6 +123,7 @@ export function HomePageSections({ sections }: HomePageSectionsProps) {
                 key={key}
                 heading={heading}
                 categories={mapCategories(section.categories)}
+                viewAllLabel={getViewAllLabel(section)}
               />
             );
 
@@ -127,6 +134,7 @@ export function HomePageSections({ sections }: HomePageSectionsProps) {
                 key={key}
                 heading={heading}
                 posts={mapBlogPosts(section.blogs)}
+                viewAllLabel={getViewAllLabel(section)}
               />
             );
 
@@ -160,6 +168,7 @@ export function HomePageSections({ sections }: HomePageSectionsProps) {
               return (<RecentlyViewedSection
                 key={key}
                 heading={heading}
+                viewAllLabel={getViewAllLabel(section)}
               />
               );
             }
@@ -178,6 +187,7 @@ export function HomePageSections({ sections }: HomePageSectionsProps) {
                   <CategorySection
                     heading={heading}
                     categories={mapCategories(section.categories)}
+                    viewAllLabel={getViewAllLabel(section)}
                   />
                 )}
                 {section.products.length > 0 && (
@@ -185,6 +195,7 @@ export function HomePageSections({ sections }: HomePageSectionsProps) {
                     heading={heading}
                     products={mapProducts(section.products)}
                     viewAllLink="/products"
+                    viewAllLabel={getViewAllLabel(section)}
                     viewAllSeed={
                       section.slug
                         ? { sectionSlugs: [section.slug] }
@@ -196,6 +207,7 @@ export function HomePageSections({ sections }: HomePageSectionsProps) {
                   <BlogSection
                     heading={heading}
                     posts={mapBlogPosts(section.blogs)}
+                    viewAllLabel={getViewAllLabel(section)}
                   />
                 )}
                 {section.reviews.length > 0 && (

@@ -89,10 +89,10 @@ export function BlogDetailContent({ blog }: { blog: BlogDetail }) {
             <Image
               src={blog.image}
               alt={blog.imageAlt || blog.title}
-              width={1200}
-              height={640}
-              sizes="(max-width: 768px) 100vw, 960px"
-              style={{ width: "100%", height: "auto", maxHeight: 480, objectFit: "cover" }}
+              width={1600}
+              height={900}
+              sizes="100vw"
+              style={{ width: "100%", height: "auto" }}
               priority
             />
           </div>

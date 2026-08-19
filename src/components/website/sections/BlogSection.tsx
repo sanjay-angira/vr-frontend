@@ -50,11 +50,14 @@ export function BlogSection({
   posts,
   heading,
   viewAllLink = "/blogs",
+  viewAllLabel,
 }: {
   posts: BlogPost[];
   heading: SectionHeadingProps;
   viewAllLink?: string;
+  viewAllLabel?: string;
 }) {
+  const buttonLabel = viewAllLabel?.trim() || "View All Articles";
   return (
     <section className="section home-section blog-section">
       <div className="container">
@@ -67,7 +70,7 @@ export function BlogSection({
         {viewAllLink ? (
           <div className="home-section__actions">
             <Link href={viewAllLink} className="btn btn-outline btn-lg">
-              View All Articles
+              {buttonLabel}
             </Link>
           </div>
         ) : null}

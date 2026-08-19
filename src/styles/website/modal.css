@@ -127,16 +127,12 @@
   gap: var(--gap-s);
 }
 
-.auth-brand-mark {
-  display: flex;
-  width: 36px;
-  height: 42px;
-  flex-shrink: 0;
-}
-
-.auth-brand-logo-feather {
-  width: 100%;
-  height: 100%;
+.auth-brand-logo-img {
+  display: block;
+  width: auto;
+  height: 48px;
+  max-width: 200px;
+  object-fit: contain;
 }
 
 .auth-brand-logo-text {
@@ -281,9 +277,8 @@
   margin-bottom: 0.85rem;
 }
 
-.auth-modal-form.is-profile-step .auth-form-shield {
-  width: 44px;
-  height: 44px;
+.auth-modal-form.is-profile-step .auth-form-logo {
+  height: 40px;
   margin-bottom: 0.55rem;
 }
 
@@ -294,6 +289,15 @@
 .auth-modal-form.is-profile-step .auth-form-subtitle {
   margin-top: 0.3rem;
   font-size: 0.82rem;
+}
+
+.auth-form-logo {
+  display: block;
+  width: auto;
+  height: 48px;
+  max-width: 180px;
+  margin: 0 auto 0.85rem;
+  object-fit: contain;
 }
 
 .auth-form-shield {
