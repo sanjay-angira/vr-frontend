@@ -13,6 +13,13 @@ type ReviewItem = {
   rating: number;
 };
 
+function authorInitials(name: string) {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return "VR";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+}
+
 export function ProductReviewsShowcase({
   heading,
   reviews,
@@ -28,7 +35,7 @@ export function ProductReviewsShowcase({
           {reviews.map((review) => (
             <article key={review.id} className="product-review-card">
               <div className="product-review-quote-mark" aria-hidden>
-                <Quote size={28} />
+                <Quote size={22} />
               </div>
               <div
                 className="product-review-quote rich-html"
@@ -38,7 +45,7 @@ export function ProductReviewsShowcase({
                 {[...Array(5)].map((_, index) => (
                   <Star
                     key={index}
-                    size={16}
+                    size={14}
                     className={
                       index < review.rating ? "review-star active" : "review-star"
                     }
@@ -46,13 +53,20 @@ export function ProductReviewsShowcase({
                   />
                 ))}
               </div>
-              {review.product ? (
-                <p className="product-review-product">{review.product}</p>
-              ) : null}
-              <p className="product-review-name">{review.name}</p>
-              {review.location ? (
-                <p className="product-review-location">{review.location}</p>
-              ) : null}
+              <div className="product-review-author">
+                <span className="product-review-avatar" aria-hidden>
+                  {authorInitials(review.name || "")}
+                </span>
+                <div className="product-review-author-copy">
+                  <p className="product-review-name">{review.name}</p>
+                  {review.location ? (
+                    <p className="product-review-location">{review.location}</p>
+                  ) : null}
+                  {review.product ? (
+                    <p className="product-review-product">{review.product}</p>
+                  ) : null}
+                </div>
+              </div>
             </article>
           ))}
         </div>
