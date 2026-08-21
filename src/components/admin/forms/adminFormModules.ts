@@ -18,6 +18,7 @@ export const ADMIN_FORM_MODULES = [
   "cms-pages",
   "users",
   "customers",
+  "contact-us-leads",
 ] as const satisfies readonly AdminModuleKey[];
 
 const adminFormModuleSet = new Set<string>(ADMIN_FORM_MODULES);

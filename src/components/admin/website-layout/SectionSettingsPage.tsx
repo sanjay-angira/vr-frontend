@@ -53,7 +53,7 @@ const SECTION_TYPES = [
   { label: "Product Slider", value: "product_slider" },
   { label: "Category Slider", value: "category_slider" },
   { label: "Blog Section", value: "blog_section" },
-  { label: "Offer Banner", value: "offer_banner" },
+  { label: "Offer Banner", value: "offer_section" },
   { label: "FAQ Section", value: "faq_section" },
   { label: "Review Section", value: "review_section" },
   { label: "Custom", value: "custom" },

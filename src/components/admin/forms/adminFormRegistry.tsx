@@ -16,6 +16,7 @@ import { OfferForm } from "./OfferForm";
 import { ProductFaqForm } from "./ProductFaqForm";
 import { ProductForm } from "./ProductForm";
 import { ReviewForm } from "./ReviewForm";
+import { ContactLeadForm } from "./ContactLeadForm";
 import { UserForm } from "./UserForm";
 
 const adminFormRegistry: Partial<
@@ -37,6 +38,7 @@ const adminFormRegistry: Partial<
   "product-faq": ProductFaqForm,
   users: UserForm,
   customers: UserForm,
+  "contact-us-leads": ContactLeadForm,
 };
 
 export function getAdminFormComponent(module: string) {
