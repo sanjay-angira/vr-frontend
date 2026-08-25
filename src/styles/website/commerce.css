@@ -22,6 +22,17 @@
   gap: var(--gap-m);
 }
 
+.commerce-header > div {
+  min-width: 0;
+  flex: 1;
+}
+
+.commerce-header .cart-clear-btn {
+  flex-shrink: 0;
+  white-space: nowrap;
+  align-self: flex-start;
+}
+
 .commerce-eyebrow {
   margin: 0 0 0.35rem;
   color: var(--vr-gold-dark);
@@ -435,8 +446,9 @@
     height: 72px;
   }
 
-  .commerce-header {
-    flex-direction: column;
+  .commerce-header .cart-clear-btn {
+    padding: 0.45rem 0.7rem;
+    font-size: 0.8rem;
   }
 }
 
