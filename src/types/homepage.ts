@@ -12,6 +12,7 @@ export type HomepageCategory = {
   name: string;
   description: string;
   image: string;
+  mobileImage?: string;
   slug: string;
   href: string;
 };

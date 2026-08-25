@@ -35,6 +35,8 @@ export const ProductComponentColumns: AdminTableColumnDefinition[] = [
 export const CategoryComponentColumns: AdminTableColumnDefinition[] = [
   { label: "ID", property: "id", type: "text", datatype: "id", visible: true, cssClasses: ["font-medium"] },
   { label: "Category Name", property: "categoryName", type: "text", datatype: "categoryName", visible: true },
+  { label: "Image", property: "image", type: "text", datatype: "images", visible: true, cssClasses: ["font-medium"] },
+  { label: "Mobile Image", property: "mobileImage", type: "text", datatype: "images", visible: true, cssClasses: ["font-medium"] },
   { label: "Parent Category", property: "parentCategory", type: "text", datatype: "parentCategory", visible: true },
   { label: "Status", property: "isActive", type: "text", datatype: "status", visible: true, cssClasses: ["font-medium"] },
   { label: "Created On", property: "createdAt", type: "text", datatype: "date", visible: true, cssClasses: ["font-medium"] },

@@ -35,6 +35,58 @@ const IMAGE_TYPES = [
   "image/heif",
 ];
 
+function ImageFullView({
+  src,
+  alt = "Full image",
+  onClose,
+}: {
+  src: string;
+  alt?: string;
+  onClose: () => void;
+}) {
+  useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") onClose();
+    }
+
+    window.addEventListener("keydown", onKeyDown);
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [onClose]);
+
+  return (
+    <div
+      className="fixed inset-0 z-[80] flex items-center justify-center bg-black/80 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-label={alt}
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+    >
+      <button
+        type="button"
+        onClick={onClose}
+        className="absolute right-4 top-4 rounded-lg p-2 text-white transition-colors hover:bg-white/15"
+        aria-label="Close full image"
+      >
+        <X className="h-6 w-6" />
+      </button>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={src}
+        alt={alt}
+        className="max-h-[90vh] max-w-[min(96vw,1200px)] object-contain"
+      />
+    </div>
+  );
+}
+
 
 type ImageUploadModalProps = {
   uploadPath: string;
@@ -62,6 +114,7 @@ function ImageUploadModal({
   const [progress, setProgress] = useState(0);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
+  const [fullViewOpen, setFullViewOpen] = useState(false);
 
   useEffect(() => {
     return () => {
@@ -184,14 +237,19 @@ function ImageUploadModal({
               Add attachment
             </button>
           ) : previewUrl ? (
-            <div className="overflow-hidden rounded-lg border border-zinc-200">
+            <button
+              type="button"
+              onClick={() => setFullViewOpen(true)}
+              className="block w-full overflow-hidden rounded-lg border border-zinc-200"
+              aria-label="View full image"
+            >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={previewUrl}
                 alt="Selected preview"
-                className="max-h-72 w-full object-contain"
+                className="max-h-72 w-full cursor-zoom-in object-contain"
               />
-            </div>
+            </button>
           ) : (
             <div className="rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-6 text-center text-sm text-zinc-600">
               {fileName} is ready to upload.
@@ -241,6 +299,14 @@ function ImageUploadModal({
           </Button>
         </div>
       </div>
+
+      {fullViewOpen && previewUrl ? (
+        <ImageFullView
+          src={previewUrl}
+          alt="Selected preview"
+          onClose={() => setFullViewOpen(false)}
+        />
+      ) : null}
     </div>
   );
 }
@@ -291,6 +357,7 @@ export function ImageUploadField({
   const [modalOpen, setModalOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [actionError, setActionError] = useState("");
+  const [fullViewOpen, setFullViewOpen] = useState(false);
 
   const accept = mediaType === "video" ? "video/*" : "image/*";
   const displayError = error || actionError;
@@ -365,25 +432,32 @@ export function ImageUploadField({
           <div
             className={`flex ${COMPACT_FIELD_HEIGHT} w-full items-center gap-1 overflow-hidden ${COMPACT_BORDER_CLASS} ${compactBorderClass} pl-1 pr-1.5`}
           >
+            {mediaType === "video" ? (
+              <video
+                src={resolveImageUrl(value)}
+                className="h-[34px] w-[34px] shrink-0 rounded-md bg-black object-cover"
+              />
+            ) : (
+              <button
+                type="button"
+                onClick={() => setFullViewOpen(true)}
+                className="shrink-0"
+                aria-label={`View ${label} full size`}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={resolveImageUrl(value)}
+                  alt={label}
+                  className="h-[34px] w-[34px] cursor-zoom-in rounded-md object-cover"
+                />
+              </button>
+            )}
             <button
               type="button"
               onClick={openModal}
               className="flex min-w-0 flex-1 items-center gap-2 text-left"
               aria-label={`Replace ${label}`}
             >
-              {mediaType === "video" ? (
-                <video
-                  src={resolveImageUrl(value)}
-                  className="h-[34px] w-[34px] shrink-0 rounded-md bg-black object-cover"
-                />
-              ) : (
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img
-                  src={resolveImageUrl(value)}
-                  alt={label}
-                  className="h-[34px] w-[34px] shrink-0 rounded-md object-cover"
-                />
-              )}
               <span className="truncate text-sm text-zinc-600">Change image</span>
             </button>
             <button
@@ -427,12 +501,19 @@ export function ImageUploadField({
                     className="h-32 w-auto max-w-full bg-black"
                   />
                 ) : (
-                  /* eslint-disable-next-line @next/next/no-img-element */
-                  <img
-                    src={resolveImageUrl(value)}
-                    alt={label}
-                    className="h-32 w-32 object-cover"
-                  />
+                  <button
+                    type="button"
+                    onClick={() => setFullViewOpen(true)}
+                    className="block"
+                    aria-label={`View ${label} full size`}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={resolveImageUrl(value)}
+                      alt={label}
+                      className="h-32 w-32 cursor-zoom-in object-cover"
+                    />
+                  </button>
                 )}
               </div>
               <button
@@ -500,6 +581,14 @@ export function ImageUploadField({
           onUploaded={handleUploaded}
         />
       )}
+
+      {fullViewOpen && mediaType === "image" && value ? (
+        <ImageFullView
+          src={resolveImageUrl(value)}
+          alt={label}
+          onClose={() => setFullViewOpen(false)}
+        />
+      ) : null}
     </div>
   );
 }
@@ -525,6 +614,7 @@ export function MultiImageUploadField({
   const [modalOpen, setModalOpen] = useState(false);
   const [deletingUrl, setDeletingUrl] = useState<string | null>(null);
   const [actionError, setActionError] = useState("");
+  const [fullViewSrc, setFullViewSrc] = useState("");
   const displayError = error || actionError;
 
   function rememberUploadKey(location: string, key?: string) {
@@ -595,14 +685,19 @@ export function MultiImageUploadField({
         <div className="mt-4 flex flex-wrap gap-4">
           {values.map((image, index) => (
             <div key={`${image}-${index}`} className="relative w-28">
-              <div className="overflow-hidden rounded-lg border border-zinc-200 shadow-sm">
+              <button
+                type="button"
+                onClick={() => setFullViewSrc(image)}
+                className="block overflow-hidden rounded-lg border border-zinc-200 shadow-sm"
+                aria-label={`View ${label} ${index + 1} full size`}
+              >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={resolveImageUrl(image)}
                   alt={label}
-                  className="h-28 w-full object-cover"
+                  className="h-28 w-full cursor-zoom-in object-cover"
                 />
-              </div>
+              </button>
               <button
                 type="button"
                 onClick={() => handleRemove(image)}
@@ -638,6 +733,14 @@ export function MultiImageUploadField({
           }}
         />
       )}
+
+      {fullViewSrc ? (
+        <ImageFullView
+          src={resolveImageUrl(fullViewSrc)}
+          alt={label}
+          onClose={() => setFullViewSrc("")}
+        />
+      ) : null}
     </div>
   );
 }

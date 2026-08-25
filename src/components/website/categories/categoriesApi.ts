@@ -13,6 +13,7 @@ type CategoriesApiResponse = {
       slug: string | null;
       description?: string;
       image?: string | null;
+      mobileImage?: string | null;
       productCount?: number;
       href?: string;
     }>;
@@ -38,6 +39,7 @@ export async function fetchAllCategories(): Promise<Category[]> {
       slug: row.slug || undefined,
       description: row.description || "",
       image: resolveImageUrl(row.image || ""),
+      mobileImage: resolveImageUrl(row.mobileImage || ""),
       productCount: Number(row.productCount) || 0,
       href: row.slug
         ? `/category/${encodeURIComponent(row.slug)}`

@@ -33,8 +33,7 @@ type Values = {
   isActive: boolean;
   showOnHomePage: boolean;
   image: string;
-  video: string;
-  icon: string;
+  mobileImage: string;
   imageAltText: string;
   metaTitle: string;
   metaDescription: string;
@@ -68,8 +67,7 @@ const initialValues: Values = {
   isActive: true,
   showOnHomePage: false,
   image: "",
-  video: "",
-  icon: "",
+  mobileImage: "",
   imageAltText: "",
   metaTitle: "",
   metaDescription: "",
@@ -87,8 +85,7 @@ const schema = Yup.object({
   isActive: activeField,
   showOnHomePage: Yup.boolean(),
   image: Yup.string(),
-  video: Yup.string(),
-  icon: Yup.string(),
+  mobileImage: Yup.string(),
   imageAltText: Yup.string(),
   metaTitle: requiredString("Meta title", 3, META_TITLE_MAX),
   metaDescription: requiredString("Meta description", 3, META_DESC_MAX),
@@ -201,8 +198,7 @@ export function CategoryForm({ module, recordId }: AdminFormProps) {
         isActive: Boolean(r.isActive ?? true),
         showOnHomePage: Boolean(r.showOnHomePage ?? false),
         image: String(r.image ?? ""),
-        video: String(r.video ?? ""),
-        icon: String(r.icon ?? ""),
+        mobileImage: String(r.mobileImage ?? ""),
         imageAltText: String(r.imageAltText ?? ""),
         metaTitle: String(seo.metaTitle ?? r.metaTitle ?? ""),
         metaDescription: String(seo.metaDescription ?? r.metaDescription ?? ""),
@@ -220,8 +216,7 @@ export function CategoryForm({ module, recordId }: AdminFormProps) {
       isActive: v.isActive,
       showOnHomePage: v.showOnHomePage,
       image: v.image || null,
-      video: v.video || null,
-      icon: v.icon || null,
+      mobileImage: v.mobileImage || null,
       imageAltText: v.imageAltText || null,
       seo: {
         metaTitle: v.metaTitle,
@@ -370,16 +365,10 @@ export function CategoryForm({ module, recordId }: AdminFormProps) {
             />
             <FormImageUpload
               formik={formik}
-              name="icon"
-              label="Upload Icon (.svg)"
-              uploadPath={UPLOAD_PATHS.categories.icon}
-            />
-            <FormImageUpload
-              formik={formik}
-              name="video"
-              label="Upload Video"
-              uploadPath={UPLOAD_PATHS.categories.video}
-              mediaType="video"
+              name="mobileImage"
+              label="Upload Mobile Image"
+              uploadPath={UPLOAD_PATHS.categories.mobile}
+              imageType="category_mobile"
             />
             <FormFullWidth>
               <FormInput formik={formik} name="imageAltText" label="Image Alt Text" />

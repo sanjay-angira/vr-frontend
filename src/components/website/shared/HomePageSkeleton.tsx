@@ -10,7 +10,7 @@ export function HomePageSkeleton() {
             <div className="store-skeleton-line store-skeleton-shimmer medium" />
           </div>
           <div className="category-grid">
-            {Array.from({ length: 6 }).map((_, index) => (
+            {Array.from({ length: 8 }).map((_, index) => (
               <div
                 key={`home-cat-${index}`}
                 className="home-skeleton__category-card"

@@ -42,6 +42,7 @@ function mapCategories(categories: HomepageSection["categories"]): Category[] {
     slug: category.slug,
     description: category.description,
     image: resolveImageUrl(category.image),
+    mobileImage: resolveImageUrl(category.mobileImage || ""),
     href: category.href,
   }));
 }

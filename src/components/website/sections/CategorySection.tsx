@@ -1,3 +1,4 @@
+import { ArrowRight, Flower2, Leaf, Truck } from "lucide-react";
 import { CategoryCard, type Category } from "@/components/website/cards/CategoryCard";
 import {
   SectionHeading,
@@ -12,6 +13,27 @@ interface CategorySectionProps {
   viewAllLabel?: string;
 }
 
+const highlights = [
+  {
+    id: "quality",
+    icon: Leaf,
+    label: "Premium Quality",
+    detail: "Handpicked Products",
+  },
+  {
+    id: "variety",
+    icon: Flower2,
+    label: "Wide Variety",
+    detail: "Everything You Need",
+  },
+  {
+    id: "fast",
+    icon: Truck,
+    label: "Fast & Reliable",
+    detail: "Quick Delivery",
+  },
+] as const;
+
 export function CategorySection({
   heading,
   categories,
@@ -21,8 +43,28 @@ export function CategorySection({
   const buttonLabel = viewAllLabel?.trim() || "View All Categories";
   return (
     <section className="section home-section category-section">
-      <div className="container">
-        <SectionHeading {...heading} />
+      <div className="container category-section__inner">
+        <SectionHeading {...heading} showDivider={false} />
+        <ul className="category-section__highlights">
+          {highlights.map((item) => {
+            const Icon = item.icon;
+            return (
+              <li key={item.id} className="category-section__highlight">
+                <span className="category-section__highlight-icon" aria-hidden>
+                  <Icon size={18} strokeWidth={1.55} />
+                </span>
+                <span className="category-section__highlight-copy">
+                  <span className="category-section__highlight-label">
+                    {item.label}
+                  </span>
+                  <span className="category-section__highlight-detail">
+                    {item.detail}
+                  </span>
+                </span>
+              </li>
+            );
+          })}
+        </ul>
         <div className="category-grid">
           {categories.map((category) => (
             <CategoryCard key={category.id} category={category} />
@@ -30,8 +72,9 @@ export function CategorySection({
         </div>
         {viewAllLink ? (
           <div className="home-section__actions">
-            <Link href={viewAllLink} className="btn btn-outline btn-lg">
+            <Link href={viewAllLink} className="btn category-section__view-all-btn">
               {buttonLabel}
+              <ArrowRight size={16} />
             </Link>
           </div>
         ) : null}

@@ -9,6 +9,7 @@ export type SectionHeadingProps = {
   description?: string;
   className?: string;
   align?: "center" | "left";
+  showDivider?: boolean;
 };
 
 function LeafMark({ className }: { className?: string }) {
@@ -61,6 +62,7 @@ export function SectionHeading({
   description,
   className,
   align = "center",
+  showDivider = true,
 }: SectionHeadingProps) {
   const parts = splitTitle(title, accent);
   const showEyebrow = Boolean(eyebrow?.trim());
@@ -96,13 +98,15 @@ export function SectionHeading({
         <p className="section-description">{(description ?? "").trim()}</p>
       ) : null}
 
-      <div className="section-divider" aria-hidden>
-        <span className="section-divider__line" />
-        <span className="section-divider__dot" />
-        <LeafMark className="section-divider__icon" />
-        <span className="section-divider__dot" />
-        <span className="section-divider__line" />
-      </div>
+      {showDivider ? (
+        <div className="section-divider" aria-hidden>
+          <span className="section-divider__line" />
+          <span className="section-divider__dot" />
+          <LeafMark className="section-divider__icon" />
+          <span className="section-divider__dot" />
+          <span className="section-divider__line" />
+        </div>
+      ) : null}
     </header>
   );
 }
