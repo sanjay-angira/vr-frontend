@@ -63,7 +63,8 @@ export function FormTextarea<T extends Record<string, unknown>>({
   hint,
   className,
   rows = 4,
-}: BaseFieldProps<T> & { rows?: number }) {
+  maxLength,
+}: BaseFieldProps<T> & { rows?: number; maxLength?: number }) {
   const error = getError(formik, name);
 
   return (
@@ -72,6 +73,7 @@ export function FormTextarea<T extends Record<string, unknown>>({
       <textarea
         name={name}
         rows={rows}
+        maxLength={maxLength}
         value={String(getIn(formik.values, name) ?? "")}
         onChange={formik.handleChange}
         onBlur={formik.handleBlur}
