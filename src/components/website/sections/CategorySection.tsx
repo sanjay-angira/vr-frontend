@@ -72,9 +72,9 @@ export function CategorySection({
         </div>
         {viewAllLink ? (
           <div className="home-section__actions">
-            <Link href={viewAllLink} className="btn category-section__view-all-btn">
+            <Link href={viewAllLink} className="home-section__view-all">
               {buttonLabel}
-              <ArrowRight size={16} />
+              <ArrowRight size={16} strokeWidth={1.75} />
             </Link>
           </div>
         ) : null}

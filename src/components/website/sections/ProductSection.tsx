@@ -1,3 +1,4 @@
+import { ArrowRight } from "lucide-react";
 import {
   SectionHeading,
   type SectionHeadingProps,
@@ -42,9 +43,10 @@ export function ProductSection({
             <ShopSeedLink
               href={viewAllLink}
               seed={viewAllSeed}
-              className="btn btn-outline btn-lg"
+              className="home-section__view-all"
             >
               {buttonLabel}
+              <ArrowRight size={16} strokeWidth={1.75} />
             </ShopSeedLink>
           </div>
         ) : null}

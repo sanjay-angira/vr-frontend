@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import {
   ComboProductCard,
   type ComboProduct,
@@ -50,8 +51,9 @@ export function ProductComboSection({
         </div>
         {viewAllLink ? (
           <div className="home-section__actions">
-            <Link href={viewAllLink} className="btn btn-outline btn-lg">
+            <Link href={viewAllLink} className="home-section__view-all">
               {buttonLabel}
+              <ArrowRight size={16} strokeWidth={1.75} />
             </Link>
           </div>
         ) : null}
