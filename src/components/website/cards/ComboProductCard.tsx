@@ -7,6 +7,7 @@ export interface ComboProduct {
   description: string;
   price: number;
   originalPrice?: number;
+  discountPercentage?: number;
   image: string;
   category: string;
   rating?: number;
@@ -18,9 +19,12 @@ export function ComboProductCard({ combo }: { combo: ComboProduct }) {
   const hasDiscount =
     typeof combo.originalPrice === "number" &&
     combo.originalPrice > combo.price;
+  const configuredDiscount = Number(combo.discountPercentage);
   const discountPercent = hasDiscount
     ? Math.round(
-        ((combo.originalPrice! - combo.price) / combo.originalPrice!) * 100
+        Number.isFinite(configuredDiscount) && configuredDiscount > 0
+          ? configuredDiscount
+          : ((combo.originalPrice! - combo.price) / combo.originalPrice!) * 100,
       )
     : 0;
 

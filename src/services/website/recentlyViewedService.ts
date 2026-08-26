@@ -13,6 +13,7 @@ export type RecentlyViewedProduct = {
   description: string;
   price: number;
   originalPrice?: number;
+  discountPercentage?: number;
   image: string;
   category: string;
   rating: number;
@@ -52,6 +53,11 @@ export function mapRecentlyViewedToCard(
     originalPrice:
       product.originalPrice && product.originalPrice > product.price
         ? product.originalPrice
+        : undefined,
+    discountPercentage:
+      Number.isFinite(Number(product.discountPercentage)) &&
+      Number(product.discountPercentage) > 0
+        ? Number(product.discountPercentage)
         : undefined,
     image: resolveImageUrl(product.image),
     category: product.category || "",

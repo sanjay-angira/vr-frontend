@@ -23,13 +23,14 @@ type ProductOffersSectionProps = {
 };
 
 function getOfferPercentage(offer: Offer): number | null {
-  if (offer.sellingPrice && offer.sellingPrice > 0 && offer.totalDiscount > 0) {
-    return Math.round((offer.totalDiscount / offer.sellingPrice) * 100);
-  }
-
   const discountType = offer.discountType.toLowerCase();
   if (discountType === "percentage" || discountType === "percent") {
-    return Math.round(offer.discountValue);
+    const configured = Math.round(Number(offer.discountValue) || 0);
+    return configured > 0 ? configured : null;
+  }
+
+  if (offer.sellingPrice && offer.sellingPrice > 0 && offer.totalDiscount > 0) {
+    return Math.round((offer.totalDiscount / offer.sellingPrice) * 100);
   }
 
   return null;

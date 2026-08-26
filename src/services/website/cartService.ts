@@ -66,8 +66,8 @@ function withIdentity<T extends Record<string, unknown>>(
 }
 
 /**
- * Cart API may still store raw list price. Product detail API always has
- * OfferPricingService output — reuse that so bag/checkout match the PDP.
+ * Cart lines should already include offer pricing (finalPrice = pay,
+ * sellingPrice = crossed MRP). If not, reuse PDP OfferPricingService output.
  */
 async function applyProductOfferPricing(cart: CartData): Promise<CartData> {
   if (!cart.items.length) return cart;

@@ -200,6 +200,7 @@ export default async function ProductDetailPage({
     description: item.description,
     price: item.price,
     originalPrice: item.originalPrice,
+    discountPercentage: item.discountPercentage,
     image: resolveImageUrl(item.image),
     category: item.category || product.category?.categoryName || "",
     rating: item.rating,

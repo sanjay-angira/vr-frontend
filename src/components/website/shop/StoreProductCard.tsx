@@ -41,6 +41,11 @@ export function mapStoreListProduct(
     price: finalPrice,
     originalPrice:
       originalPrice > finalPrice && finalPrice > 0 ? originalPrice : undefined,
+    discountPercentage:
+      Number.isFinite(Number(product.discountPercentage)) &&
+      Number(product.discountPercentage) > 0
+        ? Number(product.discountPercentage)
+        : undefined,
     image: product.image || "",
     category: product.categoryName?.trim() || "",
     rating: Number(product.rating || 0),

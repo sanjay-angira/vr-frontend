@@ -80,7 +80,7 @@ const variantSchema = Yup.object({
   slug: Yup.string(),
   description: Yup.string(),
   sku: Yup.string(),
-  price: Yup.number().min(0.01, "Price must be at least 0.01").required("Price is required"),
+  price: Yup.number().min(0.01, "Selling price must be at least 0.01").required("Selling price is required"),
   stock: Yup.number().min(0, "Stock must be 0 or more").required("Stock is required"),
   productVariantOffers: Yup.array().of(Yup.number()),
   images: Yup.array().of(Yup.string()),
@@ -215,7 +215,7 @@ function VariantPanel({
             Variant #{index + 1}: {variant.name || "Untitled"}
           </p>
           <p className="mt-0.5 text-sm text-zinc-500">
-            Price: ₹{variant.price || "0"} | Stock: {variant.stock || "0"}
+            Selling price: ₹{variant.price || "0"} | Stock: {variant.stock || "0"}
           </p>
         </div>
         <ChevronDown
@@ -253,7 +253,7 @@ function VariantPanel({
               error={getNestedError(formik.touched, formik.errors, `${prefix}.sku`)}
             />
             <Input
-              label="Price"
+              label="Selling price"
               required
               name={`${prefix}.price`}
               type="number"
@@ -263,6 +263,7 @@ function VariantPanel({
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
               error={getNestedError(formik.touched, formik.errors, `${prefix}.price`)}
+              hint="What the customer pays. Offers only raise the crossed MRP (e.g. ₹1000 + 50% off → MRP ₹2000)."
             />
             <Input
               label="Stock"

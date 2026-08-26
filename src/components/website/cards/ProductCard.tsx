@@ -19,6 +19,8 @@ export interface WebsiteProductCardData {
   description: string;
   price: number;
   originalPrice?: number;
+  /** Offer-configured % (e.g. 50), not (MRP − pay) / MRP. */
+  discountPercentage?: number;
   image: string;
   category: string;
   rating: number;
@@ -39,6 +41,7 @@ export interface ProductCardProps {
   image?: string | { src?: string };
   price?: string | number;
   originalPrice?: string | number;
+  discountPercentage?: number;
   rating?: number;
   description?: string;
   category?: string;
@@ -61,6 +64,7 @@ export function ProductCard({
   image,
   price,
   originalPrice,
+  discountPercentage: discountPercentageProp,
   rating,
   description,
   category,
@@ -92,6 +96,7 @@ export function ProductCard({
             : originalPrice !== undefined
               ? Number(originalPrice)
               : undefined,
+        discountPercentage: discountPercentageProp,
         image: resolveCardImage(image),
         category: category ?? "",
         rating: rating ?? 0,
@@ -117,8 +122,13 @@ export function ProductCard({
   const currentPrice = Number(normalizedProduct.price || 0);
   const listPrice = Number(normalizedProduct.originalPrice || 0);
   const hasDiscount = listPrice > currentPrice && currentPrice > 0;
+  const configuredDiscount = Number(normalizedProduct.discountPercentage);
   const discountPercentage = hasDiscount
-    ? Math.round(((listPrice - currentPrice) / listPrice) * 100)
+    ? Math.round(
+        Number.isFinite(configuredDiscount) && configuredDiscount > 0
+          ? configuredDiscount
+          : ((listPrice - currentPrice) / listPrice) * 100,
+      )
     : 0;
 
   const priceFormatter = useMemo(

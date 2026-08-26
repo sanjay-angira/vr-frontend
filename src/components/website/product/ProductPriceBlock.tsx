@@ -27,10 +27,18 @@ export default function ProductPriceBlock({ pricing, inStock }: ProductPriceBloc
     finalPrice !== null &&
     sellingPrice > finalPrice;
 
-  const discountPercentage =
-    hasDiscount && sellingPrice && pricing.totalDiscount > 0
-      ? Math.round((pricing.totalDiscount / sellingPrice) * 100)
-      : null;
+  const offerType = pricing.appliedOffer?.discountType?.toLowerCase();
+  const discountPercentage = (() => {
+    if (!hasDiscount) return null;
+    if (offerType === "percentage" || offerType === "percent") {
+      const configured = Math.round(Number(pricing.appliedOffer?.discountValue) || 0);
+      return configured > 0 ? configured : null;
+    }
+    if (sellingPrice && pricing.totalDiscount > 0) {
+      return Math.round((pricing.totalDiscount / sellingPrice) * 100);
+    }
+    return null;
+  })();
 
   if (finalPrice === null && sellingPrice === null) {
     return null;

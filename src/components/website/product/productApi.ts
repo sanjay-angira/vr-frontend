@@ -124,6 +124,7 @@ export type SameCategoryProductCard = {
   description: string;
   price: number;
   originalPrice?: number;
+  discountPercentage?: number;
   image: string;
   category: string;
   rating: number;
@@ -202,6 +203,11 @@ export async function fetchSameCategoryProducts(options: {
         originalPrice:
           Number.isFinite(originalPrice) && originalPrice > finalPrice
             ? originalPrice
+            : undefined,
+        discountPercentage:
+          Number.isFinite(Number(row.discountPercentage)) &&
+          Number(row.discountPercentage) > 0
+            ? Number(row.discountPercentage)
             : undefined,
         image: String(row.image || ""),
         category: categoryName,

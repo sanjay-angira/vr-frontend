@@ -27,6 +27,11 @@ function mapProducts(products: HomepageSection["products"]): WebsiteProductCardD
       product.originalPrice && product.originalPrice > product.price
         ? product.originalPrice
         : undefined,
+    discountPercentage:
+      Number.isFinite(Number(product.discountPercentage)) &&
+      Number(product.discountPercentage) > 0
+        ? Number(product.discountPercentage)
+        : undefined,
     image: resolveImageUrl(product.image),
     category: product.category,
     rating: product.rating,
