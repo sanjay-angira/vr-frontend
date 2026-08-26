@@ -470,7 +470,7 @@ body {
 
 .section-title {
   font-family: var(--font-heading);
-  font-size: clamp(1.85rem, 3.4vw, 2.85rem);
+  font-size: clamp(1.85rem, 3.4vw, 2rem);
   line-height: 1.15;
   font-weight: 700;
   color: var(--vr-forest);
