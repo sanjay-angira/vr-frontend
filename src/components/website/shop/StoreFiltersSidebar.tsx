@@ -1,19 +1,24 @@
 "use client";
 
 import { useEffect, useId, useMemo, useState } from "react";
+import Link from "next/link";
 import {
   Grid2X2,
   ListFilter,
+  Percent,
   SlidersHorizontal,
+  Star,
   Tag,
   X,
 } from "lucide-react";
 import {
   buildCategoryTree,
+  buildFocusedCategoryTree,
   countTopLevelCategorySelections,
   toggleCategorySelection,
   type CategoryFilterNode,
 } from "@/utils/categoryFilterHelpers";
+import { DISCOUNT_FILTER_OPTIONS } from "@/utils/shopFilterUrl";
 
 export type StoreCategoryOption = {
   id: number;
@@ -36,7 +41,11 @@ export type StoreFilterState = {
   sortBy: string;
   categoryIds: number[];
   sectionSlugs: string[];
+  minRating: number | null;
+  minDiscount: number | null;
 };
+
+export const RATING_FILTER_OPTIONS = [4, 3, 2, 1] as const;
 
 type StoreFiltersSidebarProps = {
   categories: StoreCategoryOption[];
@@ -47,8 +56,8 @@ type StoreFiltersSidebarProps = {
   onClear: () => void;
   mobileOpen: boolean;
   onCloseMobile: () => void;
-  /** Hide category checkboxes on `/category/[slug]` (path is the category) */
-  hideCategories?: boolean;
+  /** On `/category/[slug]`, show parent + children of this category */
+  activeCategorySlug?: string;
 };
 
 function CategoryTreeChecks({
@@ -91,6 +100,54 @@ function CategoryTreeChecks({
   );
 }
 
+function CategoryContextLinks({
+  nodes,
+  depth,
+  activeSlug,
+}: {
+  nodes: CategoryFilterNode[];
+  depth: number;
+  activeSlug: string;
+}) {
+  const current = activeSlug.trim().toLowerCase();
+
+  return (
+    <>
+      {nodes.map((node) => {
+        const isCurrent = node.slug.trim().toLowerCase() === current;
+        return (
+          <div key={node.id} className="store-filters__category-node">
+            {isCurrent ? (
+              <span
+                className="store-filters__category-link is-current"
+                style={{ paddingLeft: depth * 1.1 + "rem" }}
+                aria-current="page"
+              >
+                {node.name}
+              </span>
+            ) : (
+              <Link
+                href={`/category/${encodeURIComponent(node.slug)}`}
+                className="store-filters__category-link"
+                style={{ paddingLeft: depth * 1.1 + "rem" }}
+              >
+                {node.name}
+              </Link>
+            )}
+            {node.children.length > 0 && (
+              <CategoryContextLinks
+                nodes={node.children}
+                depth={depth + 1}
+                activeSlug={activeSlug}
+              />
+            )}
+          </div>
+        );
+      })}
+    </>
+  );
+}
+
 export function StoreFiltersSidebar({
   categories,
   productSections,
@@ -100,7 +157,7 @@ export function StoreFiltersSidebar({
   onClear,
   mobileOpen,
   onCloseMobile,
-  hideCategories = false,
+  activeCategorySlug,
 }: StoreFiltersSidebarProps) {
   const priceId = useId();
   const [draftMin, setDraftMin] = useState(value.minPrice);
@@ -111,21 +168,27 @@ export function StoreFiltersSidebar({
     setDraftMax(value.maxPrice);
   }, [value.minPrice, value.maxPrice]);
 
+  const focusedSlug = activeCategorySlug?.trim().toLowerCase() || "";
   const categoryTree = useMemo(
-    () => buildCategoryTree(categories),
-    [categories]
+    () =>
+      focusedSlug
+        ? buildFocusedCategoryTree(categories, focusedSlug)
+        : buildCategoryTree(categories),
+    [categories, focusedSlug]
   );
 
   const activeCount = useMemo(() => {
     let count = 0;
-    if (!hideCategories) {
+    if (!focusedSlug) {
       count += countTopLevelCategorySelections(value.categoryIds, categories);
     }
     if (value.sectionSlugs.length) count += value.sectionSlugs.length;
+    if (value.minRating) count += 1;
+    if (value.minDiscount) count += 1;
     if (value.minPrice > priceBounds.min || value.maxPrice < priceBounds.max)
       count += 1;
     return count;
-  }, [value, priceBounds, categories, hideCategories]);
+  }, [value, priceBounds, categories, focusedSlug]);
 
   const commitPrice = () => {
     const min = Math.min(draftMin, draftMax);
@@ -151,6 +214,20 @@ export function StoreFiltersSidebar({
       sectionSlugs: exists
         ? value.sectionSlugs.filter((item) => item !== slug)
         : [...value.sectionSlugs, slug],
+    });
+  };
+
+  const selectRating = (stars: number) => {
+    onChange({
+      ...value,
+      minRating: value.minRating === stars ? null : stars,
+    });
+  };
+
+  const selectDiscount = (percent: number) => {
+    onChange({
+      ...value,
+      minDiscount: value.minDiscount === percent ? null : percent,
     });
   };
 
@@ -235,6 +312,60 @@ export function StoreFiltersSidebar({
 
       <section className="store-filters__section">
         <h3>
+          <Star size={16} />
+          Rating
+        </h3>
+        <div className="store-filters__rating">
+          {RATING_FILTER_OPTIONS.map((stars) => {
+            const selected = value.minRating === stars;
+            return (
+              <label
+                key={stars}
+                className={`store-filters__rating-option${selected ? " is-active" : ""}`}
+              >
+                <input
+                  type="checkbox"
+                  checked={selected}
+                  onChange={() => selectRating(stars)}
+                />
+                <span className="store-filters__rating-stars" aria-hidden>
+                  {Array.from({ length: 5 }, (_, index) => (
+                    <Star
+                      key={index}
+                      className={`store-filters__rating-star${
+                        index < stars ? " is-filled" : ""
+                      }`}
+                    />
+                  ))}
+                </span>
+                <span>
+                  {stars} Star{stars === 1 ? "" : "s"} & Up
+                </span>
+              </label>
+            );
+          })}
+        </div>
+      </section>
+
+      <section className="store-filters__section">
+        <h3>
+          <Percent size={16} />
+          Discount
+        </h3>
+        {DISCOUNT_FILTER_OPTIONS.map((percent) => (
+          <label key={percent} className="store-filters__check">
+            <input
+              type="checkbox"
+              checked={value.minDiscount === percent}
+              onChange={() => selectDiscount(percent)}
+            />
+            <span>{percent}% or more</span>
+          </label>
+        ))}
+      </section>
+
+      <section className="store-filters__section">
+        <h3>
           <ListFilter size={16} />
           Product Status
         </h3>
@@ -253,25 +384,31 @@ export function StoreFiltersSidebar({
         ))}
       </section>
 
-      {!hideCategories && (
-        <section className="store-filters__section">
-          <h3>
-            <Grid2X2 size={16} />
-            Product Categories
-          </h3>
-          <div className="store-filters__categories">
-            {categoryTree.length === 0 && (
-              <p className="store-filters__empty">No categories available.</p>
-            )}
+      <section className="store-filters__section">
+        <h3>
+          <Grid2X2 size={16} />
+          Product Categories
+        </h3>
+        <div className="store-filters__categories">
+          {categoryTree.length === 0 && (
+            <p className="store-filters__empty">No categories available.</p>
+          )}
+          {focusedSlug ? (
+            <CategoryContextLinks
+              nodes={categoryTree}
+              depth={0}
+              activeSlug={focusedSlug}
+            />
+          ) : (
             <CategoryTreeChecks
               nodes={categoryTree}
               depth={0}
               selectedIds={value.categoryIds}
               onToggle={toggleCategory}
             />
-          </div>
-        </section>
-      )}
+          )}
+        </div>
+      </section>
     </aside>
   );
 

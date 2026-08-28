@@ -102,6 +102,8 @@ function buildDefaultFilters(
     sortBy: "newest",
     categoryIds: [],
     sectionSlugs: [],
+    minRating: null,
+    minDiscount: null,
     ...overrides,
   };
 }
@@ -430,6 +432,12 @@ export function ShopPageContent({
         if (filters.sectionSlugs.length) {
           query.set("sectionSlugs", filters.sectionSlugs.join(","));
         }
+        if (filters.minRating) {
+          query.set("minRating", String(filters.minRating));
+        }
+        if (filters.minDiscount) {
+          query.set("minDiscount", String(filters.minDiscount));
+        }
 
         const response = (await getData(
           `${API_ENDPOINTS.CUSTOMER.STORE_PRODUCTS}?${query.toString()}`,
@@ -542,7 +550,7 @@ export function ShopPageContent({
           onClear={handleClearFilters}
           mobileOpen={mobileFiltersOpen}
           onCloseMobile={() => setMobileFiltersOpen(false)}
-          hideCategories={isCategoryPage}
+          activeCategorySlug={isCategoryPage ? pathCategorySlug : undefined}
         />
 
         <div className="store-catalog__main">

@@ -86,6 +86,7 @@ export default async function CategoryShopPage({
           fallback={<div className="store-catalog__layout" aria-busy="true" />}
         >
           <ShopPageContent
+            key={data.category.slug}
             categorySlug={data.category.slug}
             initialData={data}
             hideCategoryChrome

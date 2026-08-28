@@ -104,6 +104,47 @@ export function toggleCategorySelection(
   return Array.from(selected);
 }
 
+/**
+ * On `/category/[slug]`, show only parent → current → direct children.
+ */
+export function buildFocusedCategoryTree(
+  categories: FlatCategoryOption[],
+  currentSlug: string
+): CategoryFilterNode[] {
+  const slug = currentSlug.trim().toLowerCase();
+  if (!slug || !categories.length) return [];
+
+  const current = categories.find(
+    (category) => category.slug.trim().toLowerCase() === slug
+  );
+  if (!current) return [];
+
+  const toNode = (
+    category: FlatCategoryOption,
+    children: CategoryFilterNode[] = []
+  ): CategoryFilterNode => ({
+    id: category.id,
+    name: category.name,
+    slug: category.slug,
+    parentId: category.parentId ?? null,
+    children,
+  });
+
+  const childNodes = categories
+    .filter((category) => category.parentId === current.id)
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map((category) => toNode(category));
+
+  const currentNode = toNode(current, childNodes);
+  const parent =
+    current.parentId != null
+      ? categories.find((category) => category.id === current.parentId)
+      : undefined;
+
+  if (!parent) return [currentNode];
+  return [toNode(parent, [currentNode])];
+}
+
 /** Nest flat categories for hierarchical filter rendering. */
 export function buildCategoryTree(
   categories: FlatCategoryOption[]

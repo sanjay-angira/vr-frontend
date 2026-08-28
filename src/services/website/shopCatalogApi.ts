@@ -1,7 +1,9 @@
 import { getApiBaseUrl } from "@/lib/site";
-import type { StoreCategoryOption } from "@/components/website/shop/StoreFiltersSidebar";
-import type { StoreProductSectionOption } from "@/components/website/shop/StoreFiltersSidebar";
-import type { StoreFilterState } from "@/components/website/shop/StoreFiltersSidebar";
+import type {
+  StoreCategoryOption,
+  StoreFilterState,
+  StoreProductSectionOption,
+} from "@/components/website/shop/StoreFiltersSidebar";
 import type { StoreListProduct } from "@/components/website/shop/StoreProductCard";
 import { categorySlugsToExpandedIds } from "@/utils/categoryFilterHelpers";
 import { parseShopSearchParams } from "@/utils/shopFilterUrl";
@@ -95,6 +97,8 @@ function buildDefaultFilters(
     sortBy: "newest",
     categoryIds: [],
     sectionSlugs: [],
+    minRating: null,
+    minDiscount: null,
     ...overrides,
   };
 }
@@ -197,6 +201,12 @@ export async function fetchCategoryShopPage(
   }
   if (filters.sectionSlugs.length) {
     productQuery.set("sectionSlugs", filters.sectionSlugs.join(","));
+  }
+  if (filters.minRating) {
+    productQuery.set("minRating", String(filters.minRating));
+  }
+  if (filters.minDiscount) {
+    productQuery.set("minDiscount", String(filters.minDiscount));
   }
 
   const productsRes = await apiGet<ProductsResponse>(

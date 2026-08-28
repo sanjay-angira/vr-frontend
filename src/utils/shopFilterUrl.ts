@@ -1,4 +1,7 @@
 import type { StoreFilterState } from "@/components/website/shop/StoreFiltersSidebar";
+
+/** Shared by URL parsing (server) and the shop sidebar (client). */
+export const DISCOUNT_FILTER_OPTIONS = [50, 40, 30, 20, 10] as const;
 import {
   categoryIdsToTopLevelSlugs,
   categorySlugsToExpandedIds,
@@ -11,6 +14,8 @@ export type ShopUrlState = {
     categoryIds: number[];
     sectionSlugs: string[];
     sortBy: string;
+    minRating: number | null;
+    minDiscount: number | null;
   };
   search: string;
   pageNumber: number;
@@ -29,6 +34,8 @@ export type ShopFilterSeed = {
   page?: number;
   minPrice?: number;
   maxPrice?: number;
+  minRating?: number;
+  minDiscount?: number;
 };
 
 function parseNumberList(raw: string | null): number[] {
@@ -98,11 +105,26 @@ export function parseShopSearchParams(
       ? Number(maxPriceRaw)
       : undefined;
 
+  const minRatingRaw = Number(searchParams.get("minRating"));
+  const minRating =
+    Number.isFinite(minRatingRaw) && minRatingRaw >= 1 && minRatingRaw <= 5
+      ? Math.floor(minRatingRaw)
+      : null;
+
+  const minDiscountRaw = Number(searchParams.get("minDiscount"));
+  const minDiscount = (DISCOUNT_FILTER_OPTIONS as readonly number[]).includes(
+    minDiscountRaw
+  )
+    ? minDiscountRaw
+    : null;
+
   return {
     filters: {
       categoryIds,
       sectionSlugs,
       sortBy,
+      minRating,
+      minDiscount,
     },
     search,
     pageNumber,
@@ -158,6 +180,14 @@ export function buildShopQueryString({
     params.set("maxPrice", String(filters.maxPrice));
   }
 
+  if (filters.minRating) {
+    params.set("minRating", String(filters.minRating));
+  }
+
+  if (filters.minDiscount) {
+    params.set("minDiscount", String(filters.minDiscount));
+  }
+
   if (search.trim()) {
     params.set("search", search.trim());
   }
@@ -199,6 +229,12 @@ export function buildShopHref(seed?: ShopFilterSeed): string {
   }
   if (seed.maxPrice != null && Number.isFinite(seed.maxPrice)) {
     params.set("maxPrice", String(seed.maxPrice));
+  }
+  if (seed.minRating != null && Number.isFinite(seed.minRating) && seed.minRating >= 1) {
+    params.set("minRating", String(Math.floor(seed.minRating)));
+  }
+  if (seed.minDiscount != null && Number.isFinite(seed.minDiscount) && seed.minDiscount > 0) {
+    params.set("minDiscount", String(Math.floor(seed.minDiscount)));
   }
 
   const qs = params.toString();
