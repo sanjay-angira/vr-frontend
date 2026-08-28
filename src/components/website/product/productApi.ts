@@ -77,6 +77,7 @@ export type ProductPageData = {
     rating?: string | number | null;
     comment?: string | null;
     createdAt?: string;
+    verified?: boolean;
   }>;
 };
 

@@ -233,6 +233,7 @@ export const API_ENDPOINTS = {
     WISHLIST_BY_VARIATION: (variationId: number | string) =>
       `customer/wishlist/by-variation/${variationId}`,
     RECENTLY_VIEWED: "customer/recently-viewed",
+    REVIEWS: "customer/reviews",
   },
 
   ORDERS: {

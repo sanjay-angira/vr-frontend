@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { Accordion } from "@/components/website/shared/Accordion";
 import ReviewSection from "@/components/website/product/ReviewSection";
 import ProductDetail from "@/components/website/product/ProductDetail";
+import { ProductFaqSection } from "@/components/website/product/ProductFaqSection";
 import { ProductSection } from "@/components/website/sections/ProductSection";
 import {
   fetchProductBySlug,
@@ -147,8 +147,14 @@ export default async function ProductDetailPage({
     rating: toNumber(review.rating) || 0,
     comment: review.comment || "",
     date: review.createdAt
-      ? new Date(review.createdAt).toLocaleDateString("en-IN")
+      ? new Date(review.createdAt).toLocaleDateString("en-GB", {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+        })
       : "",
+    createdAt: review.createdAt || "",
+    verified: Boolean(review.verified),
   }));
 
   const validRatings = reviewList
@@ -298,20 +304,10 @@ export default async function ProductDetailPage({
           </section>
         )}
 
-        {faqItems.length > 0 && (
-          <section
-            className="product-section-block faq-section product-faq-block"
-            style={{ marginTop: "2.25rem" }}
-          >
-            <h2 className="product-section-heading" style={{ marginBottom: "1rem" }}>
-              Frequently Asked Questions
-            </h2>
-            <Accordion items={faqItems} className="product-faq-accordion" />
-          </section>
-        )}
+        {faqItems.length > 0 && <ProductFaqSection items={faqItems} />}
 
         <div className="product-reviews-wrap">
-          <ReviewSection productId={product.productSlug} reviews={reviewList} />
+          <ReviewSection productId={product.id} reviews={reviewList} />
         </div>
       </div>
 

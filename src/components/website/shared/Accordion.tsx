@@ -14,6 +14,8 @@ type AccordionProps = {
   allowMultipleOpen?: boolean;
   className?: string;
   showIndex?: boolean;
+  defaultOpenFirst?: boolean;
+  showChevron?: boolean;
 };
 
 function AccordionRow({
@@ -22,12 +24,14 @@ function AccordionRow({
   isOpen,
   onToggle,
   showIndex,
+  showChevron,
 }: {
   item: AccordionItem;
   index: number;
   isOpen: boolean;
   onToggle: () => void;
   showIndex: boolean;
+  showChevron: boolean;
 }) {
   return (
     <div className={`accordion-item${isOpen ? " open" : ""}`}>
@@ -44,12 +48,14 @@ function AccordionRow({
           </span>
         )}
         <span className="accordion-question">{item.question}</span>
-        <span
-          className={`accordion-icon${isOpen ? " is-open" : ""}`}
-          aria-hidden
-        >
-          <ChevronDown size={18} strokeWidth={2.25} />
-        </span>
+        {showChevron ? (
+          <span
+            className={`accordion-icon${isOpen ? " is-open" : ""}`}
+            aria-hidden
+          >
+            <ChevronDown size={18} strokeWidth={2.25} />
+          </span>
+        ) : null}
       </button>
       <div
         id={`acc-${item.id}`}
@@ -72,8 +78,12 @@ export function Accordion({
   allowMultipleOpen = false,
   className,
   showIndex = false,
+  defaultOpenFirst = false,
+  showChevron = true,
 }: AccordionProps) {
-  const [openIds, setOpenIds] = useState<string[]>([]);
+  const [openIds, setOpenIds] = useState<string[]>(() =>
+    defaultOpenFirst && items[0] ? [items[0].id] : []
+  );
 
   function toggle(id: string) {
     setOpenIds((prev) => {
@@ -93,6 +103,7 @@ export function Accordion({
           item={item}
           index={index}
           showIndex={showIndex}
+          showChevron={showChevron}
           isOpen={openIds.includes(item.id)}
           onToggle={() => toggle(item.id)}
         />
