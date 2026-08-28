@@ -14,7 +14,7 @@ export function HeaderCategoryNav({ categories }: HeaderCategoryNavProps) {
   if (!categories.length) return null;
 
   const items = [
-    { id: 0, name: "All", href: "/products", slug: "" },
+    { id: 0, name: "All Products", href: "/products", slug: "" },
     ...categories,
   ];
 
