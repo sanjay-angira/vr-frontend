@@ -139,6 +139,7 @@ export default function ProductImageGallery({ images, alt, topRightSlot }: Props
                 sizes="90vw"
                 className="product-gallery__lightbox-image"
                 priority
+                unoptimized
               />
             </div>
 
@@ -192,7 +193,11 @@ export default function ProductImageGallery({ images, alt, topRightSlot }: Props
           </>
         )}
 
-        <div key={fadeKey} className="product-gallery__image-frame">
+        <div
+          key={fadeKey}
+          className="product-gallery__image-frame"
+          style={{ position: "absolute", inset: 0 }}
+        >
           <Image
             src={activeImage}
             alt={alt}
@@ -201,6 +206,8 @@ export default function ProductImageGallery({ images, alt, topRightSlot }: Props
             className="product-gallery__image"
             onClick={() => setIsZoomed(true)}
             priority
+            unoptimized
+            style={{ objectFit: "cover" }}
           />
         </div>
 
@@ -231,6 +238,7 @@ export default function ProductImageGallery({ images, alt, topRightSlot }: Props
                 fill
                 sizes="96px"
                 className="product-gallery__thumb-image"
+                unoptimized
               />
             </button>
           ))}
