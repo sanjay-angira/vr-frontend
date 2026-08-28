@@ -1,30 +1,48 @@
 import { getData } from "@/services/api/apiService";
 import { API_ENDPOINTS } from "@/services/api/API_ENDPOINT";
-import type { FooterApiResponse, FooterData } from "@/types/footer";
-import { normalizeFooterData } from "@/utils/footerHelpers";
+import type { FooterData, FooterListItem } from "@/types/footer";
+import { buildLiveFooterData } from "@/utils/footerHelpers";
 
-const FALLBACK_FOOTER: FooterData = {
-  settings: {
-    email: "vrindavanrasa@gmail.com",
-    phone: "+91 9043534534",
-    address: "Mathura, India",
-    copyrightText: `© ${new Date().getFullYear()} Vrindavan Rasa. All rights reserved.`,
-  },
-  sections: [],
+type FooterItemsApiResponse = {
+  success?: boolean;
+  data?: {
+    items?: Array<{
+      id?: number;
+      label?: string;
+      url?: string;
+      position?: number;
+      sectionTitle?: string;
+      sectionPosition?: number;
+    }>;
+  };
 };
 
-export async function fetchFooterData(): Promise<FooterData> {
+export async function fetchFooterListItems(): Promise<FooterListItem[]> {
   try {
     const response = (await getData(API_ENDPOINTS.FOOTER.PUBLIC, undefined, {
       auth: false,
-    })) as FooterApiResponse;
+    })) as FooterItemsApiResponse;
 
-    if (response?.success && response?.data) {
-      return normalizeFooterData(response.data);
+    if (!response?.success || !response.data?.items) {
+      return [];
     }
-  } catch {
-    return FALLBACK_FOOTER;
-  }
 
-  return FALLBACK_FOOTER;
+    return response.data.items
+      .filter((row) => row?.id && row.label)
+      .map((row) => ({
+        id: Number(row.id),
+        label: String(row.label),
+        url: row.url || "",
+        position: Number(row.position) || 0,
+        sectionTitle: row.sectionTitle || "Information",
+        sectionPosition: Number(row.sectionPosition) || 0,
+      }));
+  } catch {
+    return [];
+  }
+}
+
+export async function fetchFooterData(): Promise<FooterData> {
+  const items = await fetchFooterListItems();
+  return buildLiveFooterData(items);
 }

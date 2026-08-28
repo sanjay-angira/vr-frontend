@@ -12,8 +12,4 @@ export const UPLOAD_PATHS = {
   blogs: "/blog/images",
   users: "/user/images",
   attributeColors: "/products/attribute-colors",
-  footer: {
-    icons: "/footer/icons",
-  },
-  
 } as const;

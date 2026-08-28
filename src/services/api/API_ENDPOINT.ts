@@ -176,19 +176,12 @@ export const API_ENDPOINTS = {
 
   FOOTER: {
     PUBLIC: "footer/public",
-    SETTINGS: "admin/footer-settings",
-    SETTING_BY_ID: (id: number | string) => `admin/footer-settings/${id}`,
     SECTIONS: "admin/footer-sections",
     SECTION_BY_ID: (id: number | string) => `admin/footer-sections/${id}`,
     ITEMS: "footer-items",
     ITEM_BY_ID: (id: number | string) => `footer-items/${id}`,
     ITEMS_BY_SECTION: (sectionId: number | string) =>
       `footer-items/section/${sectionId}`,
-    PAYMENT_METHODS: "footer-payment-methods",
-    PAYMENT_METHOD_BY_ID: (id: number | string) =>
-      `footer-payment-methods/${id}`,
-    SOCIAL_LINKS: "footer-social-links",
-    SOCIAL_LINK_BY_ID: (id: number | string) => `footer-social-links/${id}`,
   },
 
   CONTACT_LEADS: {
