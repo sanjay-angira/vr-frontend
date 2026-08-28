@@ -2,19 +2,27 @@
 
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
-import { DesktopNavigation } from "@/components/website/header/DesktopNavigation";
+import { HeaderCategoryNav } from "@/components/website/header/HeaderCategoryNav";
 import { HeaderLogo } from "@/components/website/header/HeaderLogo";
+import { HeaderSearch } from "@/components/website/header/HeaderSearch";
 import { HeaderStaticActions } from "@/components/website/header/HeaderStaticActions";
 import { MobileNavigation } from "@/components/website/header/MobileNavigation";
-import type { HeaderSettingsData, MenuItemNode } from "@/types/header";
+import type { HeaderParentCategory } from "@/components/website/categories/categoriesApi";
+import { STATIC_WEBSITE_HEADER } from "@/types/header";
 
 type WebsiteHeaderBarProps = {
-  header: HeaderSettingsData;
-  menu: MenuItemNode[];
+  categories: HeaderParentCategory[];
 };
 
-export function WebsiteHeaderBar({ header, menu }: WebsiteHeaderBarProps) {
+export function WebsiteHeaderBar({ categories }: WebsiteHeaderBarProps) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const header = STATIC_WEBSITE_HEADER;
+  const menu = categories.map((category) => ({
+    id: category.id,
+    label: category.name,
+    url: category.href,
+    children: [],
+  }));
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -65,25 +73,29 @@ export function WebsiteHeaderBar({ header, menu }: WebsiteHeaderBarProps) {
             textColor={header.textColor}
           />
 
-          <DesktopNavigation items={menu} textColor={header.textColor} />
+          <div className="header-tools">
+            <HeaderSearch />
 
-          <div className="header-actions">
-            <HeaderStaticActions settings={header} />
-            {menu.length > 0 ? (
-              <button
-                type="button"
-                className="icon-button header-menu-toggle"
-                aria-label={menuOpen ? "Close menu" : "Open menu"}
-                aria-expanded={menuOpen}
-                aria-controls="mobile-navigation"
-                onClick={() => setMenuOpen((open) => !open)}
-              >
-                {menuOpen ? <X size={22} /> : <Menu size={22} />}
-              </button>
-            ) : null}
+            <div className="header-actions">
+              <HeaderStaticActions settings={header} />
+              {menu.length > 0 ? (
+                <button
+                  type="button"
+                  className="icon-button header-menu-toggle"
+                  aria-label={menuOpen ? "Close menu" : "Open menu"}
+                  aria-expanded={menuOpen}
+                  aria-controls="mobile-navigation"
+                  onClick={() => setMenuOpen((open) => !open)}
+                >
+                  {menuOpen ? <X size={20} /> : <Menu size={20} />}
+                </button>
+              ) : null}
+            </div>
           </div>
         </div>
       </div>
+
+      <HeaderCategoryNav categories={categories} />
 
       {menu.length > 0 ? (
         <div

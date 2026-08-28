@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Heart, Search, ShoppingCart } from "lucide-react";
+import { Heart, ShoppingCart } from "lucide-react";
 import type { HeaderSettingsData } from "@/types/header";
 import { useAppSelector } from "@/services/redux/hooks";
 import { HeaderUser } from "@/components/website/header/HeaderUser";
@@ -25,18 +25,11 @@ export function HeaderStaticActions({ settings }: HeaderStaticActionsProps) {
 
   return (
     <>
-      {settings.showSearch ? (
-        <Link href="/search" className="icon-button" aria-label="Search">
-          <Search size={20} />
-        </Link>
-      ) : null}
-
       {settings.showWishlist ? (
         <Link
           href="/wishlist"
           className="icon-button"
           aria-label="Wishlist"
-          style={{ position: "relative" }}
         >
           <Heart size={20} />
           {mounted && isAuthenticated && wishlistCount > 0 ? (
@@ -50,7 +43,6 @@ export function HeaderStaticActions({ settings }: HeaderStaticActionsProps) {
           href="/cart"
           className="icon-button"
           aria-label="Cart"
-          style={{ position: "relative" }}
         >
           <ShoppingCart size={20} />
           {mounted && cartCount > 0 ? (

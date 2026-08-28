@@ -70,21 +70,20 @@ export type AdminMenu = {
   items: AdminMenuItem[];
 };
 
+export const STATIC_WEBSITE_HEADER: HeaderSettingsData = {
+  logoUrl: null,
+  mobileLogoUrl: null,
+  stickyHeader: true,
+  showSearch: true,
+  showCart: true,
+  showWishlist: true,
+  showAccount: true,
+  backgroundColor: "#fcf9f2",
+  textColor: "#2d2926",
+};
+
 export const DEFAULT_WEBSITE_HEADER: WebsiteHeaderData = {
   announcementBar: null,
-  header: {
-    logoUrl: null,
-    mobileLogoUrl: null,
-    stickyHeader: true,
-    showSearch: true,
-    showCart: true,
-    showWishlist: true,
-    showAccount: true,
-    backgroundColor: "#ffffff",
-    textColor: "#111111",
-  },
-  menu: [
-    { id: 1, label: "Home", url: "/", children: [] },
-    { id: 2, label: "Shop", url: "/shop", children: [] },
-  ],
+  header: STATIC_WEBSITE_HEADER,
+  menu: [],
 };

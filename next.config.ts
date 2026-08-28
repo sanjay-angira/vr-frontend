@@ -58,6 +58,7 @@ const nextConfig: NextConfig = {
         destination: "/addresses",
         permanent: false,
       },
+      { source: "/search", destination: "/products", permanent: false },
     ];
   },
   async rewrites() {

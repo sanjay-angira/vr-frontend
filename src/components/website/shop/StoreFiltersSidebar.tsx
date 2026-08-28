@@ -2,7 +2,6 @@
 
 import { useEffect, useId, useMemo, useState } from "react";
 import {
-  ChevronDown,
   Grid2X2,
   ListFilter,
   SlidersHorizontal,
@@ -43,7 +42,6 @@ type StoreFiltersSidebarProps = {
   categories: StoreCategoryOption[];
   productSections: StoreProductSectionOption[];
   priceBounds: { min: number; max: number };
-  sortOptions: Array<{ value: string; label: string }>;
   value: StoreFilterState;
   onChange: (next: StoreFilterState) => void;
   onClear: () => void;
@@ -97,7 +95,6 @@ export function StoreFiltersSidebar({
   categories,
   productSections,
   priceBounds,
-  sortOptions,
   value,
   onChange,
   onClear,
@@ -127,7 +124,6 @@ export function StoreFiltersSidebar({
     if (value.sectionSlugs.length) count += value.sectionSlugs.length;
     if (value.minPrice > priceBounds.min || value.maxPrice < priceBounds.max)
       count += 1;
-    if (value.sortBy && value.sortBy !== "newest") count += 1;
     return count;
   }, [value, priceBounds, categories, hideCategories]);
 
@@ -235,28 +231,6 @@ export function StoreFiltersSidebar({
           ₹{Math.min(draftMin, draftMax).toLocaleString("en-IN")} To ₹
           {Math.max(draftMin, draftMax).toLocaleString("en-IN")}
         </p>
-      </section>
-
-      <section className="store-filters__section">
-        <h3>
-          <ListFilter size={16} />
-          Sort By
-        </h3>
-        <div className="store-filters__select-wrap">
-          <select
-            value={value.sortBy}
-            onChange={(event) =>
-              onChange({ ...value, sortBy: event.target.value })
-            }
-          >
-            {sortOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-          <ChevronDown size={16} />
-        </div>
       </section>
 
       <section className="store-filters__section">

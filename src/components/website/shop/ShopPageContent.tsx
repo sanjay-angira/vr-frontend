@@ -5,9 +5,7 @@ import {
   useEffect,
   useRef,
   useState,
-  type FormEvent,
 } from "react";
-import { Search, SlidersHorizontal } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { API_ENDPOINTS } from "@/services/api/API_ENDPOINT";
 import { getData } from "@/services/api/apiService";
@@ -21,10 +19,8 @@ import {
   StoreProductCard,
   type StoreListProduct,
 } from "@/components/website/shop/StoreProductCard";
-import {
-  StorePromoBanner,
-  type StoreBanner,
-} from "@/components/website/shop/StorePromoBanner";
+import { StoreSortBar } from "@/components/website/shop/StoreSortBar";
+import { StoreMobileTools } from "@/components/website/shop/StoreMobileTools";
 import {
   buildShopQueryString,
   normalizeQueryString,
@@ -85,7 +81,6 @@ type StoreFiltersApiResponse = {
     priceRange: { min: number; max: number };
     sortOptions: Array<{ value: string; label: string }>;
     productSections?: StoreProductSectionOption[];
-    banners: StoreBanner[];
   };
 };
 
@@ -143,9 +138,6 @@ export function ShopPageContent({
   const [filtersLoading, setFiltersLoading] = useState(() => !initialData);
   const [error, setError] = useState("");
   const [categoryMissing, setCategoryMissing] = useState(false);
-  const [searchInput, setSearchInput] = useState(
-    () => initialData?.search || ""
-  );
   const [search, setSearch] = useState(() => initialData?.search || "");
   const [pageNumber, setPageNumber] = useState(1);
   const pageSize = 48;
@@ -158,9 +150,6 @@ export function ShopPageContent({
   const [productSections, setProductSections] = useState<
     StoreProductSectionOption[]
   >(() => initialData?.productSections || []);
-  const [banners, setBanners] = useState<StoreBanner[]>(
-    () => initialData?.banners || []
-  );
   const [sortOptions, setSortOptions] = useState(
     () => initialData?.sortOptions || DEFAULT_SORT_OPTIONS
   );
@@ -230,7 +219,6 @@ export function ShopPageContent({
       skipUrlWriteRef.current = true;
       setFilters(nextFilters);
       setSearch(parsed.search);
-      setSearchInput(parsed.search);
       setPageNumber(1);
     },
     [isCategoryPage, pathCategorySlug]
@@ -281,7 +269,6 @@ export function ShopPageContent({
         setCategoryMissing(false);
         setCategories(nextCategories);
         setProductSections(response.data.productSections || []);
-        setBanners(response.data.banners || []);
         setSortOptions(
           response.data.sortOptions?.length
             ? response.data.sortOptions
@@ -500,12 +487,6 @@ export function ShopPageContent({
     fetchStoreProducts(nextPage, true);
   };
 
-  const handleSearchSubmit = (event: FormEvent) => {
-    event.preventDefault();
-    setPageNumber(1);
-    setSearch(searchInput.trim());
-  };
-
   const handleFiltersChange = (next: StoreFilterState) => {
     setPageNumber(1);
     if (isCategoryPage && pathCategorySlug) {
@@ -524,7 +505,6 @@ export function ShopPageContent({
   const handleClearFilters = () => {
     setPageNumber(1);
     setSearch("");
-    setSearchInput("");
     const lockedCategoryIds =
       isCategoryPage && pathCategorySlug
         ? categorySlugsToExpandedIds([pathCategorySlug], categories)
@@ -539,7 +519,6 @@ export function ShopPageContent({
   const catalogBody = (
     <>
       <style dangerouslySetInnerHTML={{ __html: STORE_GRID_STYLES }} />
-      <StorePromoBanner banners={banners} />
 
       {!hideCategoryChrome && isCategoryPage && categoryDisplay && (
         <div className="store-catalog__category-head">
@@ -561,7 +540,6 @@ export function ShopPageContent({
           categories={categories}
           productSections={productSections}
           priceBounds={priceBounds}
-          sortOptions={sortOptions}
           value={filters}
           onChange={handleFiltersChange}
           onClear={handleClearFilters}
@@ -571,40 +549,22 @@ export function ShopPageContent({
         />
 
         <div className="store-catalog__main">
-          <div className="store-catalog__toolbar">
-            <form
-              className="store-catalog__search"
-              onSubmit={handleSearchSubmit}
-            >
-              <Search size={18} aria-hidden />
-              <input
-                type="search"
-                placeholder="Search products..."
-                value={searchInput}
-                onChange={(event) => setSearchInput(event.target.value)}
-              />
-              <button type="submit" className="btn btn-outline btn-sm">
-                Search
-              </button>
-            </form>
+          <StoreMobileTools
+            sortOptions={sortOptions}
+            sortBy={filters.sortBy || "newest"}
+            onSortChange={(sortBy) =>
+              handleFiltersChange({ ...filters, sortBy })
+            }
+            onOpenFilters={() => setMobileFiltersOpen(true)}
+          />
 
-            <button
-              type="button"
-              className="store-catalog__filter-btn"
-              onClick={() => setMobileFiltersOpen(true)}
-            >
-              <SlidersHorizontal size={16} />
-              Filters
-            </button>
-
-            <p className="store-catalog__count">
-              {loading && products.length === 0
-                ? "Loading…"
-                : products.length > 0
-                  ? `Showing ${products.length} of ${count}`
-                  : `${count} product${count === 1 ? "" : "s"}`}
-            </p>
-          </div>
+          <StoreSortBar
+            options={sortOptions}
+            value={filters.sortBy || "newest"}
+            onChange={(sortBy) =>
+              handleFiltersChange({ ...filters, sortBy })
+            }
+          />
 
           {loading && products.length === 0 && (
             <div className="store-catalog__grid" aria-busy="true">

@@ -3,7 +3,6 @@ import type { StoreCategoryOption } from "@/components/website/shop/StoreFilters
 import type { StoreProductSectionOption } from "@/components/website/shop/StoreFiltersSidebar";
 import type { StoreFilterState } from "@/components/website/shop/StoreFiltersSidebar";
 import type { StoreListProduct } from "@/components/website/shop/StoreProductCard";
-import type { StoreBanner } from "@/components/website/shop/StorePromoBanner";
 import { categorySlugsToExpandedIds } from "@/utils/categoryFilterHelpers";
 import { parseShopSearchParams } from "@/utils/shopFilterUrl";
 
@@ -21,7 +20,6 @@ export type CategoryShopInitialData = {
   category: ShopCategoryInfo;
   categories: StoreCategoryOption[];
   productSections: StoreProductSectionOption[];
-  banners: StoreBanner[];
   sortOptions: Array<{ value: string; label: string }>;
   priceBounds: { min: number; max: number };
   filters: StoreFilterState;
@@ -37,7 +35,6 @@ type StoreFiltersResponse = {
     priceRange?: { min: number; max: number };
     sortOptions?: Array<{ value: string; label: string }>;
     productSections?: StoreProductSectionOption[];
-    banners?: StoreBanner[];
   };
 };
 
@@ -211,7 +208,6 @@ export async function fetchCategoryShopPage(
     category,
     categories: filterCategories,
     productSections: filtersRes?.data?.productSections || [],
-    banners: filtersRes?.data?.banners || [],
     sortOptions: filtersRes?.data?.sortOptions?.length
       ? filtersRes.data.sortOptions
       : DEFAULT_SORT_OPTIONS,

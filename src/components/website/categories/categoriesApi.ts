@@ -15,6 +15,7 @@ type CategoriesApiResponse = {
       image?: string | null;
       mobileImage?: string | null;
       productCount?: number;
+      parentId?: number | null;
       href?: string;
     }>;
     count: number;
@@ -45,6 +46,44 @@ export async function fetchAllCategories(): Promise<Category[]> {
         ? `/category/${encodeURIComponent(row.slug)}`
         : "/products",
     }));
+  } catch {
+    return [];
+  }
+}
+
+export type HeaderParentCategory = {
+  id: number;
+  name: string;
+  slug: string;
+  href: string;
+};
+
+export async function fetchParentCategories(): Promise<HeaderParentCategory[]> {
+  try {
+    const response = (await getData(
+      API_ENDPOINTS.CUSTOMER.CATEGORIES,
+      undefined,
+      { auth: false }
+    )) as CategoriesApiResponse;
+
+    if (!response?.success || !response.data) {
+      return [];
+    }
+
+    return (response.data.rows || [])
+      .filter((row) => row.parentId == null)
+      .filter((row) => Boolean((row.name || "").trim()))
+      .map((row) => {
+        const slug = (row.slug || "").trim();
+        return {
+          id: row.id,
+          name: row.name.trim(),
+          slug,
+          href: slug
+            ? `/category/${encodeURIComponent(slug)}`
+            : "/products",
+        };
+      });
   } catch {
     return [];
   }

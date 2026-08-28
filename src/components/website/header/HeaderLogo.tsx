@@ -19,10 +19,7 @@ export function HeaderLogo({
     : desktopSrc;
 
   const fallbackText = (
-    <span
-      className="logo-text text-[30px] font-bold"
-      style={{ color: textColor }}
-    >
+    <span className="logo-text" style={{ color: textColor }}>
       Vrindavan Rasa
     </span>
   );
