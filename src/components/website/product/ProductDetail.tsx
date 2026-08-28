@@ -122,6 +122,11 @@ export default function ProductDetail({
   }, [product.variants]);
 
   useEffect(() => {
+    document.body.classList.add("has-pdp-cta-bar");
+    return () => document.body.classList.remove("has-pdp-cta-bar");
+  }, []);
+
+  useEffect(() => {
     if (!product.id) return;
     // Avoid duplicate POSTs under React Strict Mode remounts.
     const timer = window.setTimeout(() => {
@@ -349,26 +354,28 @@ export default function ProductDetail({
             </button>
           </div>
 
-          <button
-            type="button"
-            className={`btn btn-primary btn-lg product-cta-button${
-              addedFlash ? " is-added" : ""
-            }`}
-            disabled={!inStock || !selectedVariant || isAdding}
-            onClick={handleAddToCart}
-          >
-            <ShoppingCart size={18} aria-hidden="true" />
-            {isAdding ? "Adding…" : addedFlash ? "Added to Cart" : inStock ? "Add to Cart" : "Unavailable"}
-          </button>
-          <button
-            type="button"
-            className="btn btn-outline btn-lg product-cta-button product-cta-button--secondary"
-            disabled={!inStock || !selectedVariant || isAdding}
-            onClick={handleBuyNow}
-          >
-            <Zap size={18} aria-hidden="true" />
-            Buy Now
-          </button>
+          <div className="product-cta-bar">
+            <button
+              type="button"
+              className={`btn btn-primary btn-lg product-cta-button${
+                addedFlash ? " is-added" : ""
+              }`}
+              disabled={!inStock || !selectedVariant || isAdding}
+              onClick={handleAddToCart}
+            >
+              <ShoppingCart size={18} aria-hidden="true" />
+              {isAdding ? "Adding…" : addedFlash ? "Added to Cart" : inStock ? "Add to Cart" : "Unavailable"}
+            </button>
+            <button
+              type="button"
+              className="btn btn-outline btn-lg product-cta-button product-cta-button--secondary"
+              disabled={!inStock || !selectedVariant || isAdding}
+              onClick={handleBuyNow}
+            >
+              <Zap size={18} aria-hidden="true" />
+              Buy Now
+            </button>
+          </div>
         </div>
 
         <ProductCouponBanner
