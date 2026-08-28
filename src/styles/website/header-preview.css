@@ -161,7 +161,7 @@
 .header-categories__row {
   display: flex;
   align-items: center;
-  gap: 0.15rem 1.15rem;
+  gap: 0;
   height: 44px;
   overflow-x: auto;
   scrollbar-width: none;
@@ -172,6 +172,7 @@
 }
 
 .header-categories__link {
+  position: relative;
   flex-shrink: 0;
   text-decoration: none;
   font-family: var(--font-ui);
@@ -179,8 +180,27 @@
   font-weight: 600;
   color: var(--header-text);
   white-space: nowrap;
-  padding: 0.4rem 0;
+  padding: 0.4rem 0.95rem;
   border-bottom: 2px solid transparent;
+}
+
+.header-categories__link:first-child {
+  padding-left: 0;
+}
+
+.header-categories__link:last-child {
+  padding-right: 0;
+}
+
+.header-categories__link:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1px;
+  height: 0.9em;
+  background: color-mix(in srgb, var(--vr-forest) 28%, transparent);
 }
 
 .header-categories__link:hover,
