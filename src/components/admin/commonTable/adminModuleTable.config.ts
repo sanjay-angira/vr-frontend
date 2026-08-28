@@ -32,7 +32,6 @@ export type AdminModuleKey =
   | "blog-categories"
   | "blog-tags"
   | "reviews"
-  | "header-settings"
   | "footer-settings"
   | "website-layout"
   | "users"
@@ -197,13 +196,6 @@ export const adminModuleTableConfig: Record<
     columns: CmsPagesComponentColumns,
     actions: ["add", "view", "edit", "delete"],
     addLabel: "Add page",
-  },
-  "header-settings": {
-    label: "Header Settings",
-    description: "Manage header settings",
-    columns: [],
-    actions: ["add", "view", "edit", "delete"],
-    addLabel: "Add setting",
   },
   "footer-settings": {
     label: "Footer Settings",

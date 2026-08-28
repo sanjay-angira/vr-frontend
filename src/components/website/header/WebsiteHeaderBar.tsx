@@ -8,7 +8,7 @@ import { HeaderSearch } from "@/components/website/header/HeaderSearch";
 import { HeaderStaticActions } from "@/components/website/header/HeaderStaticActions";
 import { MobileNavigation } from "@/components/website/header/MobileNavigation";
 import type { HeaderParentCategory } from "@/components/website/categories/categoriesApi";
-import { STATIC_WEBSITE_HEADER } from "@/types/header";
+import { HEADER_TEXT_COLOR } from "@/types/header";
 
 type WebsiteHeaderBarProps = {
   categories: HeaderParentCategory[];
@@ -16,7 +16,6 @@ type WebsiteHeaderBarProps = {
 
 export function WebsiteHeaderBar({ categories }: WebsiteHeaderBarProps) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const header = STATIC_WEBSITE_HEADER;
   const menu = categories.map((category) => ({
     id: category.id,
     label: category.name,
@@ -68,16 +67,16 @@ export function WebsiteHeaderBar({ categories }: WebsiteHeaderBarProps) {
       <div className="container">
         <div className="header-content">
           <HeaderLogo
-            logoUrl={header.logoUrl}
-            mobileLogoUrl={header.mobileLogoUrl}
-            textColor={header.textColor}
+            logoUrl={null}
+            mobileLogoUrl={null}
+            textColor={HEADER_TEXT_COLOR}
           />
 
           <div className="header-tools">
             <HeaderSearch />
 
             <div className="header-actions">
-              <HeaderStaticActions settings={header} />
+              <HeaderStaticActions />
               {menu.length > 0 ? (
                 <button
                   type="button"
@@ -114,7 +113,7 @@ export function WebsiteHeaderBar({ categories }: WebsiteHeaderBarProps) {
             <div className="container">
               <MobileNavigation
                 items={menu}
-                textColor={header.textColor}
+                textColor={HEADER_TEXT_COLOR}
                 isOpen={menuOpen}
                 onClose={() => setMenuOpen(false)}
               />

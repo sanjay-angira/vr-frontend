@@ -258,18 +258,6 @@ export const API_ENDPOINTS = {
   SETTINGS: {
     LIST: "settings",
   },
-
-  HEADER: {
-    WEBSITE_HEADER: "website/header",
-    ADMIN_HEADER: "admin/header",
-    ANNOUNCEMENT_BARS: "admin/announcement-bars",
-    ANNOUNCEMENT_BAR_BY_ID: (id: number | string) =>
-      `admin/announcement-bars/${id}`,
-    MENUS: "admin/menus",
-    MENU_BY_ID: (id: number | string) => `admin/menus/${id}`,
-    MENU_ITEMS: "admin/menu-items",
-    MENU_ITEM_BY_ID: (id: number | string) => `admin/menu-items/${id}`,
-  },
 } as const;
 
 export default API_ENDPOINTS;

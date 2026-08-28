@@ -17,7 +17,6 @@ const legacyIconAliases: Record<string, string> = {
   "blog-categories": "folder-tree",
   "blog-tags": "hash",
   reviews: "star",
-  "header-settings": "panel-top",
   "footer-settings": "panel-bottom",
   "website-layout": "layout-template",
   customers: "users",

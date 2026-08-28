@@ -96,11 +96,6 @@ export const adminMenuSections: AdminMenuSection[] = [
         icon: "star",
       },
       {
-        label: "Header Settings",
-        href: "/admin/header-settings",
-        icon: "panel-top",
-      },
-      {
         label: "Footer Settings",
         href: "/admin/footer-settings",
         icon: "panel-bottom",
