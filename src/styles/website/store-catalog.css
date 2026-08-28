@@ -16,8 +16,7 @@
 .store-catalog__category-head {
   display: flex;
   flex-direction: column;
-  gap: 0.65rem;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.15rem;
 }
 
 .store-catalog__breadcrumbs {
@@ -39,16 +38,12 @@
 }
 
 .store-catalog__breadcrumbs .is-current {
-  color: var(--vr-text);
-}
-
-.store-catalog__category-title {
   margin: 0;
-  font-family: "Cormorant Garamond", Georgia, serif;
-  font-size: clamp(1.75rem, 3vw, 2.35rem);
-  font-weight: 600;
-  color: var(--vr-forest);
-  line-height: 1.15;
+  color: var(--vr-text);
+  font: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
 }
 
 .store-catalog__category-description {

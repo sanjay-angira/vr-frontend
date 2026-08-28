@@ -5,7 +5,7 @@ type CategoryShopHeaderProps = {
   category: ShopCategoryInfo;
 };
 
-/** Server-rendered category title + breadcrumbs. */
+/** Server-rendered category breadcrumbs (name is the page heading). */
 export function CategoryShopHeader({ category }: CategoryShopHeaderProps) {
   return (
     <div className="store-catalog__category-head">
@@ -14,9 +14,8 @@ export function CategoryShopHeader({ category }: CategoryShopHeaderProps) {
         <span aria-hidden>›</span>
         <Link href="/products">Shop</Link>
         <span aria-hidden>›</span>
-        <span className="is-current">{category.name}</span>
+        <h1 className="is-current">{category.name}</h1>
       </nav>
-      <h1 className="store-catalog__category-title">{category.name}</h1>
     </div>
   );
 }

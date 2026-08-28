@@ -527,11 +527,8 @@ export function ShopPageContent({
             <span aria-hidden>›</span>
             <Link href="/products">Shop</Link>
             <span aria-hidden>›</span>
-            <span className="is-current">{categoryDisplay.name}</span>
+            <h1 className="is-current">{categoryDisplay.name}</h1>
           </nav>
-          <h1 className="store-catalog__category-title">
-            {categoryDisplay.name}
-          </h1>
         </div>
       )}
 
