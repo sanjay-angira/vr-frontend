@@ -1095,7 +1095,7 @@ body {
   display: grid;
   grid-template-columns: 1fr;
   gap: clamp(var(--gap-m), 2.5vw, var(--gap-xl));
-  animation: product-detail-enter 0.55s ease both;
+  animation: product-detail-enter 0.55s ease;
 }
 
 @keyframes product-detail-enter {
@@ -3421,7 +3421,7 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    z-index: 80;
+    z-index: 110;
     flex: none;
     gap: 0.6rem;
     padding: 0.7rem 0.85rem calc(0.7rem + env(safe-area-inset-bottom, 0px));
@@ -3443,8 +3443,14 @@ body {
     min-width: 0;
   }
 
-  body.has-pdp-cta-bar {
-    padding-bottom: calc(5.75rem + env(safe-area-inset-bottom, 0px));
+  body.has-pdp-cta-bar .website-layout > main {
+    position: relative;
+    z-index: 2;
+  }
+
+  body.has-pdp-cta-bar .footer {
+    z-index: 1;
+    padding-bottom: calc(6.5rem + env(safe-area-inset-bottom, 0px));
   }
 
   .product-trust-row {
