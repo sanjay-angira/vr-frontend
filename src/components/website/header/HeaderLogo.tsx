@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { resolveImageUrl } from "@/components/admin/forms/shared/resolveImageUrl";
+import { DEFAULT_STORE_LOGO } from "@/lib/site";
 
 type HeaderLogoProps = {
   logoUrl: string | null;
@@ -8,49 +9,39 @@ type HeaderLogoProps = {
   textColor: string;
 };
 
+function resolveLogoSrc(url: string | null | undefined): string {
+  const trimmed = url?.trim() ?? "";
+  if (!trimmed) return DEFAULT_STORE_LOGO;
+  if (trimmed.startsWith("/")) return trimmed;
+  return resolveImageUrl(trimmed);
+}
+
 export function HeaderLogo({
   logoUrl,
   mobileLogoUrl = null,
   textColor,
 }: HeaderLogoProps) {
-  const desktopSrc = logoUrl ? resolveImageUrl(logoUrl) : "";
-  const mobileSrc = mobileLogoUrl
-    ? resolveImageUrl(mobileLogoUrl)
-    : desktopSrc;
-
-  const fallbackText = (
-    <span className="logo-text" style={{ color: textColor }}>
-      Vrindavan Rasa
-    </span>
-  );
+  const desktopSrc = resolveLogoSrc(logoUrl);
+  const mobileSrc = resolveLogoSrc(mobileLogoUrl || logoUrl);
 
   return (
     <Link href="/" className="logo" style={{ color: textColor }}>
-      {desktopSrc ? (
-        <Image
-          src={desktopSrc}
-          alt="Store logo"
-          width={140}
-          height={40}
-          className="logo-image logo-image--desktop h-15 w-auto object-contain"
-          priority
-        />
-      ) : (
-        <span className="logo-fallback logo-fallback--desktop">{fallbackText}</span>
-      )}
-
-      {mobileSrc ? (
-        <Image
-          src={mobileSrc}
-          alt="Store logo"
-          width={120}
-          height={36}
-          className="logo-image logo-image--mobile h-10 w-auto object-contain"
-          priority
-        />
-      ) : (
-        <span className="logo-fallback logo-fallback--mobile">{fallbackText}</span>
-      )}
+      <Image
+        src={desktopSrc}
+        alt="Vrindavan Rasa"
+        width={280}
+        height={64}
+        className="logo-image logo-image--desktop"
+        priority
+      />
+      <Image
+        src={mobileSrc}
+        alt="Vrindavan Rasa"
+        width={220}
+        height={48}
+        className="logo-image logo-image--mobile"
+        priority
+      />
     </Link>
   );
 }

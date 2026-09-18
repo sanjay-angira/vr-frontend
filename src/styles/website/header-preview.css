@@ -224,6 +224,11 @@
   filter: none;
 }
 
+.logo-image {
+  width: auto;
+  object-fit: contain;
+}
+
 .logo-image--mobile,
 .logo-fallback--mobile {
   display: none;
@@ -232,6 +237,8 @@
 .logo-image--desktop,
 .logo-fallback--desktop {
   display: block;
+  height: 52px;
+  max-width: min(280px, 46vw);
 }
 
 @media (max-width: 767px) {
@@ -243,6 +250,8 @@
   .logo-image--mobile,
   .logo-fallback--mobile {
     display: block;
+    height: 40px;
+    max-width: min(210px, 58vw);
   }
 
   .logo-fallback--mobile .logo-text {

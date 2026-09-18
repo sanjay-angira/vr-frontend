@@ -130,8 +130,8 @@
 .auth-brand-logo-img {
   display: block;
   width: auto;
-  height: 48px;
-  max-width: 200px;
+  height: 64px;
+  max-width: 280px;
   object-fit: contain;
 }
 

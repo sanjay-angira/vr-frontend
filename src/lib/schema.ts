@@ -28,7 +28,7 @@ export function getOrganizationSchema(): JsonLdObject {
     "@type": "Organization",
     name: SITE_NAME,
     url: siteUrl(),
-    logo: abs("/apple-touch-icon.png"),
+    logo: abs("/logo.png"),
     description: SEO_PAGES.home.description,
   };
 }
@@ -198,7 +198,7 @@ export function getBlogPostingSchema(options: {
       name: SITE_NAME,
       logo: {
         "@type": "ImageObject",
-        url: abs("/apple-touch-icon.png"),
+        url: abs("/logo.png"),
       },
     },
   };

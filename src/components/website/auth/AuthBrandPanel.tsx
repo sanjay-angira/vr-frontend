@@ -1,6 +1,8 @@
 "use client";
 
+import Image from "next/image";
 import { ShoppingBag, Heart, Gift } from "lucide-react";
+import { DEFAULT_STORE_LOGO } from "@/lib/site";
 
 const FEATURES = [
   {
@@ -117,13 +119,14 @@ export default function AuthBrandPanel() {
 
       <div className="auth-brand-content">
         <div className="auth-brand-logo">
-          <span className="auth-brand-mark" aria-hidden>
-            <PeacockFeather className="auth-brand-logo-feather" />
-          </span>
-          <div className="auth-brand-logo-text">
-            <span className="auth-brand-name">Vrindavan Rasa</span>
-            <span className="auth-brand-tagline">Taste of Brij</span>
-          </div>
+          <Image
+            src={DEFAULT_STORE_LOGO}
+            alt="Vrindavan Rasa"
+            width={280}
+            height={80}
+            className="auth-brand-logo-img"
+            priority
+          />
         </div>
 
         <h2 className="auth-brand-heading">{COPY.heading}</h2>
