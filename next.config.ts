@@ -64,7 +64,7 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       // Browsers often request /favicon.ico by default
-      { source: "/favicon.ico", destination: "/logo.png" },
+      { source: "/favicon.ico", destination: "/vrindavan-rasa-logo.png" },
     ];
   },
 };

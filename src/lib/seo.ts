@@ -283,7 +283,7 @@ export function getOrganizationJsonLd(): Record<string, unknown> {
     "@type": "Organization",
     name: SITE_NAME,
     url: site,
-    logo: absoluteUrl("/logo.png"),
+    logo: absoluteUrl("/vrindavan-rasa-logo.png"),
     description: SEO_PAGES.home.description,
   };
 }

@@ -24,9 +24,9 @@ export const metadata: Metadata = {
   keywords: home.keywords,
   applicationName: SITE_NAME,
   icons: {
-    icon: [{ url: "/logo.png", type: "image/png" }],
-    shortcut: "/logo.png",
-    apple: [{ url: "/logo.png", type: "image/png" }],
+    icon: [{ url: "/vrindavan-rasa-logo.png", type: "image/png" }],
+    shortcut: "/vrindavan-rasa-logo.png",
+    apple: [{ url: "/vrindavan-rasa-logo.png", type: "image/png" }],
   },
   openGraph: {
     type: "website",
