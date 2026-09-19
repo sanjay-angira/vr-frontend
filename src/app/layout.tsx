@@ -1,9 +1,4 @@
-import {
-  DEFAULT_OG_IMAGE,
-  SEO_PAGES,
-  SITE_NAME,
-  absoluteSeoUrl,
-} from "@/lib/seo";
+import { getOgImage, SEO_PAGES, SITE_NAME } from "@/lib/seo";
 import { getOrganizationSchema } from "@/lib/schema";
 import { getSiteUrl } from "@/lib/site";
 import type { Metadata } from "next";
@@ -13,6 +8,7 @@ import "./globals.css";
 
 const home = SEO_PAGES.home;
 const siteUrl = getSiteUrl();
+const ogImage = getOgImage();
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -31,18 +27,19 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName: SITE_NAME,
+    locale: "en_IN",
     title: home.title,
     description:
       "Shop premium groceries, spices, dry fruits, puja items, sweets, and daily essentials with fast delivery across India.",
     url: siteUrl,
-    images: [{ url: absoluteSeoUrl(DEFAULT_OG_IMAGE) }],
+    images: [ogImage],
   },
   twitter: {
     card: "summary_large_image",
     title: home.title,
     description:
       "Premium groceries, puja items, spices, dry fruits, sweets, and daily essentials delivered across India.",
-    images: [absoluteSeoUrl(DEFAULT_OG_IMAGE)],
+    images: [ogImage.url],
   },
   alternates: {
     canonical: siteUrl,

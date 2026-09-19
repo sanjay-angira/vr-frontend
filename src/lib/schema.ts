@@ -29,6 +29,7 @@ export function getOrganizationSchema(): JsonLdObject {
     name: SITE_NAME,
     url: siteUrl(),
     logo: abs("/vrindavan-rasa-logo.png"),
+    image: abs("/vrindavan-rasa-og-image.jpg"),
     description: SEO_PAGES.home.description,
   };
 }

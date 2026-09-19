@@ -65,6 +65,8 @@ const nextConfig: NextConfig = {
     return [
       // Browsers often request /favicon.ico by default
       { source: "/favicon.ico", destination: "/vrindavan-rasa-logo.png" },
+      // Old OG path 404'd on production and broke WhatsApp/Facebook previews
+      { source: "/og-image.jpg", destination: "/vrindavan-rasa-og-image.jpg" },
     ];
   },
 };

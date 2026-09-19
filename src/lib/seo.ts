@@ -2,7 +2,12 @@ import type { Metadata } from "next";
 import { getSiteUrl } from "@/lib/site";
 
 const SITE_NAME = "Vrindavan Rasa";
-const DEFAULT_OG_IMAGE = "/og-image.jpg";
+/** Public 1200×630 JPG — WhatsApp/Facebook require a reachable absolute image URL. */
+const DEFAULT_OG_IMAGE = "/vrindavan-rasa-og-image.jpg";
+const DEFAULT_OG_IMAGE_WIDTH = 1200;
+const DEFAULT_OG_IMAGE_HEIGHT = 630;
+const DEFAULT_OG_IMAGE_TYPE = "image/jpeg";
+const DEFAULT_OG_IMAGE_ALT = "Vrindavan Rasa — Taste of Brij";
 
 export type SeoPageKey =
   | "home"
@@ -138,6 +143,25 @@ function ogImageUrl(image?: string | null): string {
   return absoluteUrl(DEFAULT_OG_IMAGE);
 }
 
+function isDefaultOgImage(url: string): boolean {
+  return url.includes("vrindavan-rasa-og-image.jpg") || url.includes("/og-image.jpg");
+}
+
+/** Open Graph / Twitter image object WhatsApp and Facebook can scrape. */
+export function getOgImage(image?: string | null) {
+  const url = ogImageUrl(image);
+  const isDefault = isDefaultOgImage(url);
+
+  return {
+    url,
+    secureUrl: url.startsWith("https:") ? url : undefined,
+    type: isDefault ? DEFAULT_OG_IMAGE_TYPE : undefined,
+    width: isDefault ? DEFAULT_OG_IMAGE_WIDTH : undefined,
+    height: isDefault ? DEFAULT_OG_IMAGE_HEIGHT : undefined,
+    alt: isDefault ? DEFAULT_OG_IMAGE_ALT : SITE_NAME,
+  };
+}
+
 type BuildMetadataOptions = {
   title: string;
   description: string;
@@ -159,7 +183,7 @@ export function buildPageMetadata({
   type = "website",
 }: BuildMetadataOptions): Metadata {
   const url = absoluteUrl(path);
-  const ogImage = ogImageUrl(image);
+  const ogImage = getOgImage(image);
 
   return {
     title,
@@ -170,16 +194,17 @@ export function buildPageMetadata({
     openGraph: {
       type,
       siteName: SITE_NAME,
+      locale: "en_IN",
       title,
       description,
       url,
-      images: [{ url: ogImage }],
+      images: [ogImage],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [ogImage],
+      images: [ogImage.url],
     },
   };
 }
@@ -288,4 +313,12 @@ export function getOrganizationJsonLd(): Record<string, unknown> {
   };
 }
 
-export { SITE_NAME, DEFAULT_OG_IMAGE, absoluteUrl as absoluteSeoUrl };
+export {
+  SITE_NAME,
+  DEFAULT_OG_IMAGE,
+  DEFAULT_OG_IMAGE_WIDTH,
+  DEFAULT_OG_IMAGE_HEIGHT,
+  DEFAULT_OG_IMAGE_TYPE,
+  DEFAULT_OG_IMAGE_ALT,
+  absoluteUrl as absoluteSeoUrl,
+};
