@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import { getData } from "@/services/api/apiService";
 import { API_ENDPOINTS } from "@/services/api/API_ENDPOINT";
 import type { FooterData, FooterListItem } from "@/types/footer";
@@ -17,7 +18,7 @@ type FooterItemsApiResponse = {
   };
 };
 
-export async function fetchFooterListItems(): Promise<FooterListItem[]> {
+async function loadFooterListItems(): Promise<FooterListItem[]> {
   try {
     const response = (await getData(API_ENDPOINTS.FOOTER.PUBLIC, undefined, {
       auth: false,
@@ -41,6 +42,12 @@ export async function fetchFooterListItems(): Promise<FooterListItem[]> {
     return [];
   }
 }
+
+const fetchFooterListItems = unstable_cache(
+  loadFooterListItems,
+  ["customer-footer-items"],
+  { revalidate: 300 }
+);
 
 export async function fetchFooterData(): Promise<FooterData> {
   const items = await fetchFooterListItems();

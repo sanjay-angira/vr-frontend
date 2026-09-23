@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import { resolveImageUrl } from "@/components/admin/forms/shared/resolveImageUrl";
 import type { Category } from "@/components/website/cards/CategoryCard";
 import { API_ENDPOINTS } from "@/services/api/API_ENDPOINT";
@@ -58,7 +59,7 @@ export type HeaderParentCategory = {
   href: string;
 };
 
-export async function fetchParentCategories(): Promise<HeaderParentCategory[]> {
+async function loadParentCategories(): Promise<HeaderParentCategory[]> {
   try {
     const response = (await getData(
       API_ENDPOINTS.CUSTOMER.CATEGORIES,
@@ -88,3 +89,9 @@ export async function fetchParentCategories(): Promise<HeaderParentCategory[]> {
     return [];
   }
 }
+
+export const fetchParentCategories = unstable_cache(
+  loadParentCategories,
+  ["customer-parent-categories"],
+  { revalidate: 300 }
+);

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { homepageLinkPreviewHtml, isLinkPreviewBot } from "@/lib/linkPreview";
 import { STORAGE_KEYS } from "@/services/api/storage";
 
 const ADMIN_PUBLIC_PATHS = new Set([
@@ -14,6 +15,20 @@ function hasAdminSession(request: NextRequest): boolean {
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  if (
+    pathname === "/" &&
+    isLinkPreviewBot(request.headers.get("user-agent"))
+  ) {
+    return new NextResponse(homepageLinkPreviewHtml(), {
+      status: 200,
+      headers: {
+        "Content-Type": "text/html; charset=utf-8",
+        "Cache-Control": "public, max-age=3600",
+      },
+    });
+  }
+
   console.log("pathname", pathname);
 
   if (pathname === "/admin" || pathname === "/admin/") {
@@ -41,5 +56,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin", "/admin/:path*"],
+  matcher: ["/", "/admin", "/admin/:path*"],
 };

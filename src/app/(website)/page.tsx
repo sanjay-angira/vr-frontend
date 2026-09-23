@@ -9,7 +9,15 @@ import { getStaticPageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = getStaticPageMetadata("home");
 
-export default async function Page() {
+export default function Page() {
+  return (
+    <Suspense fallback={<HomePageSkeleton />}>
+      <HomePageContent />
+    </Suspense>
+  );
+}
+
+async function HomePageContent() {
   const sections = await fetchHomepageSections();
   const websiteLd = getWebSiteSchema();
 
@@ -29,9 +37,7 @@ export default async function Page() {
   return (
     <>
       <JsonLd data={websiteLd} />
-      <Suspense fallback={<HomePageSkeleton />}>
-        <HomePageSections sections={sections} />
-      </Suspense>
+      <HomePageSections sections={sections} />
     </>
   );
 }

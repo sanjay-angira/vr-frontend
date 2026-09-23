@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { WebsiteProgressBar } from "@/components/website/shared/WebsiteProgressBar";
 import AuthModals from "@/components/website/auth/AuthModals";
 import { WebsiteFooter } from "@/components/website/footer/WebsiteFooter";
@@ -18,9 +19,13 @@ export function WebsiteShell({ children }: WebsiteShellProps) {
       <CartHydrator />
       <WishlistHydrator />
       <AuthModals />
-      <WebsiteHeader />
+      <Suspense fallback={null}>
+        <WebsiteHeader />
+      </Suspense>
       <main className="flex-1">{children}</main>
-      <WebsiteFooter />
+      <Suspense fallback={null}>
+        <WebsiteFooter />
+      </Suspense>
       <ToastContainer
         position="top-right"
         autoClose={4000}
