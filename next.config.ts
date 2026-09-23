@@ -61,6 +61,19 @@ const nextConfig: NextConfig = {
       { source: "/search", destination: "/products", permanent: false },
     ];
   },
+  async headers() {
+    return [
+      {
+        source: "/vrindavan-rasa-share.png",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+    ];
+  },
   async rewrites() {
     return [
       // Browsers often request /favicon.ico by default

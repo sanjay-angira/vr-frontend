@@ -46,9 +46,9 @@ export function homepageLinkPreviewHtml(): string {
 <meta property="og:description" content="${description}"/>
 <meta property="og:image" content="${imageUrl}"/>
 <meta property="og:image:secure_url" content="${imageUrl}"/>
-<meta property="og:image:type" content="image/jpeg"/>
-<meta property="og:image:width" content="1200"/>
-<meta property="og:image:height" content="630"/>
+<meta property="og:image:type" content="${escapeHtml(image.type || "image/png")}"/>
+<meta property="og:image:width" content="${image.width || 1200}"/>
+<meta property="og:image:height" content="${image.height || 630}"/>
 <meta property="og:image:alt" content="${imageAlt}"/>
 <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:title" content="${title}"/>

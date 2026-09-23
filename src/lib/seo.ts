@@ -2,11 +2,14 @@ import type { Metadata } from "next";
 import { getSiteUrl } from "@/lib/site";
 
 const SITE_NAME = "Vrindavan Rasa";
-/** Public 1200×630 JPG — WhatsApp/Facebook require a reachable absolute image URL. */
-const DEFAULT_OG_IMAGE = "/vrindavan-rasa-og-image.jpg";
+/**
+ * Public 1200×630 PNG. WhatsApp shows the full-width card only for an image
+ * at least 300px wide and under 600KB. A new filename avoids a cached thumbnail.
+ */
+const DEFAULT_OG_IMAGE = "/vrindavan-rasa-share.png";
 const DEFAULT_OG_IMAGE_WIDTH = 1200;
 const DEFAULT_OG_IMAGE_HEIGHT = 630;
-const DEFAULT_OG_IMAGE_TYPE = "image/jpeg";
+const DEFAULT_OG_IMAGE_TYPE = "image/png";
 const DEFAULT_OG_IMAGE_ALT = "Vrindavan Rasa — Taste of Brij";
 
 export type SeoPageKey =
@@ -144,7 +147,11 @@ function ogImageUrl(image?: string | null): string {
 }
 
 function isDefaultOgImage(url: string): boolean {
-  return url.includes("vrindavan-rasa-og-image.jpg") || url.includes("/og-image.jpg");
+  return (
+    url.includes("vrindavan-rasa-share.png") ||
+    url.includes("vrindavan-rasa-og-image.jpg") ||
+    url.includes("/og-image.jpg")
+  );
 }
 
 /** Open Graph / Twitter image object WhatsApp and Facebook can scrape. */
