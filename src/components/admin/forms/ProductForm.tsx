@@ -57,7 +57,6 @@ import {
   inferAttributeCustomerDisplay,
   isProductStepValid,
   mapAttributeIdsFromRecord,
-  mapProductImagesFromRecord,
   mapVariantAttributesFromRecord,
   normalizeColorCode,
   normalizeIds,
@@ -108,9 +107,6 @@ const schema = Yup.object({
   productOffers: Yup.array().of(Yup.number()),
   productTags: Yup.array().of(Yup.number()),
   frequentlyBoughtTogether: Yup.array().of(Yup.number()),
-  images: Yup.array()
-    .of(Yup.string())
-    .min(1, "At least one product image is required"),
   attributeIds: Yup.array().of(Yup.number()),
   attributeCustomerDisplay: Yup.object(),
   variants: Yup.array()
@@ -524,7 +520,6 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
         productOffers: normalizeIds(record.productOffers),
         productTags: normalizeIds(record.productTags ?? record.tags),
         frequentlyBoughtTogether: normalizeIds(record.frequentlyBoughtTogether),
-        images: mapProductImagesFromRecord(record, syncedVariants),
         attributeIds,
         attributeCustomerDisplay,
         variants: syncedVariants,
@@ -852,19 +847,6 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
                   </div>
                 )}
               </FormFullWidth>
-
-              <FormFullWidth>
-                <MultiImageUploadField
-                  label="Product Images"
-                  required
-                  values={formik.values.images}
-                  onChange={(urls) => formik.setFieldValue("images", urls)}
-                  uploadPath={UPLOAD_PATHS.products}
-                  imageType="product"
-                  error={getNestedError(formik.touched, formik.errors, "images")}
-                />
-              </FormFullWidth>
-
 
               <FormFullWidth>
                 <FormMultiDropdown

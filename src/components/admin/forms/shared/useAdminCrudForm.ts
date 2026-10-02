@@ -23,7 +23,9 @@ type UseAdminCrudFormOptions<T extends Record<string, unknown>> = {
 
 function getErrorMessage(error: unknown): string {
   if (error && typeof error === "object" && "message" in error) {
-    return String((error as { message: string }).message);
+    const apiError = error as { message: string; statusCode?: number };
+    const message = String(apiError.message);
+    return apiError.statusCode ? `${apiError.statusCode}: ${message}` : message;
   }
   return "Something went wrong. Please try again.";
 }
@@ -97,6 +99,7 @@ export function useAdminCrudForm<T extends Record<string, unknown>>({
     enableReinitialize: true,
     validationSchema,
     onSubmit: async (values, helpers) => {
+      helpers.setStatus(undefined);
       try {
         const payload = mapValuesToPayload?.(values) ?? values;
         const response = isEdit

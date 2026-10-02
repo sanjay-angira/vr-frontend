@@ -58,15 +58,6 @@ export type ProductPageData = {
     categoryName?: string | null;
     categorySlug?: string | null;
   } | null;
-  images?: Array<{
-    id: number;
-    originalUrl?: string;
-    url?: string;
-    sortOrder: number;
-    webp400?: string | null;
-    webp800?: string | null;
-    webp1200?: string | null;
-  }>;
   variants?: Array<Record<string, unknown>>;
   attributes?: Array<Record<string, unknown>>;
   productAttributes?: Array<Record<string, unknown>>;

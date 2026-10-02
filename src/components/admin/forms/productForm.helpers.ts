@@ -247,7 +247,6 @@ export type ProductFormValues = {
   productOffers: number[];
   productTags: number[];
   frequentlyBoughtTogether: number[];
-  images: string[];
   attributeIds: number[];
   attributeCustomerDisplay: Record<number, AttributeViewOption>;
   variants: ProductVariant[];
@@ -286,7 +285,6 @@ export const productFormInitialValues: ProductFormValues = {
   productOffers: [],
   productTags: [],
   frequentlyBoughtTogether: [],
-  images: [],
   attributeIds: [],
   attributeCustomerDisplay: {},
   variants: [emptyVariant()],
@@ -337,6 +335,11 @@ export function normalizeIds(value: unknown): number[] {
         : Number(item)
     )
     .filter((id) => !Number.isNaN(id));
+}
+
+export function normalizeNumberArray(value: unknown): number[] {
+  if (!Array.isArray(value)) return [];
+  return value.map((item) => Number(item)).filter((id) => Number.isFinite(id));
 }
 
 export function mapAttributeIdsFromRecord(record: Record<string, unknown>): number[] {
@@ -407,18 +410,6 @@ export function normalizeImageArray(value: unknown): string[] {
 
 export { resolveImageUrl } from "./shared/resolveImageUrl";
 
-export function mapProductImagesFromRecord(
-  record: Record<string, unknown>,
-  variants: ProductVariant[]
-): string[] {
-  const fromProduct = normalizeImageArray(record.images);
-  if (fromProduct.length > 0) return fromProduct;
-  const fromAlternate = normalizeImageArray(record.productImages ?? record.productImage);
-  if (fromAlternate.length > 0) return fromAlternate;
-  if (variants.length > 0) return normalizeImageArray(variants[0].images);
-  return [];
-}
-
 export function getDeepestCategoryId(values: ProductFormValues): number | "" {
   for (let i = values.childCategories.length - 1; i >= 0; i -= 1) {
     const child = values.childCategories[i];
@@ -443,9 +434,12 @@ export function buildProductPayload(
   values: ProductFormValues,
   attributeMetaById: Record<number, AttributeMeta> = {}
 ): Record<string, unknown> {
-  const productImages = normalizeImageArray(values.images).map((url, index) =>
-    imagePayloadFromUrl(url, index + 1),
-  );
+  const productOffers = normalizeNumberArray(values.productOffers);
+  const productTags = normalizeNumberArray(values.productTags);
+  const frequentlyBoughtTogether = normalizeNumberArray(values.frequentlyBoughtTogether);
+  const attributes = values.attributeIds
+    .map((attributeId) => Number(attributeId))
+    .filter((attributeId) => Number.isFinite(attributeId));
 
   return {
     productName: values.productName,
@@ -456,11 +450,10 @@ export function buildProductPayload(
     isActive: values.isActive,
     brandId: Number(values.brandId),
     category: getDeepestCategoryId(values),
-    productOffers: values.productOffers,
-    productTags: values.productTags,
-    frequentlyBoughtTogether: values.frequentlyBoughtTogether,
-    images: productImages,
-    attributes: values.attributeIds.map((attributeId) => ({ attributeId })),
+    productOffers,
+    productTags,
+    frequentlyBoughtTogether,
+    attributes: attributes.map((attributeId) => ({ attributeId })),
     variants: values.variants.map((variant) => {
       const variantName = variant.name.trim();
       const variantPayload: Record<string, unknown> = {
@@ -478,11 +471,14 @@ export function buildProductPayload(
       // Always send images/offers/attributes so clearing them on edit reaches the API.
       // Omitting empty arrays left old ManyToMany / child rows attached.
       variantPayload.images = variantImages;
-      variantPayload.productVariantOffers = variant.productVariantOffers;
+      variantPayload.productVariantOffers = normalizeNumberArray(variant.productVariantOffers);
       const variantAttributes = variant.variantAttributes
         .filter((item) => item.value.trim())
         .map((item) => {
-          const payload: Record<string, unknown> = { attributeId: item.attributeId, value: item.value.trim() };
+          const payload: Record<string, unknown> = {
+            attributeId: Number(item.attributeId),
+            value: item.value.trim(),
+          };
           if (attributeSupportsImage(item.attributeId, attributeMetaById)) {
             const display = values.attributeCustomerDisplay[item.attributeId] ?? "value";
             payload.viewOption = display;
@@ -555,7 +551,6 @@ export function isProductStepValid(
       const displayValid = getImageEnabledAttributeIds(values.attributeIds, attributeMetaById).every(
         (attributeId) => Boolean(values.attributeCustomerDisplay[attributeId])
       );
-      const hasProductImages = normalizeImageArray(values.images).length > 0;
       return (
         Boolean(values.productName?.trim()) &&
         Boolean(values.productSlug?.trim()) &&
@@ -563,15 +558,13 @@ export function isProductStepValid(
         Boolean(descriptionText) &&
         Boolean(values.brandId) &&
         categorySelected &&
-        hasProductImages &&
         displayValid &&
         !hasFieldError(errors, "productName") &&
         !hasFieldError(errors, "productSlug") &&
         !hasFieldError(errors, "shortDescription") &&
         !hasFieldError(errors, "description") &&
         !hasFieldError(errors, "brandId") &&
-        !hasFieldError(errors, "category") &&
-        !hasFieldError(errors, "images")
+        !hasFieldError(errors, "category")
       );
     }
     case 2: {
@@ -616,7 +609,7 @@ export function isProductStepValid(
 }
 
 export const STEP_TOUCH_FIELDS: Record<number, string[]> = {
-  1: ["productName", "productSlug", "shortDescription", "description", "brandId", "category", "childCategories", "attributeIds", "attributeCustomerDisplay", "images"],
+  1: ["productName", "productSlug", "shortDescription", "description", "brandId", "category", "childCategories", "attributeIds", "attributeCustomerDisplay"],
   2: ["variants"],
   3: ["seo.metaTitle", "seo.metaDescription", "seo.metaKeywords", "seo.canonicalUrl", "seo.ogImage"],
   4: ["publishStatus", "isActive"],

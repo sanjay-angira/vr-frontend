@@ -211,7 +211,7 @@ export function CategoryForm({ module, recordId }: AdminFormProps) {
       shortDescription: v.shortDescription,
       description: v.description,
       parentId: v.parentId ? Number(v.parentId) : null,
-      offerIds: v.offerIds,
+      offerIds: (v.offerIds ?? []).map((id) => Number(id)).filter((id) => Number.isFinite(id)),
       publishStatus: v.publishStatus,
       isActive: v.isActive,
       showOnHomePage: v.showOnHomePage,

@@ -53,23 +53,23 @@ export async function generateMetadata({
   }
 
   const name = product.productName?.trim() || "Product";
-  const image =
-    product.images
-      ?.slice()
-      .sort((a, b) => a.sortOrder - b.sortOrder)
-      .map((item) =>
-        getProductWebpImageUrl(
-          {
-            originalUrl: item.originalUrl || item.url,
-            url: item.originalUrl || item.url,
-            webp400: item.webp400,
-            webp800: item.webp800,
-            webp1200: item.webp1200,
-          },
-          1200,
-        ),
-      )
-      .find((url) => typeof url === "string" && url.trim()) || null;
+  const firstVariant = product.variants?.[0];
+  const firstVariantImages = firstVariant?.images as
+    | Array<Record<string, unknown>>
+    | undefined;
+  const firstVariantImage = firstVariantImages?.[0];
+  const image = firstVariantImage
+    ? getProductWebpImageUrl(
+        {
+          originalUrl: String(firstVariantImage.originalUrl ?? firstVariantImage.url ?? ""),
+          url: String(firstVariantImage.originalUrl ?? firstVariantImage.url ?? ""),
+          webp400: String(firstVariantImage.webp400 ?? "") || null,
+          webp800: String(firstVariantImage.webp800 ?? "") || null,
+          webp1200: String(firstVariantImage.webp1200 ?? "") || null,
+        },
+        1200,
+      ) || null
+    : null;
 
   const description =
     product.shortDescription?.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim() ||
@@ -120,26 +120,9 @@ export default async function ProductDetailPage({
   const normalizedVariants = normalizeVariants(
     product.variants as Parameters<typeof normalizeVariants>[0]
   );
+  const baseImages = normalizedVariants[0]?.images ?? [];
 
   const requestedVariantSlug = variantFromQuery;
-
-  const baseImages =
-    product.images
-      ?.slice()
-      .sort((a, b) => a.sortOrder - b.sortOrder)
-      .map((image) =>
-        getProductWebpImageUrl(
-          {
-            originalUrl: image.originalUrl || image.url,
-            url: image.originalUrl || image.url,
-            webp400: image.webp400,
-            webp800: image.webp800,
-            webp1200: image.webp1200,
-          },
-          1200,
-        ),
-      )
-      .filter((url): url is string => typeof url === "string" && url.trim().length > 0) ?? [];
 
   const reviewList = (product.reviews || []).map((review) => ({
     id: String(review.id),

@@ -33,7 +33,6 @@ type ProductRecord = {
   isActive?: boolean;
   brand?: { brandName?: string };
   category?: { categoryName?: string };
-  images?: ProductImage[];
   variants?: ProductVariant[];
   seo?: {
     metaTitle?: string;
@@ -53,18 +52,10 @@ function formatPrice(value: unknown): string {
 function collectProductViewImages(product: ProductRecord): string[] {
   const urls = new Set<string>();
 
-  for (const url of normalizeImageArray(product.images)) {
-    urls.add(url);
-  }
-
   for (const variant of product.variants ?? []) {
     for (const url of normalizeImageArray(variant.images)) {
       urls.add(url);
     }
-  }
-
-  for (const url of normalizeImageArray(product.seo?.ogImage)) {
-    urls.add(url);
   }
 
   return Array.from(urls);
@@ -275,7 +266,7 @@ export function ProductView({ module, recordId }: AdminViewProps) {
             ))}
           </div>
         ) : (
-          <p className="text-sm text-zinc-500">No images uploaded for this product.</p>
+          <p className="text-sm text-zinc-500">No variant images uploaded.</p>
         )}
       </div>
 

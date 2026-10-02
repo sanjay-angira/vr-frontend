@@ -51,8 +51,21 @@ const schema = Yup.object({
     .oneOf(["percentage", "fixed"])
     .required("Discount type is required"),
   discountValue: Yup.number().min(0).required("Discount value is required"),
-  startDateTime: Yup.string(),
-  endDateTime: Yup.string(),
+  startDateTime: Yup.string().when("timeBased", {
+    is: true,
+    then: (field) => field.required("Start date is required for a time-based offer"),
+    otherwise: (field) => field,
+  }),
+  endDateTime: Yup.string()
+    .when("timeBased", {
+      is: true,
+      then: (field) => field.required("End date is required for a time-based offer"),
+      otherwise: (field) => field,
+    })
+    .test("end-after-start", "End date must be after the start date", function (value) {
+      if (!this.parent.timeBased || !value || !this.parent.startDateTime) return true;
+      return new Date(value).getTime() > new Date(this.parent.startDateTime).getTime();
+    }),
   timeBased: Yup.boolean(),
   isActive: activeField,
 });
