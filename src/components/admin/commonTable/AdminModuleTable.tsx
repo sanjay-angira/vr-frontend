@@ -10,6 +10,8 @@ import {
 } from "@/components/admin/commonTable/adminModuleTable.config";
 import type { AdminModuleKey } from "@/components/admin/commonTable/adminModuleTable.config";
 import { buildAdminTableColumns } from "@/components/admin/commonTable/buildAdminTableColumns";
+import { FormDropdown } from "@/components/admin/forms/shared/FormDropdown";
+import { fetchCategoriesOptions } from "@/components/admin/forms/shared/fetchOptions";
 import { deleteData, getData } from "@/services/api/apiService";
 import axios from "axios";
 
@@ -25,12 +27,29 @@ export function AdminModuleTable({ module }: AdminModuleTableProps) {
   const [count, setCount] = useState(0);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [categoryId, setCategoryId] = useState("");
+  const [categoryOptions, setCategoryOptions] = useState<
+    Array<{ label: string; value: string | number }>
+  >([]);
   const [pageNumber, setPageNumber] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const isFirstSearchChange = useRef(true);
   const previousDebouncedSearch = useRef(debouncedSearch);
+
+  useEffect(() => {
+    if (module !== "products") return;
+
+    let isCurrent = true;
+    fetchCategoriesOptions().then((options) => {
+      if (isCurrent) setCategoryOptions(options);
+    });
+
+    return () => {
+      isCurrent = false;
+    };
+  }, [module]);
 
   useEffect(() => {
     if (isFirstSearchChange.current) {
@@ -67,6 +86,7 @@ export function AdminModuleTable({ module }: AdminModuleTableProps) {
         column: sortColumn,
         order: "DESC",
         ...(debouncedSearch ? { search: debouncedSearch } : {}),
+        ...(module === "products" && categoryId ? { categoryId } : {}),
       });
       setData(response.data?.rows ?? response.data ?? []);
       setCount(response.data?.count ?? response.count ?? 0);
@@ -77,7 +97,7 @@ export function AdminModuleTable({ module }: AdminModuleTableProps) {
     } finally {
       setIsLoading(false);
     }
-  }, [apiPath, config, debouncedSearch, pageNumber, pageSize, sortColumn]);
+  }, [apiPath, categoryId, config, debouncedSearch, module, pageNumber, pageSize, sortColumn]);
 
   useEffect(() => {
     if (!config) return;
@@ -97,6 +117,7 @@ export function AdminModuleTable({ module }: AdminModuleTableProps) {
             column: sortColumn,
             order: "DESC",
             ...(debouncedSearch ? { search: debouncedSearch } : {}),
+            ...(module === "products" && categoryId ? { categoryId } : {}),
           },
           { signal: controller.signal }
         );
@@ -125,7 +146,7 @@ export function AdminModuleTable({ module }: AdminModuleTableProps) {
     fetchTableData();
 
     return () => controller.abort();
-  }, [apiPath, config, debouncedSearch, pageNumber, pageSize, sortColumn]);
+  }, [apiPath, categoryId, config, debouncedSearch, module, pageNumber, pageSize, sortColumn]);
 
   if (!config) {
     return null;
@@ -169,6 +190,22 @@ export function AdminModuleTable({ module }: AdminModuleTableProps) {
         searchValue={search}
         onSearchChange={setSearch}
         isSearching={isLoading && Boolean(search.trim())}
+        toolbarContent={
+          module === "products" ? (
+            <div className="w-full sm:w-56">
+              <FormDropdown
+                label=""
+                value={categoryId}
+                onChange={(value) => {
+                  setCategoryId(value);
+                  setPageNumber(1);
+                }}
+                options={[{ label: "Filter by category", value: "" }, ...categoryOptions]}
+                placeholder="Filter by category"
+              />
+            </div>
+          ) : undefined
+        }
         searchPlaceholder={`Search ${config.label.toLowerCase()}...`}
         viewHref={(row) => {
           const id = row.id;

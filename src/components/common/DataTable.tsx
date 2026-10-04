@@ -38,6 +38,7 @@ export type DataTableProps<T extends object> = {
   deleteConfirmMessage?: string | ((row: T) => string);
   /** Show search input. Default: true */
   searchable?: boolean;
+  toolbarContent?: React.ReactNode;
   searchPlaceholder?: string;
   /** Controlled search value (server-side filtering) */
   searchValue?: string;
@@ -148,6 +149,7 @@ export function DataTable<T extends object>({
   deleteConfirmTitle = "Confirm deletion",
   deleteConfirmMessage,
   searchable = true,
+  toolbarContent,
   searchPlaceholder = "Search...",
   searchValue,
   onSearchChange,
@@ -197,7 +199,7 @@ export function DataTable<T extends object>({
   const showEdit = actions.includes("edit");
   const showDelete = actions.includes("delete");
   const showRowActions = showView || showEdit || showDelete;
-  const showToolbar = showAdd || searchable;
+  const showToolbar = showAdd || searchable || Boolean(toolbarContent);
   const hasActiveSearch = Boolean(query.trim());
   const emptyText =
     hasActiveSearch && displayData.length === 0
@@ -246,24 +248,25 @@ export function DataTable<T extends object>({
     <div className="rounded-xl border border-zinc-200 bg-white shadow-sm">
       {showToolbar && (
         <div className="flex flex-col gap-3 border-b border-zinc-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-          {searchable ? (
-            <div className="relative min-w-0 flex-1">
-              <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
-              <input
-                type="search"
-                value={query}
-                onChange={(event) => handleSearchChange(event.target.value)}
-                placeholder={searchPlaceholder}
-                className="w-full rounded-lg border border-zinc-300 bg-white py-2.5 pl-9 pr-10 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-admin-primary focus:outline-none focus:ring-2 focus:ring-admin-primary/15"
-                aria-label="Search table"
-              />
-              {isSearching && (
-                <span className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-700" />
-              )}
-            </div>
-          ) : (
-            <div className="min-w-0 flex-1" />
-          )}
+          <div className="flex min-w-0 flex-1 flex-col gap-3 sm:flex-row sm:items-end">
+            {searchable && (
+              <div className="relative min-w-0 flex-1">
+                <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+                <input
+                  type="search"
+                  value={query}
+                  onChange={(event) => handleSearchChange(event.target.value)}
+                  placeholder={searchPlaceholder}
+                  className="w-full rounded-lg border border-zinc-300 bg-white py-2.5 pl-9 pr-10 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-admin-primary focus:outline-none focus:ring-2 focus:ring-admin-primary/15"
+                  aria-label="Search table"
+                />
+                {isSearching && (
+                  <span className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-700" />
+                )}
+              </div>
+            )}
+            {toolbarContent}
+          </div>
 
           {showAdd && (
             <div className="shrink-0">
