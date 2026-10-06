@@ -2791,6 +2791,12 @@ body {
 
 .product-description-card__body {
   padding: 1rem 1.1rem 1.15rem;
+  color: #000;
+}
+
+.product-description-card__body,
+.product-description-card__body * {
+  color: #000 !important;
 }
 
 .product-description-card__body p:first-child {

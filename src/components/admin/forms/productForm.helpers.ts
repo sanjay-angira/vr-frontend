@@ -385,6 +385,7 @@ export function normalizeImageArray(value: unknown): string[] {
   if (!value) return [];
   if (typeof value === "string") return value.trim() ? [value.trim()] : [];
   const arr = Array.isArray(value) ? value : typeof value === "object" ? Object.values(value as Record<string, unknown>) : [value];
+  const seen = new Set<string>();
   return arr
     .map((item) => {
       if (typeof item === "string") return item.trim();
@@ -405,7 +406,12 @@ export function normalizeImageArray(value: unknown): string[] {
       }
       return "";
     })
-    .filter((url) => url.length > 0);
+    .filter((url) => {
+      if (!url) return false;
+      if (seen.has(url)) return false;
+      seen.add(url);
+      return true;
+    });
 }
 
 export { resolveImageUrl } from "./shared/resolveImageUrl";

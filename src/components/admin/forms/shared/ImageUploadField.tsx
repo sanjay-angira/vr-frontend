@@ -665,7 +665,8 @@ export function MultiImageUploadField({
   function handleAdd(result: S3UploadResult) {
     rememberUploadKey(result.Location, result.Key);
     rememberImageSizes(result.Location, columnsFromUploadResult(result));
-    onChange([...values, result.Location]);
+    const nextValues = [...new Set([...values, result.Location].filter(Boolean))];
+    onChange(nextValues);
   }
 
   return (
