@@ -1,6 +1,5 @@
 import { getData, postData } from "@/services/api/apiService";
 import { API_ENDPOINTS } from "@/services/api/API_ENDPOINT";
-import { resolveImageUrl } from "@/components/admin/forms/shared/resolveImageUrl";
 import { getCartIdentity } from "@/utils/cartIdentity";
 
 export type WebsiteCoupon = {
@@ -102,7 +101,7 @@ export async function fetchWebsiteCoupons(): Promise<WebsiteCoupon[]> {
         return {
           id: Number(row.id),
           couponCode: String(row.couponCode ?? "").trim(),
-          image: rawImage ? resolveImageUrl(rawImage) || null : null,
+          image: rawImage || null,
           discountType: String(row.discountType ?? "percentage"),
           discountValue: Number(row.discountValue ?? 0),
           startDate: row.startDate ? String(row.startDate) : undefined,

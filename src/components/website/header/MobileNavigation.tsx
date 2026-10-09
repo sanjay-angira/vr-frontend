@@ -3,7 +3,12 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ChevronDown } from "lucide-react";
-import type { MenuItemNode } from "@/types/header";
+type MenuItemNode = { 
+  id: number;
+  label: string;
+  url: string;
+  children: MenuItemNode[];
+}
 
 type MobileNavigationProps = {
   items: MenuItemNode[];
@@ -75,7 +80,7 @@ export function MobileNavigation({
                 className={`mobile-nav-submenu${isExpanded ? " is-open" : ""}`}
               >
                 <div className="mobile-nav-submenu-inner">
-                  {item.children.map((child) => (
+                  {item.children.map((child: MenuItemNode) => (
                     <Link
                       key={child.id}
                       href={child.url}

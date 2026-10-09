@@ -7,7 +7,6 @@ import {
   type AdminModuleKey,
 } from "@/components/admin/commonTable/adminModuleTable.config";
 import type { AdminViewProps } from "@/components/admin/views/adminViewRegistry";
-import { resolveImageUrl } from "@/components/admin/forms/shared/resolveImageUrl";
 import { getData } from "@/services/api/apiService";
 
 type OrderItemRecord = {
@@ -167,7 +166,7 @@ function InfoItem({ label, value }: { label: string; value: React.ReactNode }) {
 
 function ItemImage({ src, alt }: { src?: string | null; alt: string }) {
   const [failed, setFailed] = useState(false);
-  const resolved = src ? resolveImageUrl(src) : "";
+  const resolved = src ? src : "";
 
   if (!resolved || failed) {
     return (

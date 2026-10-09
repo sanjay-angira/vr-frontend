@@ -6,7 +6,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Heart, ShoppingCart, Trash2 } from "lucide-react";
 import { toast } from "react-toastify";
 import { AccountWishlistSkeleton } from "@/components/website/account/AccountSkeletons";
-import { resolveImageUrl } from "@/components/admin/forms/shared/resolveImageUrl";
 import { useAppDispatch, useAppSelector } from "@/services/redux/hooks";
 import {
   fetchWishlistItems,
@@ -112,7 +111,7 @@ export function AccountWishlistContent() {
                 ? `/product/${item.productSlug}`
                 : undefined;
               const image =
-                resolveImageUrl(item.image || "") || "/next.svg";
+                item.image || "/next.svg";
               const listPrice = Number(item.sellingPrice || 0);
               const finalPrice = Number(item.finalPrice || 0);
               const hasDiscount =

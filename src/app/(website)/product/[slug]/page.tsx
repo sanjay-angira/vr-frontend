@@ -16,7 +16,6 @@ import { fetchWebsiteCoupons } from "@/services/website/couponService";
 import { ShopSeedLink } from "@/components/website/shop/ShopSeedLink";
 import { ScrollToTopOnMount } from "@/components/website/shared/ScrollToTopOnMount";
 import { JsonLd } from "@/components/website/seo/JsonLd";
-import { resolveImageUrl } from "@/components/admin/forms/shared/resolveImageUrl";
 import {
   getBreadcrumbSchema,
   getFaqPageSchema,
@@ -190,7 +189,7 @@ export default async function ProductDetailPage({
     price: item.price,
     originalPrice: item.originalPrice,
     discountPercentage: item.discountPercentage,
-    image: resolveImageUrl(item.image),
+    image:item.image,
     category: item.category || product.category?.categoryName || "",
     rating: item.rating,
     reviewCount: item.reviewCount,

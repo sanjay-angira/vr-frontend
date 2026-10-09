@@ -1,4 +1,3 @@
-import { resolveImageUrl } from "@/components/admin/forms/shared/resolveImageUrl";
 import { API_ENDPOINTS } from "@/services/api/API_ENDPOINT";
 import { getData } from "@/services/api/apiService";
 
@@ -80,7 +79,7 @@ function mapListCard(row: Record<string, unknown>): BlogListCard {
     title: String(row.title || ""),
     slug,
     excerpt: String(row.excerpt || ""),
-    image: resolveImageUrl(String(row.image || "")),
+    image: String(row.image || ""),
     imageAlt: String(row.imageAlt || row.title || ""),
     category: String(row.category || "Blog"),
     categorySlug: row.categorySlug ? String(row.categorySlug) : null,
@@ -167,7 +166,7 @@ export async function fetchBlogBySlug(slug: string): Promise<BlogDetail | null> 
       slug: String(data.slug || slug),
       excerpt: String(data.excerpt || ""),
       content: String(data.content || ""),
-      image: resolveImageUrl(String(data.image || "")),
+      image: String(data.image || ""),
       imageAlt: String(data.imageAlt || data.title || ""),
       category: category
         ? {

@@ -10,7 +10,6 @@ import {
 } from "@/components/admin/commonTable/adminModuleTable.config";
 import type { AdminViewProps } from "@/components/admin/views/adminViewRegistry";
 import { normalizeImageArray } from "@/components/admin/forms/productForm.helpers";
-import { resolveImageUrl } from "@/components/admin/forms/shared/resolveImageUrl";
 import { getData } from "@/services/api/apiService";
 
 type ProductImage = { url?: string; sortOrder?: number };
@@ -100,7 +99,7 @@ function InfoItem({ label, value }: { label: string; value: React.ReactNode }) {
 
 function ViewImage({ src, alt }: { src: string; alt: string }) {
   const [failed, setFailed] = useState(false);
-  const resolved = resolveImageUrl(src);
+  const resolved = src;
 
   if (!resolved || failed) {
     return (

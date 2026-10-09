@@ -1,7 +1,5 @@
 
 import Image from "next/image";
-import { DEFAULT_STORE_LOGO } from "@/lib/site";
-
 type AdminAuthCardProps = {
   title: string;
   subtitle?: string;
@@ -18,7 +16,7 @@ export function AdminAuthCard({
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
           <Image
-            src={DEFAULT_STORE_LOGO}
+            src="/logo/logo.png"
             alt="Vrindavan Rasa"
             width={240}
             height={70}

@@ -6,11 +6,11 @@ const SITE_NAME = "Vrindavan Rasa";
  * Public 1200×630 PNG. WhatsApp shows the full-width card only for an image
  * at least 300px wide and under 600KB. A new filename avoids a cached thumbnail.
  */
-const DEFAULT_OG_IMAGE = "/vrindavan-rasa-share.png";
+const DEFAULT_OG_IMAGE = "/images/og-image.png";
 const DEFAULT_OG_IMAGE_WIDTH = 1200;
 const DEFAULT_OG_IMAGE_HEIGHT = 630;
 const DEFAULT_OG_IMAGE_TYPE = "image/png";
-const DEFAULT_OG_IMAGE_ALT = "Vrindavan Rasa — Taste of Brij";
+const DEFAULT_OG_IMAGE_ALT = "Vrindavan Rasa | Premium Grocery, Puja Items & Daily Essentials";
 
 export type SeoPageKey =
   | "home"
@@ -315,7 +315,7 @@ export function getOrganizationJsonLd(): Record<string, unknown> {
     "@type": "Organization",
     name: SITE_NAME,
     url: site,
-    logo: absoluteUrl("/vrindavan-rasa-logo.png"),
+    logo: absoluteUrl("/logo/logo.png"),
     description: SEO_PAGES.home.description,
   };
 }

@@ -9,7 +9,6 @@ import {
   uploadFile,
   type S3UploadResult,
 } from "@/services/api/uploadService";
-import { resolveImageUrl } from "./resolveImageUrl";
 import { FormLabel } from "./FormLabel";
 import type { ImageOptimizationType, OptimizedImageColumns } from "@/utils/optimizedImage";
 import { columnsFromUploadResult } from "@/utils/optimizedImage";
@@ -434,7 +433,7 @@ export function ImageUploadField({
           >
             {mediaType === "video" ? (
               <video
-                src={resolveImageUrl(value)}
+                src={value}
                 className="h-[34px] w-[34px] shrink-0 rounded-md bg-black object-cover"
               />
             ) : (
@@ -446,7 +445,7 @@ export function ImageUploadField({
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={resolveImageUrl(value)}
+                  src={value}
                   alt={label}
                   className="h-[34px] w-[34px] cursor-zoom-in rounded-md object-cover"
                 />
@@ -496,7 +495,7 @@ export function ImageUploadField({
               <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
                 {mediaType === "video" ? (
                   <video
-                    src={resolveImageUrl(value)}
+                    src={value}
                     controls
                     className="h-32 w-auto max-w-full bg-black"
                   />
@@ -509,7 +508,7 @@ export function ImageUploadField({
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src={resolveImageUrl(value)}
+                      src={value}
                       alt={label}
                       className="h-32 w-32 cursor-zoom-in object-cover"
                     />
@@ -584,7 +583,7 @@ export function ImageUploadField({
 
       {fullViewOpen && mediaType === "image" && value ? (
         <ImageFullView
-          src={resolveImageUrl(value)}
+          src={value}
           alt={label}
           onClose={() => setFullViewOpen(false)}
         />
@@ -694,7 +693,7 @@ export function MultiImageUploadField({
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={resolveImageUrl(image)}
+                  src={image}
                   alt={label}
                   className="h-28 w-full cursor-zoom-in object-cover"
                 />
@@ -737,7 +736,7 @@ export function MultiImageUploadField({
 
       {fullViewSrc ? (
         <ImageFullView
-          src={resolveImageUrl(fullViewSrc)}
+          src={fullViewSrc}
           alt={label}
           onClose={() => setFullViewSrc("")}
         />

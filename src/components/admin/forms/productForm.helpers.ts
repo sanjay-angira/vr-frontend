@@ -414,7 +414,6 @@ export function normalizeImageArray(value: unknown): string[] {
     });
 }
 
-export { resolveImageUrl } from "./shared/resolveImageUrl";
 
 export function getDeepestCategoryId(values: ProductFormValues): number | "" {
   for (let i = values.childCategories.length - 1; i >= 0; i -= 1) {
