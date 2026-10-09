@@ -2,10 +2,7 @@
  * Canonical public site origin for SEO (sitemap, robots, absolute URLs).
  */
 export function getSiteUrl(): string {
-  const raw =
-    process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
-    process.env.SITE_URL?.trim() ||
-    "https://www.vrindavanrasa.com";
+  const raw = process.env.NEXT_PUBLIC_SITE_URL?.trim() || "https://www.vrindavanrasa.com";
 
   const normalized = raw.replace(/\/+$/, "");
 
