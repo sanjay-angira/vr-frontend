@@ -4,7 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Heart, ShoppingCart, Star } from "lucide-react";
-import { resolveImageUrl } from "@/components/admin/forms/shared/resolveImageUrl";
 import { buildProductVariantUrl } from "@/components/website/product/productVariantUtils";
 import { useAppDispatch } from "@/services/redux/hooks";
 import {
@@ -54,7 +53,7 @@ export interface ProductCardProps {
 
 function resolveCardImage(value: string | { src?: string } | undefined): string {
   const raw = typeof value === "string" ? value : value?.src ?? "";
-  return resolveImageUrl(raw.trim()) || "";
+  return raw.trim() || "";
 }
 
 export function ProductCard({

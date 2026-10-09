@@ -20,8 +20,6 @@ export function getSiteUrl(): string {
   }
 }
 
-export const DEFAULT_STORE_LOGO = "/vrindavan-rasa-logo.png";
-
 export function getApiBaseUrl(): string {
   const raw =
     process.env.NEXT_PUBLIC_API_URL?.trim() ||

@@ -6,7 +6,6 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Settings } from "react-slick";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { resolveImageUrl } from "@/components/admin/forms/shared/resolveImageUrl";
 import type { HomepageBanner } from "@/types/homepage";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -144,8 +143,8 @@ export function HeroBannerSection({
 }
 
 function HeroSlide({ banner }: { banner: HomepageBanner }) {
-  const desktopSrc = resolveImageUrl(banner.image || banner.mobileImage || "");
-  const mobileSrc = resolveImageUrl(banner.mobileImage || banner.image || "");
+  const desktopSrc = banner.image || banner.mobileImage || "";
+  const mobileSrc = banner.mobileImage || banner.image || "";
   const hasDistinctMobile = Boolean(
     mobileSrc && desktopSrc && mobileSrc !== desktopSrc
   );

@@ -8,8 +8,6 @@ import { HeaderSearch } from "@/components/website/header/HeaderSearch";
 import { HeaderStaticActions } from "@/components/website/header/HeaderStaticActions";
 import { MobileNavigation } from "@/components/website/header/MobileNavigation";
 import type { HeaderParentCategory } from "@/components/website/categories/categoriesApi";
-import { HEADER_TEXT_COLOR } from "@/types/header";
-
 type WebsiteHeaderBarProps = {
   categories: HeaderParentCategory[];
 };
@@ -66,11 +64,7 @@ export function WebsiteHeaderBar({ categories }: WebsiteHeaderBarProps) {
     <>
       <div className="container">
         <div className="header-content">
-          <HeaderLogo
-            logoUrl={null}
-            mobileLogoUrl={null}
-            textColor={HEADER_TEXT_COLOR}
-          />
+          <HeaderLogo/>
 
           <div className="header-tools">
             <HeaderSearch />
@@ -111,12 +105,12 @@ export function WebsiteHeaderBar({ categories }: WebsiteHeaderBarProps) {
           />
           <div className="mobile-nav-panel">
             <div className="container">
-              <MobileNavigation
+              {/* <MobileNavigation
                 items={menu}
                 textColor={HEADER_TEXT_COLOR}
                 isOpen={menuOpen}
                 onClose={() => setMenuOpen(false)}
-              />
+              /> */}
             </div>
           </div>
         </div>

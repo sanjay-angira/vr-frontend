@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import { ShoppingBag, Heart, Gift } from "lucide-react";
-import { DEFAULT_STORE_LOGO } from "@/lib/site";
 
 const FEATURES = [
   {
@@ -120,7 +119,7 @@ export default function AuthBrandPanel() {
       <div className="auth-brand-content">
         <div className="auth-brand-logo">
           <Image
-            src={DEFAULT_STORE_LOGO}
+            src='../../public/logo/logo.png'
             alt="Vrindavan Rasa"
             width={280}
             height={80}

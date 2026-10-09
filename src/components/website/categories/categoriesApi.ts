@@ -1,5 +1,4 @@
 import { unstable_cache } from "next/cache";
-import { resolveImageUrl } from "@/components/admin/forms/shared/resolveImageUrl";
 import type { Category } from "@/components/website/cards/CategoryCard";
 import { API_ENDPOINTS } from "@/services/api/API_ENDPOINT";
 import { getData } from "@/services/api/apiService";
@@ -40,8 +39,8 @@ export async function fetchAllCategories(): Promise<Category[]> {
       name: row.name,
       slug: row.slug || undefined,
       description: row.description || "",
-      image: resolveImageUrl(row.image || ""),
-      mobileImage: resolveImageUrl(row.mobileImage || ""),
+      image: row.image || "",
+      mobileImage: row.mobileImage || "",
       productCount: Number(row.productCount) || 0,
       href: row.slug
         ? `/category/${encodeURIComponent(row.slug)}`

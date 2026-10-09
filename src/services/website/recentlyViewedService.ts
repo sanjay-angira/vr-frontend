@@ -2,7 +2,6 @@ import { getData, postData } from "@/services/api/apiService";
 import { API_ENDPOINTS } from "@/services/api/API_ENDPOINT";
 import { getCartIdentity } from "@/utils/cartIdentity";
 import type { WebsiteProductCardData } from "@/components/website/cards/ProductCard";
-import { resolveImageUrl } from "@/components/admin/forms/shared/resolveImageUrl";
 
 export type RecentlyViewedProduct = {
   id: string;
@@ -59,7 +58,7 @@ export function mapRecentlyViewedToCard(
       Number(product.discountPercentage) > 0
         ? Number(product.discountPercentage)
         : undefined,
-    image: resolveImageUrl(product.image),
+    image: product.image,
     category: product.category || "",
     rating: Number(product.rating) || 0,
     reviewCount: Number(product.reviewCount) || 0,

@@ -1,7 +1,5 @@
 import { getData } from "@/services/api/apiService";
 import { API_ENDPOINTS } from "@/services/api/API_ENDPOINT";
-import { resolveImageUrl } from "@/components/admin/forms/shared/resolveImageUrl";
-
 export type StoreSearchProduct = {
   id: number;
   name: string;
@@ -88,7 +86,7 @@ export async function searchStorefront(
         id: Number(row.id),
         name: String(row.name),
         slug: row.slug ?? null,
-        image: resolveImageUrl(row.image || ""),
+        image: row.image || "",
         href: row.href || (row.slug ? `/product/${row.slug}` : "/products"),
         category: row.category?.id && row.category.name
           ? {
@@ -109,7 +107,7 @@ export async function searchStorefront(
         id: Number(row.id),
         name: String(row.name),
         slug: row.slug ?? null,
-        image: resolveImageUrl(row.image || ""),
+        image: row.image || "",
         href: row.href || (row.slug ? `/category/${row.slug}` : "/products"),
       })),
   };

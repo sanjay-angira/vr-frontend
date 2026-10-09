@@ -1,4 +1,3 @@
-import { resolveImageUrl } from "@/components/admin/forms/shared/resolveImageUrl";
 import type { HomepageSection } from "@/types/homepage";
 import type { WebsiteProductCardData } from "@/components/website/cards/ProductCard";
 import type { Category } from "@/components/website/cards/CategoryCard";
@@ -32,7 +31,7 @@ function mapProducts(products: HomepageSection["products"]): WebsiteProductCardD
       Number(product.discountPercentage) > 0
         ? Number(product.discountPercentage)
         : undefined,
-    image: resolveImageUrl(product.image),
+    image: product.image,
     category: product.category,
     rating: product.rating,
     reviewCount: product.reviewCount,
@@ -46,8 +45,8 @@ function mapCategories(categories: HomepageSection["categories"]): Category[] {
     name: category.name,
     slug: category.slug,
     description: category.description,
-    image: resolveImageUrl(category.image),
-    mobileImage: resolveImageUrl(category.mobileImage || ""),
+    image: category.image,
+    mobileImage: category.mobileImage || "",
     href: category.href,
   }));
 }
@@ -57,7 +56,7 @@ function mapBlogPosts(blogs: HomepageSection["blogs"]) {
     id: blog.id,
     title: blog.title,
     excerpt: blog.excerpt,
-    image: resolveImageUrl(blog.image),
+    image: blog.image,
     category: blog.category,
     date: blog.date,
     href: blog.href,
