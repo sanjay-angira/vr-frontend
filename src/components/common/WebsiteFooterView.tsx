@@ -4,12 +4,12 @@ import { Mail, MapPin, Phone } from "lucide-react";
 import type { FooterData, FooterLinkItem, FooterSection } from "@/types/footer";
 import { STATIC_FOOTER_SOCIAL } from "@/types/footer";
 import { getSectionLinks, sortByPosition } from "@/utils/footerHelpers";
-import razorpayLogo from "@/assets/icons/Razorpay.svg";
-import facebookIcon from "@/assets/icons/facebook.svg";
-import instagramIcon from "@/assets/icons/instagram.svg";
-import xIcon from "@/assets/icons/twitter-x.svg";
-import pinterestIcon from "@/assets/icons/pinterest.svg";
-import youtubeIcon from "@/assets/icons/youtube.svg";
+import razorpayLogo from "../../../public/social-icons/Razorpay.svg";
+import facebookIcon from "../../../public/social-icons/facebook.svg";
+import instagramIcon from "../../../public/social-icons/instagram.svg";
+import xIcon from "../../../public/social-icons/twitter-x.svg";
+import pinterestIcon from "../../../public/social-icons/pinterest.svg";
+import youtubeIcon from "../../../public/social-icons/youtube.svg";
 
 type WebsiteFooterViewProps = {
   data: FooterData;
