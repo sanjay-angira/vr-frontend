@@ -29,8 +29,6 @@ export function proxy(request: NextRequest) {
     });
   }
 
-  console.log("pathname", pathname);
-
   if (pathname === "/admin" || pathname === "/admin/") {
     if (hasAdminSession(request)) {
       return NextResponse.redirect(new URL("/admin/dashboard",request.url));

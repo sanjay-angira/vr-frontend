@@ -114,22 +114,22 @@ export const SEO_PAGES: Record<SeoPageKey, SeoEntry> = {
 /** CMS slug → SEO page key (supports common slug variants). */
 const CMS_SLUG_SEO: Record<string, SeoPageKey> = {
   "about-us": "about",
-  about: "about",
-  faq: "faq",
-  faqs: "faq",
+  "about": "about",
+  "faq": "faq",
+  "faqs": "faq",
   "privacy-policy": "privacy",
-  privacy: "privacy",
+  "privacy": "privacy",
   "terms-and-conditions": "terms",
   "terms-conditions": "terms",
-  terms: "terms",
+  "terms": "terms",
   "shipping-policy": "shipping",
-  shipping: "shipping",
+  "shipping": "shipping",
   "return-refund-policy": "returnRefund",
   "return-and-refund-policy": "returnRefund",
   "returns-policy": "returnRefund",
-  returns: "returnRefund",
+  "returns": "returnRefund",
   "cancellation-policy": "cancellation",
-  cancellation: "cancellation",
+  "cancellation": "cancellation",
 };
 
 function absoluteUrl(path: string): string {
@@ -147,11 +147,7 @@ function ogImageUrl(image?: string | null): string {
 }
 
 function isDefaultOgImage(url: string): boolean {
-  return (
-    url.includes("vrindavan-rasa-share.png") ||
-    url.includes("vrindavan-rasa-og-image.jpg") ||
-    url.includes("/og-image.jpg")
-  );
+  return (url.includes("/images/og-image.jpg"));
 }
 
 /** Open Graph / Twitter image object WhatsApp and Facebook can scrape. */
