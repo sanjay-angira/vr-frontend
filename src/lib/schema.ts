@@ -1,5 +1,5 @@
 import { SEO_PAGES, SITE_NAME, absoluteSeoUrl } from "@/lib/seo";
-import { getSiteUrl } from "@/lib/site";
+import { getSiteUrl , getSiteName } from "@/lib/site";
 
 export type BreadcrumbItem = {
   name: string;
@@ -14,10 +14,6 @@ export type FaqItem = {
 /** Shared JSON-LD script payload type. */
 export type JsonLdObject = Record<string, unknown>;
 
-function siteUrl(): string {
-  return getSiteUrl();
-}
-
 function abs(path: string): string {
   return absoluteSeoUrl(path);
 }
@@ -26,10 +22,10 @@ export function getOrganizationSchema(): JsonLdObject {
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: SITE_NAME,
-    url: siteUrl(),
+    name: getSiteName(),
+    url: getSiteUrl(),
     logo: abs("/logo/logo.png"),
-    image: abs("/vrindavan-rasa-og-image.jpg"),
+    image: abs("/image/og-image.jpg"),
     description: SEO_PAGES.home.description,
   };
 }
@@ -39,11 +35,11 @@ export function getWebSiteSchema(): JsonLdObject {
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    url: siteUrl(),
-    name: SITE_NAME,
+    url: getSiteUrl(),
+    name: getSiteName(),
     potentialAction: {
       "@type": "SearchAction",
-      target: `${siteUrl()}/products?search={search_term_string}`,
+      target: `${getSiteUrl()}/products?search={search_term_string}`,
       "query-input": "required name=search_term_string",
     },
   };
@@ -77,8 +73,8 @@ export function getCollectionPageSchema(options: {
       : {}),
     isPartOf: {
       "@type": "WebSite",
-      name: SITE_NAME,
-      url: siteUrl(),
+      name: getSiteName(),
+      url: getSiteUrl(),
     },
   };
 }
@@ -96,13 +92,13 @@ export function getWebPageSchema(options: {
     ...(options.description ? { description: options.description } : {}),
     isPartOf: {
       "@type": "WebSite",
-      name: SITE_NAME,
-      url: siteUrl(),
+      name: getSiteName(),
+      url: getSiteUrl(),
     },
     publisher: {
       "@type": "Organization",
-      name: SITE_NAME,
-      url: siteUrl(),
+      name: getSiteName(),
+      url: getSiteUrl(),
     },
   };
 }
@@ -269,8 +265,8 @@ export function getContactPageSchema(): JsonLdObject {
     description: SEO_PAGES.contact.description,
     isPartOf: {
       "@type": "WebSite",
-      name: SITE_NAME,
-      url: siteUrl(),
+      name: getSiteName(),
+      url: getSiteUrl(),
     },
   };
 }
