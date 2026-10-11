@@ -6,10 +6,10 @@ const SITE_NAME = "Vrindavan Rasa";
  * Public 1200×630 PNG. WhatsApp shows the full-width card only for an image
  * at least 300px wide and under 600KB. A new filename avoids a cached thumbnail.
  */
-const DEFAULT_OG_IMAGE = "/images/og-image.png";
+const DEFAULT_OG_IMAGE = "/images/og-image.jpg";
 const DEFAULT_OG_IMAGE_WIDTH = 1200;
 const DEFAULT_OG_IMAGE_HEIGHT = 630;
-const DEFAULT_OG_IMAGE_TYPE = "image/png";
+const DEFAULT_OG_IMAGE_TYPE = "image/jpg";
 const DEFAULT_OG_IMAGE_ALT = "Vrindavan Rasa | Premium Grocery, Puja Items & Daily Essentials";
 
 export type SeoPageKey =
@@ -139,6 +139,7 @@ function absoluteUrl(path: string): string {
 }
 
 function ogImageUrl(image?: string | null): string {
+  debugger
   if (image?.trim()) {
     if (/^https?:\/\//i.test(image)) return image.trim();
     return absoluteUrl(image.trim());
