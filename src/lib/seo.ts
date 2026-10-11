@@ -318,7 +318,7 @@ export function getOrganizationJsonLd(): Record<string, unknown> {
 
 export {
   SITE_NAME,
-  DEFAULT_OG_IMAGE,
+  DEFAULT_OG_IMAGE, 
   DEFAULT_OG_IMAGE_WIDTH,
   DEFAULT_OG_IMAGE_HEIGHT,
   DEFAULT_OG_IMAGE_TYPE,
