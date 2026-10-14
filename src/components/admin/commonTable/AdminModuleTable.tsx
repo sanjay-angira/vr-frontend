@@ -15,6 +15,14 @@ import { fetchCategoriesOptions } from "@/components/admin/forms/shared/fetchOpt
 import { deleteData, getData } from "@/services/api/apiService";
 import axios from "axios";
 
+function readCategoryFilterFromUrl(): string {
+  if (typeof window === "undefined") return "";
+  const categoryId = new URLSearchParams(window.location.search).get("categoryId");
+  return categoryId && /^\d+$/.test(categoryId) && Number(categoryId) > 0
+    ? categoryId
+    : "";
+}
+
 type AdminModuleTableProps = {
   module: AdminModuleKey;
 };
@@ -28,6 +36,9 @@ export function AdminModuleTable({ module }: AdminModuleTableProps) {
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [categoryId, setCategoryId] = useState("");
+  const [isCategoryFilterReady, setIsCategoryFilterReady] = useState(
+    module !== "products"
+  );
   const [categoryOptions, setCategoryOptions] = useState<
     Array<{ label: string; value: string | number }>
   >([]);
@@ -37,6 +48,20 @@ export function AdminModuleTable({ module }: AdminModuleTableProps) {
   const [error, setError] = useState("");
   const isFirstSearchChange = useRef(true);
   const previousDebouncedSearch = useRef(debouncedSearch);
+
+  useEffect(() => {
+    if (module !== "products") return;
+
+    const syncCategoryFromUrl = () => {
+      setCategoryId(readCategoryFilterFromUrl());
+      setPageNumber(1);
+      setIsCategoryFilterReady(true);
+    };
+
+    syncCategoryFromUrl();
+    window.addEventListener("popstate", syncCategoryFromUrl);
+    return () => window.removeEventListener("popstate", syncCategoryFromUrl);
+  }, [module]);
 
   useEffect(() => {
     if (module !== "products") return;
@@ -100,7 +125,7 @@ export function AdminModuleTable({ module }: AdminModuleTableProps) {
   }, [apiPath, categoryId, config, debouncedSearch, module, pageNumber, pageSize, sortColumn]);
 
   useEffect(() => {
-    if (!config) return;
+    if (!config || (module === "products" && !isCategoryFilterReady)) return;
 
     const controller = new AbortController();
 
@@ -146,7 +171,7 @@ export function AdminModuleTable({ module }: AdminModuleTableProps) {
     fetchTableData();
 
     return () => controller.abort();
-  }, [apiPath, categoryId, config, debouncedSearch, module, pageNumber, pageSize, sortColumn]);
+  }, [apiPath, categoryId, config, debouncedSearch, isCategoryFilterReady, module, pageNumber, pageSize, sortColumn]);
 
   if (!config) {
     return null;
@@ -197,8 +222,18 @@ export function AdminModuleTable({ module }: AdminModuleTableProps) {
                 label=""
                 value={categoryId}
                 onChange={(value) => {
-                  setCategoryId(value);
+                  const nextCategoryId =
+                    value && /^\d+$/.test(value) && Number(value) > 0 ? value : "";
+                  setCategoryId(nextCategoryId);
                   setPageNumber(1);
+
+                  const url = new URL(window.location.href);
+                  if (nextCategoryId) {
+                    url.searchParams.set("categoryId", nextCategoryId);
+                  } else {
+                    url.searchParams.delete("categoryId");
+                  }
+                  window.history.pushState(null, "", `${url.pathname}${url.search}${url.hash}`);
                 }}
                 options={[{ label: "Filter by category", value: "" }, ...categoryOptions]}
                 placeholder="Filter by category"

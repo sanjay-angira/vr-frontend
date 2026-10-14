@@ -4,7 +4,6 @@ import { useMemo, useRef, useState } from "react";
 import {
   Check,
   CheckCircle2,
-  ChevronDown,
   ChevronRight,
   Gift,
   Percent,
@@ -82,7 +81,6 @@ export function ProductOffersSection({
   coupons = [],
 }: ProductOffersSectionProps) {
   const trackRef = useRef<HTMLDivElement>(null);
-  const [expanded, setExpanded] = useState(false);
   const [copied, setCopied] = useState(false);
 
   const offers = useMemo(() => {
@@ -93,7 +91,6 @@ export function ProductOffersSection({
 
   const hasApplied = offers.some((offer) => offer.isApplied);
   const primaryCoupon = coupons[0] ?? null;
-  const visibleOffers = expanded ? offers : offers.slice(0, 6);
 
   if (!offers.length && !primaryCoupon) {
     return null;
@@ -135,13 +132,8 @@ export function ProductOffersSection({
 
       {offers.length > 0 ? (
         <div className="product-offers-section__carousel">
-          <div
-            ref={trackRef}
-            className={`product-offers-section__track${
-              expanded ? " is-expanded" : ""
-            }`}
-          >
-            {visibleOffers.map((offer, index) => {
+          <div ref={trackRef} className="product-offers-section__track">
+            {offers.map((offer, index) => {
               const isBest = offer.isApplied;
               return (
                 <article
@@ -182,7 +174,7 @@ export function ProductOffersSection({
             })}
           </div>
 
-          {!expanded && offers.length > 2 ? (
+          {offers.length > 2 ? (
             <button
               type="button"
               className="product-offers-section__nav"
@@ -195,8 +187,8 @@ export function ProductOffersSection({
         </div>
       ) : null}
 
-      <div className="product-offers-section__footer">
-        {primaryCoupon ? (
+      {primaryCoupon ? (
+        <div className="product-offers-section__footer">
           <div className="product-offers-coupon">
             <div className="product-offers-coupon__icon" aria-hidden>
               <TicketPercent size={20} />
@@ -217,24 +209,8 @@ export function ProductOffersSection({
               {copied ? "Copied" : "Copy"}
             </button>
           </div>
-        ) : null}
-
-        {offers.length > 2 ? (
-          <button
-            type="button"
-            className="product-offers-section__view-all"
-            onClick={() => setExpanded((value) => !value)}
-            aria-expanded={expanded}
-          >
-            {expanded ? "Show less" : "View All Offers"}
-            <ChevronDown
-              size={16}
-              className={expanded ? "is-open" : undefined}
-              aria-hidden
-            />
-          </button>
-        ) : null}
-      </div>
+        </div>
+      ) : null}
     </section>
   );
 }

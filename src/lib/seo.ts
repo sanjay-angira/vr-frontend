@@ -139,7 +139,6 @@ function absoluteUrl(path: string): string {
 }
 
 function ogImageUrl(image?: string | null): string {
-  debugger
   if (image?.trim()) {
     if (/^https?:\/\//i.test(image)) return image.trim();
     return absoluteUrl(image.trim());
