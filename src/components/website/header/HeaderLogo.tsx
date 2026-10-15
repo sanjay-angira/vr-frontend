@@ -6,7 +6,7 @@ export function HeaderLogo() {
   return (
     <Link href="/" className="logo">
       <Image
-        src='/logo/logo.png'
+        src='/logo/logo.svg'
         alt="Vrindavan Rasa"
         width={280}
         height={64}
