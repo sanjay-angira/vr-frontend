@@ -394,7 +394,10 @@ export function normalizeImageArray(value: unknown): string[] {
         const url = String(
           img.originalUrl ?? img.url ?? img.image ?? img.Location ?? img.imageUrl ?? ""
         ).trim();
-        if (url && (img.webp400 || img.webp800 || img.webp1200)) {
+        if (
+          url &&
+          ["webp400", "webp800", "webp1200"].some((key) => key in img)
+        ) {
           rememberImageSizes(url, {
             originalUrl: url,
             webp400: (img.webp400 as string) ?? null,
@@ -429,9 +432,13 @@ function imagePayloadFromUrl(url: string, sortOrder: number) {
   return {
     originalUrl: url,
     sortOrder,
-    ...(remembered?.webp400 ? { webp400: remembered.webp400 } : {}),
-    ...(remembered?.webp800 ? { webp800: remembered.webp800 } : {}),
-    ...(remembered?.webp1200 ? { webp1200: remembered.webp1200 } : {}),
+    ...(remembered
+      ? {
+          webp400: remembered.webp400 ?? null,
+          webp800: remembered.webp800 ?? null,
+          webp1200: remembered.webp1200 ?? null,
+        }
+      : {}),
   };
 }
 
