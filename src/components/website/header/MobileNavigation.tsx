@@ -12,19 +12,16 @@ type MenuItemNode = {
 
 type MobileNavigationProps = {
   items: MenuItemNode[];
-  textColor: string;
   isOpen: boolean;
   onClose: () => void;
 };
 
 export function MobileNavigation({
   items,
-  textColor,
   isOpen,
   onClose,
 }: MobileNavigationProps) {
   const [expandedIds, setExpandedIds] = useState<number[]>([]);
-
   useEffect(() => {
     if (!isOpen) {
       setExpandedIds([]);
@@ -55,7 +52,6 @@ export function MobileNavigation({
               <Link
                 href={item.url}
                 className="nav-button mobile-nav-link"
-                style={{ color: textColor }}
                 tabIndex={isOpen ? 0 : -1}
                 onClick={onClose}
               >
@@ -85,7 +81,6 @@ export function MobileNavigation({
                       key={child.id}
                       href={child.url}
                       className="nav-button is-sub mobile-nav-link"
-                      style={{ color: textColor }}
                       tabIndex={isOpen && isExpanded ? 0 : -1}
                       onClick={onClose}
                     >

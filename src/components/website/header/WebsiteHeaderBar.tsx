@@ -105,12 +105,11 @@ export function WebsiteHeaderBar({ categories }: WebsiteHeaderBarProps) {
           />
           <div className="mobile-nav-panel">
             <div className="container">
-              {/* <MobileNavigation
+              <MobileNavigation
                 items={menu}
-                textColor={HEADER_TEXT_COLOR}
                 isOpen={menuOpen}
                 onClose={() => setMenuOpen(false)}
-              /> */}
+              />
             </div>
           </div>
         </div>
