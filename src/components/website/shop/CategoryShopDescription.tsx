@@ -19,11 +19,14 @@ export function CategoryShopDescription({
       aria-label={`${name} description`}
     >
       {isHtml ? (
-        <div className="ql-snow">
-          <div className="ql-editor" dangerouslySetInnerHTML={{ __html: text }} />
+        <div className="ql-snow rich-html store-catalog__category-description-shell">
+          <div
+            className="ql-editor rich-html store-catalog__category-description-body"
+            dangerouslySetInnerHTML={{ __html: text }}
+          />
         </div>
       ) : (
-        <p>{text}</p>
+        <p className="store-catalog__category-description-copy">{text}</p>
       )}
     </article>
   );

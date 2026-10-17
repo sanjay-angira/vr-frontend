@@ -632,12 +632,15 @@ export function ShopPageContent({
           >
             {/<[a-z][\s\S]*>/i.test(resolvedCategoryDescription) ? (
               <div
+                className="store-catalog__category-description-body ql-editor rich-html"
                 dangerouslySetInnerHTML={{
                   __html: resolvedCategoryDescription,
                 }}
               />
             ) : (
-              <p>{resolvedCategoryDescription}</p>
+              <p className="store-catalog__category-description-copy">
+                {resolvedCategoryDescription}
+              </p>
             )}
           </article>
         )}
