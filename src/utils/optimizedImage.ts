@@ -10,6 +10,7 @@ export type OptimizedImageColumns = {
 export type ImageOptimizationType =
   | "product"
   | "category"
+  | "category_banner"
   | "category_mobile"
   | "blog"
   | "banner"

@@ -19,7 +19,9 @@ export function CategoryShopDescription({
       aria-label={`${name} description`}
     >
       {isHtml ? (
-        <div dangerouslySetInnerHTML={{ __html: text }} />
+        <div className="ql-snow">
+          <div className="ql-editor" dangerouslySetInnerHTML={{ __html: text }} />
+        </div>
       ) : (
         <p>{text}</p>
       )}

@@ -41,7 +41,7 @@ export async function generateMetadata({
   return getCategoryPageMetadata(data.category.name, {
     slug: data.category.slug,
     description: plainDescription,
-    image: data.category.image,
+    image: data.category.bannerImage || data.category.image,
   });
 }
 

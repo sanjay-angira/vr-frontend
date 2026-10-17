@@ -12,6 +12,7 @@ import {
   FormInput,
   FormMultiSelect,
   FormSelect,
+  FormCheckbox,
   FormQuill,
   FormTextarea,
 } from "./shared/FormFields";
@@ -20,7 +21,13 @@ import { fetchCategoriesOptions, fetchOffersOptions } from "./shared/fetchOption
 import { useAdminCrudForm } from "./shared/useAdminCrudForm";
 import { useSlugSync } from "./shared/useSlugSync";
 import { UPLOAD_PATHS } from "./shared/uploadPaths";
-import { activeField, htmlMinLength, requiredString, slugField } from "./shared/validation";
+import {
+  activeField,
+  htmlMinLength,
+  optionalUrl,
+  requiredString,
+  slugField,
+} from "./shared/validation";
 
 type Values = {
   categoryName: string;
@@ -34,10 +41,25 @@ type Values = {
   showOnHomePage: boolean;
   image: string;
   mobileImage: string;
+  bannerImage: string;
   imageAltText: string;
   metaTitle: string;
   metaDescription: string;
   metaKeywords: string;
+  canonicalUrl: string;
+  focusKeyword: string;
+  secondaryKeywords: string;
+  ogTitle: string;
+  ogDescription: string;
+  ogImage: string;
+  robotsIndex: boolean;
+  robotsFollow: boolean;
+  schemaType: string;
+  metaRobots: string;
+  twitterCard: string;
+  twitterTitle: string;
+  twitterDescription: string;
+  twitterImage: string;
 };
 
 const CATEGORY_FORM_STEPS = [
@@ -68,10 +90,25 @@ const initialValues: Values = {
   showOnHomePage: false,
   image: "",
   mobileImage: "",
+  bannerImage: "",
   imageAltText: "",
   metaTitle: "",
   metaDescription: "",
   metaKeywords: "",
+  canonicalUrl: "",
+  focusKeyword: "",
+  secondaryKeywords: "",
+  ogTitle: "",
+  ogDescription: "",
+  ogImage: "",
+  robotsIndex: true,
+  robotsFollow: true,
+  schemaType: "CollectionPage",
+  metaRobots: "",
+  twitterCard: "",
+  twitterTitle: "",
+  twitterDescription: "",
+  twitterImage: "",
 };
 
 const schema = Yup.object({
@@ -86,10 +123,25 @@ const schema = Yup.object({
   showOnHomePage: Yup.boolean(),
   image: Yup.string(),
   mobileImage: Yup.string(),
+  bannerImage: Yup.string(),
   imageAltText: Yup.string(),
   metaTitle: requiredString("Meta title", 3, META_TITLE_MAX),
   metaDescription: requiredString("Meta description", 3, META_DESC_MAX),
   metaKeywords: Yup.string(),
+  canonicalUrl: optionalUrl,
+  focusKeyword: Yup.string().max(255),
+  secondaryKeywords: Yup.string(),
+  ogTitle: Yup.string().max(95),
+  ogDescription: Yup.string().max(320),
+  ogImage: optionalUrl,
+  robotsIndex: Yup.boolean(),
+  robotsFollow: Yup.boolean(),
+  schemaType: Yup.string().max(50),
+  metaRobots: Yup.string(),
+  twitterCard: Yup.string(),
+  twitterTitle: Yup.string(),
+  twitterDescription: Yup.string(),
+  twitterImage: optionalUrl,
 });
 
 function stripHtml(value: string) {
@@ -144,20 +196,17 @@ function StatusToggle({
         aria-checked={checked}
         aria-label={label}
         onClick={onChange}
-        className={`relative ml-auto inline-flex h-6 w-11 shrink-0 rounded-full transition-colors ${
-          checked ? "bg-admin-primary" : "bg-zinc-300"
-        }`}
+        className={`relative ml-auto inline-flex h-6 w-11 shrink-0 rounded-full transition-colors ${checked ? "bg-admin-primary" : "bg-zinc-300"
+          }`}
       >
         <span
-          className={`inline-block h-5 w-5 translate-y-0.5 rounded-full bg-white shadow transition-transform ${
-            checked ? "translate-x-5" : "translate-x-0.5"
-          }`}
+          className={`inline-block h-5 w-5 translate-y-0.5 rounded-full bg-white shadow transition-transform ${checked ? "translate-x-5" : "translate-x-0.5"
+            }`}
         />
       </button>
       <span
-        className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
-          checked ? "bg-emerald-50 text-emerald-700" : "bg-zinc-200 text-zinc-600"
-        }`}
+        className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${checked ? "bg-emerald-50 text-emerald-700" : "bg-zinc-200 text-zinc-600"
+          }`}
       >
         {checked ? "Active" : "Not Active"}
       </span>
@@ -199,10 +248,27 @@ export function CategoryForm({ module, recordId }: AdminFormProps) {
         showOnHomePage: Boolean(r.showOnHomePage ?? false),
         image: String(r.image ?? ""),
         mobileImage: String(r.mobileImage ?? ""),
+        bannerImage: String(r.bannerImage ?? ""),
         imageAltText: String(r.imageAltText ?? ""),
         metaTitle: String(seo.metaTitle ?? r.metaTitle ?? ""),
         metaDescription: String(seo.metaDescription ?? r.metaDescription ?? ""),
         metaKeywords: String(seo.metaKeywords ?? r.metaKeywords ?? ""),
+        canonicalUrl: String(seo.canonicalUrl ?? ""),
+        focusKeyword: String(seo.focusKeyword ?? ""),
+        secondaryKeywords: Array.isArray(seo.secondaryKeywords)
+          ? (seo.secondaryKeywords as string[]).join(", ")
+          : "",
+        ogTitle: String(seo.ogTitle ?? ""),
+        ogDescription: String(seo.ogDescription ?? ""),
+        ogImage: String(seo.ogImage ?? ""),
+        robotsIndex: Boolean(seo.robotsIndex ?? true),
+        robotsFollow: Boolean(seo.robotsFollow ?? true),
+        schemaType: String(seo.schemaType ?? "CollectionPage"),
+        metaRobots: String(seo.metaRobots ?? ""),
+        twitterCard: String(seo.twitterCard ?? ""),
+        twitterTitle: String(seo.twitterTitle ?? ""),
+        twitterDescription: String(seo.twitterDescription ?? ""),
+        twitterImage: String(seo.twitterImage ?? ""),
       };
     },
     mapValuesToPayload: (v) => ({
@@ -217,11 +283,29 @@ export function CategoryForm({ module, recordId }: AdminFormProps) {
       showOnHomePage: v.showOnHomePage,
       image: v.image || null,
       mobileImage: v.mobileImage || null,
+      bannerImage: v.bannerImage || null,
       imageAltText: v.imageAltText || null,
       seo: {
         metaTitle: v.metaTitle,
         metaDescription: v.metaDescription,
-        metaKeywords: v.metaKeywords,
+        metaKeywords: v.metaKeywords || null,
+        canonicalUrl: v.canonicalUrl || null,
+        focusKeyword: v.focusKeyword || null,
+        secondaryKeywords: v.secondaryKeywords
+          .split(/[,\n]/)
+          .map((keyword) => keyword.trim())
+          .filter(Boolean),
+        ogTitle: v.ogTitle || null,
+        ogDescription: v.ogDescription || null,
+        ogImage: v.ogImage || null,
+        robotsIndex: v.robotsIndex,
+        robotsFollow: v.robotsFollow,
+        schemaType: v.schemaType || "CollectionPage",
+        metaRobots: v.metaRobots || null,
+        twitterCard: v.twitterCard || null,
+        twitterTitle: v.twitterTitle || null,
+        twitterDescription: v.twitterDescription || null,
+        twitterImage: v.twitterImage || null,
       },
     }),
   });
@@ -371,42 +455,160 @@ export function CategoryForm({ module, recordId }: AdminFormProps) {
               imageType="category_mobile"
             />
             <FormFullWidth>
+              <FormImageUpload
+                formik={formik}
+                name="bannerImage"
+                label="Category Banner"
+                uploadPath={UPLOAD_PATHS.categories.banner}
+                imageType="category_banner"
+                hint="Wide image shown at the top of this category page."
+              />
+            </FormFullWidth>
+            <FormFullWidth>
               <FormInput formik={formik} name="imageAltText" label="Image Alt Text" />
             </FormFullWidth>
           </div>
         )}
 
         {currentStep === 3 && (
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-            <FormFullWidth>
-              <FormInput
-                formik={formik}
-                name="metaTitle"
-                label="Meta Title"
-                required
-                maxLength={META_TITLE_MAX}
-                hint={`${formik.values.metaTitle.length}/${META_TITLE_MAX}`}
-              />
-            </FormFullWidth>
-            <FormFullWidth>
-              <FormTextarea
-                formik={formik}
-                name="metaDescription"
-                label="Meta Description"
-                required
-                rows={3}
-                maxLength={META_DESC_MAX}
-                hint={`${formik.values.metaDescription.length}/${META_DESC_MAX}`}
-              />
-            </FormFullWidth>
-            <FormFullWidth>
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+              <FormFullWidth>
+                <FormInput
+                  formik={formik}
+                  name="metaTitle"
+                  label="Meta Title"
+                  required
+                  maxLength={META_TITLE_MAX}
+                  hint={`${formik.values.metaTitle.length}/${META_TITLE_MAX}`}
+                />
+              </FormFullWidth>
+              <FormFullWidth>
+                <FormTextarea
+                  formik={formik}
+                  name="metaDescription"
+                  label="Meta Description"
+                  required
+                  rows={3}
+                  maxLength={META_DESC_MAX}
+                  hint={`${formik.values.metaDescription.length}/${META_DESC_MAX}`}
+                />
+              </FormFullWidth>
               <FormInput
                 formik={formik}
                 name="metaKeywords"
                 label="Meta Keywords"
                 hint="Separate keywords with commas"
               />
-            </FormFullWidth>
+              <FormInput formik={formik} name="focusKeyword" label="Focus Keyword" />
+              <FormInput
+                formik={formik}
+                name="canonicalUrl"
+                label="Canonical URL"
+                type="url"
+              />
+              <FormSelect
+                formik={formik}
+                name="schemaType"
+                label="Schema Type"
+                options={[
+                  { label: "Collection Page", value: "CollectionPage" },
+                  { label: "Web Page", value: "WebPage" },
+                  { label: "Breadcrumb List", value: "BreadcrumbList" },
+                ]}
+              />
+              <FormFullWidth>
+                <FormTextarea
+                  formik={formik}
+                  name="secondaryKeywords"
+                  label="Secondary Keywords"
+                  rows={2}
+                  hint="Separate keywords with commas or new lines"
+                />
+              </FormFullWidth>
+              <FormFullWidth>
+                <div className="flex flex-col gap-4 rounded-lg border border-zinc-200 p-4">
+                  <h3 className="text-sm font-semibold text-zinc-900">
+                    Search Engine Directives
+                  </h3>
+                  <div className="flex flex-wrap gap-6">
+                    <FormCheckbox
+                      formik={formik}
+                      name="robotsIndex"
+                      label="Allow search engines to index this category"
+                    />
+                    <FormCheckbox
+                      formik={formik}
+                      name="robotsFollow"
+                      label="Allow search engines to follow links"
+                    />
+                  </div>
+                  <FormInput
+                    formik={formik}
+                    name="metaRobots"
+                    label="Legacy Robots Directive"
+                    hint="Optional compatibility field, e.g. index, follow"
+                  />
+                </div>
+              </FormFullWidth>
+              <FormFullWidth>
+                <div className="space-y-4 rounded-lg border border-zinc-200 p-4">
+                  <h3 className="text-sm font-semibold text-zinc-900">
+                    Open Graph (Social Sharing)
+                  </h3>
+                  <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                    <FormInput formik={formik} name="ogTitle" label="OG Title" />
+                    <FormInput
+                      formik={formik}
+                      name="ogImage"
+                      label="OG Image URL"
+                      type="url"
+                    />
+                    <FormFullWidth>
+                      <FormTextarea
+                        formik={formik}
+                        name="ogDescription"
+                        label="OG Description"
+                        rows={2}
+                      />
+                    </FormFullWidth>
+                  </div>
+                </div>
+              </FormFullWidth>
+              <FormFullWidth>
+                <div className="space-y-4 rounded-lg border border-zinc-200 p-4">
+                  <h3 className="text-sm font-semibold text-zinc-900">
+                    Twitter Card (Legacy Social Sharing)
+                  </h3>
+                  <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                    <FormInput
+                      formik={formik}
+                      name="twitterCard"
+                      label="Twitter Card Type"
+                    />
+                    <FormInput
+                      formik={formik}
+                      name="twitterTitle"
+                      label="Twitter Title"
+                    />
+                    <FormFullWidth>
+                      <FormTextarea
+                        formik={formik}
+                        name="twitterDescription"
+                        label="Twitter Description"
+                        rows={2}
+                      />
+                    </FormFullWidth>
+                    <FormInput
+                      formik={formik}
+                      name="twitterImage"
+                      label="Twitter Image URL"
+                      type="url"
+                    />
+                  </div>
+                </div>
+              </FormFullWidth>
+            </div>
           </div>
         )}
 

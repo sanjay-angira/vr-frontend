@@ -16,6 +16,7 @@ export type ShopCategoryInfo = {
   slug: string;
   description: string;
   image?: string | null;
+  bannerImage?: string | null;
 };
 
 export type CategoryShopInitialData = {
@@ -49,6 +50,7 @@ type CategoriesResponse = {
       slug?: string | null;
       description?: string | null;
       image?: string | null;
+      bannerImage?: string | null;
     }>;
   };
 };
@@ -154,6 +156,7 @@ export async function fetchCategoryShopPage(
       listMatch?.description || filterMatch?.description || ""
     ).trim(),
     image: filterMatch?.image ?? listMatch?.image ?? null,
+    bannerImage: listMatch?.bannerImage ?? null,
   };
 
   const bounds = {

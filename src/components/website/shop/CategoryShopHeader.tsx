@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import type { ShopCategoryInfo } from "@/services/website/shopCatalogApi";
 
@@ -9,6 +10,17 @@ type CategoryShopHeaderProps = {
 export function CategoryShopHeader({ category }: CategoryShopHeaderProps) {
   return (
     <div className="store-catalog__category-head">
+      {category.bannerImage ? (
+        <div className="store-catalog__category-banner">
+          <Image
+            src={category.bannerImage}
+            alt={`${category.name} category banner`}
+            fill
+            priority
+            sizes="(max-width: 768px) 100vw, 1200px"
+          />
+        </div>
+      ) : null}
       <nav className="store-catalog__breadcrumbs" aria-label="Breadcrumb">
         <Link href="/">Home</Link>
         <span aria-hidden>›</span>

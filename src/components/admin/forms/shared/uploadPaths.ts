@@ -5,6 +5,7 @@ export const UPLOAD_PATHS = {
   categories: {
     image: "/product-category/images",
     mobile: "/product-category/mobile",
+    banner: "/product-category/banner",
   },
   offers: "/offers/images",
   coupons: "/coupons/images",
