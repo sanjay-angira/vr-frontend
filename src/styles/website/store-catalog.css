@@ -63,8 +63,14 @@
 .store-catalog__category-description {
   margin-top: 0.5rem;
   padding: 1.75rem 1.5rem;
-  border-top: 1px solid color-mix(in srgb, var(--vr-forest) 14%, transparent);
-  background: #fff;
+    background: var(--vr-white);
+    border: 1px solid #c59d5f33;
+    border-radius: 0;
+   
+    transition: transform .25s,box-shadow .25s,border-color .25s;
+   
+    overflow: hidden;
+    box-shadow: 0 8px 20px #0a2a1b14;
 }
 
 .store-catalog__category-description .ql-editor {
