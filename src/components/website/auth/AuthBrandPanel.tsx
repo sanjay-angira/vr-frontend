@@ -119,7 +119,7 @@ export default function AuthBrandPanel() {
       <div className="auth-brand-content">
         <div className="auth-brand-logo">
           <Image
-            src='../../public/logo/logo.png'
+            src="/logo/logo.svg"
             alt="Vrindavan Rasa"
             width={280}
             height={80}

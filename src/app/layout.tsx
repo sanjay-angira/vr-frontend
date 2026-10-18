@@ -20,9 +20,9 @@ export const metadata: Metadata = {
   keywords: home.keywords,
   applicationName: SITE_NAME,
   icons: {
-    icon: [{ url: "/logo/logo.png", type: "image/png" }],
-    shortcut: "/logo/logo.png",
-    apple: [{ url: "/logo/logo.png", type: "image/png" }],
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+    apple: [{ url: "/logo/apple-touch-icon.png", type: "image/png" }],
   },
   openGraph: {
     type: "website",

@@ -24,7 +24,7 @@ export function getOrganizationSchema(): JsonLdObject {
     "@type": "Organization",
     name: getSiteName(),
     url: getSiteUrl(),
-    logo: abs("/logo/logo.png"),
+    logo: abs("/logo/logo.svg"),
     image: abs("/images/og-image.jpg"),
     description: SEO_PAGES.home.description,
   };
@@ -195,7 +195,7 @@ export function getBlogPostingSchema(options: {
       name: SITE_NAME,
       logo: {
         "@type": "ImageObject",
-        url: abs("/logo/logo.png"),
+        url: abs("/logo/logo.svg"),
       },
     },
   };
