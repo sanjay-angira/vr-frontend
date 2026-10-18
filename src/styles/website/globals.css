@@ -3156,9 +3156,22 @@ body {
   margin-top: 1.5rem;
 }
 
-.product-page-shell .product-copy-block {
-  margin-top: 1.5rem;
-  padding-top: 1.25rem;
+.product-page-shell .product-copy-block,
+.product-page-shell .product-faq-block,
+.product-page-shell .product-reviews-wrap {
+  margin-top: clamp(1.25rem, 2.5vw, 1.75rem);
+  padding: clamp(1rem, 2.5vw, 1.75rem);
+  background: #fff;
+  border: 1px solid rgba(197, 157, 95, 0.22);
+}
+
+.product-page-shell .product-reviews-wrap .pdp-reviews {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.product-page-shell .product-copy-block .product-section-heading {
+  margin-bottom: 1rem;
 }
 
 .product-gallery {
