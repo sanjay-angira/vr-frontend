@@ -13,7 +13,6 @@ import { RecentlyViewedSection } from "@/components/website/sections/RecentlyVie
 type HomePageSectionsProps = {
   sections: HomepageSection[];
   banners: HomepageBanner[];
-  bannerEffect?: string;
 };
 
 function mapProducts(products: HomepageSection["products"]): WebsiteProductCardData[] {
@@ -92,12 +91,11 @@ function getViewAllLabel(section: HomepageSection): string | undefined {
 export function HomePageSections({
   sections,
   banners,
-  bannerEffect,
 }: HomePageSectionsProps) {
   return (
     <>
       {banners.length > 0 && (
-        <HeroBannerSection banners={banners} effect={bannerEffect} />
+        <HeroBannerSection banners={banners}/>
       )}
       {sections.map((section) => {
         const key = `${section.type}-${section.id}`;

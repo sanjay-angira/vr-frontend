@@ -18,11 +18,7 @@ const Slider = dynamic(() => import("react-slick"), {
 export type HeroBannerEffect = "fade" | "slide";
 
 type HeroBannerSectionProps = {
-  title?: string;
-  subtitle?: string;
   banners: HomepageBanner[];
-  /** Carousel transition. Defaults to fade. */
-  effect?: HeroBannerEffect | string | null;
 };
 
 type ArrowProps = {
@@ -59,12 +55,8 @@ function NextArrow({ onClick }: ArrowProps) {
   );
 }
 
-export function HeroBannerSection({
-  banners,
-  effect,
-}: HeroBannerSectionProps) {
+export function HeroBannerSection({banners}: HeroBannerSectionProps) {
   const [mounted, setMounted] = useState(false);
-  const bannerEffect = normalizeEffect(effect);
   const slides = useMemo(
     () =>
       Array.isArray(banners)
@@ -82,8 +74,8 @@ export function HeroBannerSection({
     () => ({
       dots: count > 1,
       infinite: count > 1,
-      speed: bannerEffect === "slide" ? 600 : 700,
-      fade: bannerEffect === "fade",
+      speed:600,
+      fade: false,
       cssEase: "ease-in-out",
       slidesToShow: 1,
       slidesToScroll: 1,
@@ -102,7 +94,7 @@ export function HeroBannerSection({
       waitForAnimate: false,
       dotsClass: "slick-dots cms-hero-banner__dots",
     }),
-    [count, bannerEffect]
+    [count]
   );
 
   if (count === 0) {
@@ -128,10 +120,10 @@ export function HeroBannerSection({
 
   return (
     <section
-      className={`cms-hero-banner cms-hero-banner--slick cms-hero-banner--${bannerEffect}`}
+      className="cms-hero-banner cms-hero-banner--slick"
       aria-label="Featured banner"
     >
-      <Slider key={`hero-slick-${bannerEffect}-${count}`} {...settings}>
+      <Slider key={`hero-slick-${count}`} {...settings}>
         {slides.map((banner, index) => (
           <div key={`${banner.id}-${index}`}>
             <HeroSlide banner={banner} />

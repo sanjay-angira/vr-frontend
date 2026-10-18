@@ -46,10 +46,6 @@ async function HomePageContent() {
       <HomePageSections
         sections={sections}
         banners={banners}
-        bannerEffect={
-          sections.find((section) => section.type === "hero_banner")?.data
-            ?.bannerEffect
-        }
       />
     </>
   );
