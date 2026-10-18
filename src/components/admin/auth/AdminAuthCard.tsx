@@ -16,7 +16,7 @@ export function AdminAuthCard({
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
           <Image
-            src="/logo/logo.png"
+            src="/logo/logo.svg"
             alt="Vrindavan Rasa"
             width={240}
             height={70}

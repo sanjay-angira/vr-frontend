@@ -1,7 +1,16 @@
 import { unstable_cache } from "next/cache";
 import { getData } from "@/services/api/apiService";
 import { API_ENDPOINTS } from "@/services/api/API_ENDPOINT";
-import type { HomepageApiResponse, HomepageSection } from "@/types/homepage";
+import type {
+  HomepageApiResponse,
+  HomepageBanner,
+  HomepageSection,
+} from "@/types/homepage";
+
+type HomepageBannersApiResponse = {
+  success: boolean;
+  data?: HomepageBanner[];
+};
 
 async function loadHomepageSections(): Promise<HomepageSection[]> {
   try {
@@ -23,5 +32,29 @@ async function loadHomepageSections(): Promise<HomepageSection[]> {
 export const fetchHomepageSections = unstable_cache(
   loadHomepageSections,
   ["customer-homepage-sections"],
+  { revalidate: 300 }
+);
+
+async function loadHomepageBanners(): Promise<HomepageBanner[]> {
+  try {
+    const response = (await getData(
+      API_ENDPOINTS.CUSTOMER.HOMEPAGE_BANNERS,
+      undefined,
+      { auth: false }
+    )) as HomepageBannersApiResponse;
+
+    if (response?.success && Array.isArray(response.data)) {
+      return response.data;
+    }
+  } catch {
+    return [];
+  }
+
+  return [];
+}
+
+export const fetchHomepageBanners = unstable_cache(
+  loadHomepageBanners,
+  ["customer-homepage-banners"],
   { revalidate: 300 }
 );

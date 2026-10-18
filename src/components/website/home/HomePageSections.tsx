@@ -1,4 +1,4 @@
-import type { HomepageSection } from "@/types/homepage";
+import type { HomepageBanner, HomepageSection } from "@/types/homepage";
 import type { WebsiteProductCardData } from "@/components/website/cards/ProductCard";
 import type { Category } from "@/components/website/cards/CategoryCard";
 import type { SectionHeadingProps } from "@/components/website/shared/SectionHeading";
@@ -12,6 +12,8 @@ import { RecentlyViewedSection } from "@/components/website/sections/RecentlyVie
 
 type HomePageSectionsProps = {
   sections: HomepageSection[];
+  banners: HomepageBanner[];
+  bannerEffect?: string;
 };
 
 function mapProducts(products: HomepageSection["products"]): WebsiteProductCardData[] {
@@ -87,24 +89,23 @@ function getViewAllLabel(section: HomepageSection): string | undefined {
   return title ? `View All ${title}` : undefined;
 }
 
-export function HomePageSections({ sections }: HomePageSectionsProps) {
+export function HomePageSections({
+  sections,
+  banners,
+  bannerEffect,
+}: HomePageSectionsProps) {
   return (
     <>
+      {banners.length > 0 && (
+        <HeroBannerSection banners={banners} effect={bannerEffect} />
+      )}
       {sections.map((section) => {
         const key = `${section.type}-${section.id}`;
         const heading = getSectionHeadingProps(section);
 
         switch (section.type) {
           case "hero_banner":
-            return (
-              <HeroBannerSection
-                key={key}
-                title={heading.title}
-                subtitle={heading.eyebrow}
-                banners={section.banners}
-                effect={section.data?.bannerEffect}
-              />
-            );
+            return null;
 
           case "product_slider":
             if (section.products.length === 0) return null;
@@ -180,14 +181,6 @@ export function HomePageSections({ sections }: HomePageSectionsProps) {
 
             return (
               <div key={key}>
-                {section.banners.length > 0 && (
-                  <HeroBannerSection
-                    title={heading.title}
-                    subtitle={heading.eyebrow}
-                    banners={section.banners}
-                    effect={section.data?.bannerEffect}
-                  />
-                )}
                 {section.categories.length > 0 && (
                   <CategorySection
                     heading={heading}

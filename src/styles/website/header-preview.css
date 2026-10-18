@@ -226,6 +226,7 @@
 
 .logo-image {
   width: auto;
+  height: auto;
   object-fit: contain;
 }
 
@@ -237,7 +238,7 @@
 .logo-image--desktop,
 .logo-fallback--desktop {
   display: block;
-  height: 52px;
+  max-height: 52px;
   max-width: min(280px, 46vw);
 }
 
@@ -250,7 +251,7 @@
   .logo-image--mobile,
   .logo-fallback--mobile {
     display: block;
-    height: 40px;
+    max-height: 40px;
     max-width: min(210px, 58vw);
   }
 

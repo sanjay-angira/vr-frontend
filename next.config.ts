@@ -77,9 +77,9 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       // Browsers often request /favicon.ico by default
-      { source: "/favicon.ico", destination: "/logo/logo.png" },
+      { source: "/favicon.ico", destination: "/logo/logo.svg" },
       // Old OG path 404'd on production and broke WhatsApp/Facebook previews
-      { source: "/og-image.jpg", destination: "/logo/logo.png" },
+      { source: "/og-image.jpg", destination: "/logo/logo.svg" },
     ];
   },
 };

@@ -202,6 +202,7 @@ export const API_ENDPOINTS = {
 
   CUSTOMER: {
     HOMEPAGE: "customer/homepage",
+    HOMEPAGE_BANNERS: "customer/banners",
     SITEMAP: "customer/sitemap",
     STORE_PRODUCTS: "customer/all-products",
     PRODUCT_DETAILS: (slug: string) => `customer/product/${slug}`,
@@ -255,5 +256,4 @@ export const API_ENDPOINTS = {
 } as const;
 
 export default API_ENDPOINTS;
-
 

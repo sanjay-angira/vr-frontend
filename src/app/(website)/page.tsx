@@ -3,7 +3,10 @@ import type { Metadata } from "next";
 import { HomePageSkeleton } from "@/components/website/shared/HomePageSkeleton";
 import { HomePageSections } from "@/components/website/home/HomePageSections";
 import { JsonLd } from "@/components/website/seo/JsonLd";
-import { fetchHomepageSections } from "@/services/website/homepageService";
+import {
+  fetchHomepageBanners,
+  fetchHomepageSections,
+} from "@/services/website/homepageService";
 import { getWebSiteSchema } from "@/lib/schema";
 import { getStaticPageMetadata } from "@/lib/seo";
 
@@ -18,10 +21,13 @@ export default function Page() {
 }
 
 async function HomePageContent() {
-  const sections = await fetchHomepageSections();
+  const [sections, banners] = await Promise.all([
+    fetchHomepageSections(),
+    fetchHomepageBanners(),
+  ]);
   const websiteLd = getWebSiteSchema();
 
-  if (sections.length === 0) {
+  if (sections.length === 0 && banners.length === 0) {
     return (
       <>
         <JsonLd data={websiteLd} />
@@ -37,7 +43,14 @@ async function HomePageContent() {
   return (
     <>
       <JsonLd data={websiteLd} />
-      <HomePageSections sections={sections} />
+      <HomePageSections
+        sections={sections}
+        banners={banners}
+        bannerEffect={
+          sections.find((section) => section.type === "hero_banner")?.data
+            ?.bannerEffect
+        }
+      />
     </>
   );
 }
