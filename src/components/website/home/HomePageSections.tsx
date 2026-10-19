@@ -92,6 +92,7 @@ export function HomePageSections({
   sections,
   banners,
 }: HomePageSectionsProps) {
+  console.log("HomePageSections sections:", sections);
   return (
     <>
       {banners.length > 0 && (
