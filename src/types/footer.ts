@@ -7,11 +7,6 @@ export interface FooterLinkItem {
   position: number;
 }
 
-export interface FooterListItem extends FooterLinkItem {
-  sectionTitle: string;
-  sectionPosition: number;
-}
-
 export interface FooterSettings {
   email?: string;
   phone?: string;
@@ -45,22 +40,4 @@ export interface FooterSection {
 export interface FooterData {
   settings: FooterSettings | null;
   sections: FooterSection[];
-}
-
-export interface AdminFooterSection {
-  id: number;
-  title: string;
-  type: FooterSectionType | string;
-  position: number;
-  status?: boolean;
-}
-
-export interface AdminFooterLinkRow {
-  id: number;
-  label: string;
-  url?: string;
-  position?: number;
-  status?: boolean;
-  sectionId?: number;
-  section?: AdminFooterSection;
 }

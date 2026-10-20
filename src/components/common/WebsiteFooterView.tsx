@@ -22,7 +22,7 @@ type SectionProps = {
 
 function FooterLink({ item }: { item: FooterLinkItem }) {
   const href = item.url?.trim() || "#";
-  const isExternal = href.startsWith("http");
+  const isExternal = /^(https?:|mailto:|tel:)/i.test(href);
 
   if (isExternal) {
     return (
@@ -117,7 +117,10 @@ function ContactSection({ section, settings }: SectionProps) {
             {phone && (
               <li>
                 <Phone size={16} />
-                <a href={`tel:${phone.replace(/\s/g, "")}`} className="footer-link">
+                <a
+                  href={`tel:${phone.replace(/\s/g, "")}`}
+                  className="footer-link"
+                >
                   {phone}
                 </a>
               </li>
@@ -163,7 +166,7 @@ function ContactSection({ section, settings }: SectionProps) {
 
 function renderFooterSection(
   section: FooterSection,
-  settings: FooterData["settings"]
+  settings: FooterData["settings"],
 ) {
   switch (section.type) {
     case "menu":
@@ -192,7 +195,9 @@ export function WebsiteFooterView({ data }: WebsiteFooterViewProps) {
     <footer className="footer">
       <div className="container">
         <div className="footer-grid">
-          {gridSections.map((section) => renderFooterSection(section, settings))}
+          {gridSections.map((section) =>
+            renderFooterSection(section, settings),
+          )}
         </div>
 
         <div className="footer-bottom">

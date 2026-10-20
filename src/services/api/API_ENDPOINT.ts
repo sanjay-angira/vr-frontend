@@ -174,16 +174,6 @@ export const API_ENDPOINTS = {
     BY_SLUG: (slug: string) => `cms-pages/slug/${slug}`,
   },
 
-  FOOTER: {
-    PUBLIC: "footer/public",
-    SECTIONS: "admin/footer-sections",
-    SECTION_BY_ID: (id: number | string) => `admin/footer-sections/${id}`,
-    ITEMS: "footer-items",
-    ITEM_BY_ID: (id: number | string) => `footer-items/${id}`,
-    ITEMS_BY_SECTION: (sectionId: number | string) =>
-      `footer-items/section/${sectionId}`,
-  },
-
   CONTACT_LEADS: {
     LIST: "contact-us-leads",
     DETAILS: (id: number | string) => `contact-us-leads/${id}`,
@@ -225,7 +215,8 @@ export const API_ENDPOINTS = {
     ORDERS: "customer/orders",
     ADDRESSES: "customer/addresses",
     ADDRESS_BY_ID: (id: number | string) => `customer/addresses/${id}`,
-    ADDRESS_DEFAULT: (id: number | string) => `customer/addresses/${id}/default`,
+    ADDRESS_DEFAULT: (id: number | string) =>
+      `customer/addresses/${id}/default`,
     WISHLIST: "customer/wishlist",
     WISHLIST_IDS: "customer/wishlist/ids",
     WISHLIST_COUNT: "customer/wishlist/count",
@@ -256,4 +247,3 @@ export const API_ENDPOINTS = {
 } as const;
 
 export default API_ENDPOINTS;
-

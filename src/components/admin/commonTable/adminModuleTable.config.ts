@@ -32,7 +32,6 @@ export type AdminModuleKey =
   | "blog-categories"
   | "blog-tags"
   | "reviews"
-  | "footer-settings"
   | "website-layout"
   | "users"
   | "customers"
@@ -197,13 +196,6 @@ export const adminModuleTableConfig: Record<
     actions: ["add", "view", "edit", "delete"],
     addLabel: "Add page",
   },
-  "footer-settings": {
-    label: "Footer Settings",
-    description: "Manage footer settings",
-    columns: [],
-    actions: ["add", "view", "edit", "delete"],
-    addLabel: "Add setting",
-  },
   "website-layout": {
     label: "Website Layout",
     description: "Manage homepage sections",
@@ -272,22 +264,22 @@ export function getAdminModuleApiPath(module: AdminModuleKey): string {
 
 export function getAdminModuleEditPath(
   module: string,
-  id: string | number
+  id: string | number,
 ): string {
   return `/admin/${module}/edit/${id}`;
 }
 
 export function getAdminModuleViewPath(
   module: string,
-  id: string | number
+  id: string | number,
 ): string {
   return `/admin/${module}/view/${id}`;
 }
 
 export function getVisibleAdminColumns(
-  columns: AdminTableColumnDefinition[]
+  columns: AdminTableColumnDefinition[],
 ): AdminTableColumnDefinition[] {
   return columns.filter(
-    (column) => column.visible && column.datatype !== "button"
+    (column) => column.visible && column.datatype !== "button",
   );
 }

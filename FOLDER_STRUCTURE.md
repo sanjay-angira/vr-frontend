@@ -59,7 +59,6 @@ src/
 │   │   ├── auth/             # Login/reset/forgot forms
 │   │   ├── commonTable/      # Table abstractions and config
 │   │   ├── dashboard/        # Stats and charts
-│   │   ├── footer-settings/  # Footer configuration UI
 │   │   ├── forms/            # CRUD admin forms and shared form helpers
 │   │   ├── layout/           # Sidebar/header/panel shell
 │   │   ├── orders/          # Order view components

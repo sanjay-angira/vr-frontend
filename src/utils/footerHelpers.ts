@@ -1,26 +1,19 @@
-import type {
-  FooterData,
-  FooterLinkItem,
-  FooterListItem,
-  FooterSection,
-} from "@/types/footer";
+import type { FooterData, FooterLinkItem, FooterSection } from "@/types/footer";
 import { STATIC_FOOTER_SETTINGS } from "@/types/footer";
 
-export function sortByPosition<T extends { position?: number }>(items: T[]): T[] {
+export function sortByPosition<T extends { position?: number }>(
+  items: T[],
+): T[] {
   return [...items].sort(
-    (a, b) => Number(a.position ?? 0) - Number(b.position ?? 0)
+    (a, b) => Number(a.position ?? 0) - Number(b.position ?? 0),
   );
-}
-
-function normalizeLink(item: FooterLinkItem): FooterLinkItem {
-  return { ...item, position: Number(item.position) || 0 };
 }
 
 function normalizeSection(section: FooterSection): FooterSection {
   return {
     ...section,
     position: Number(section.position) || 0,
-    items: sortByPosition(section.items ?? []).map(normalizeLink),
+    items: sortByPosition(section.items ?? []),
   };
 }
 
@@ -41,34 +34,10 @@ function emptyContactSection(): FooterSection {
   };
 }
 
-export function buildLiveFooterData(items: FooterListItem[]): FooterData {
-  const columns = new Map<string, FooterSection>();
-
-  for (const item of sortByPosition(items)) {
-    const title = item.sectionTitle?.trim() || "Information";
-    let section = columns.get(title);
-    if (!section) {
-      section = {
-        id: columns.size + 1,
-        title,
-        type: "menu",
-        position: Number(item.sectionPosition) || columns.size + 1,
-        items: [],
-      };
-      columns.set(title, section);
-    }
-
-    section.items.push({
-      id: item.id,
-      label: item.label,
-      url: item.url,
-      position: item.position,
-    });
-  }
-
+export function buildLiveFooterData(sections: FooterSection[]): FooterData {
   return normalizeFooterData({
     settings: STATIC_FOOTER_SETTINGS,
-    sections: [emptyContactSection(), ...sortByPosition([...columns.values()])],
+    sections: [emptyContactSection(), ...sections],
   });
 }
 

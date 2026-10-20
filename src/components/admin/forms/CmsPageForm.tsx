@@ -9,17 +9,24 @@ import {
   FormFullWidth,
   FormInput,
   FormQuill,
+  FormSelect,
   FormSection,
   FormToggle,
 } from "./shared/FormFields";
 import { useAdminCrudForm } from "./shared/useAdminCrudForm";
 import { useSlugSync } from "./shared/useSlugSync";
-import { activeField, htmlMinLength, requiredString, slugField } from "./shared/validation";
+import {
+  activeField,
+  htmlMinLength,
+  requiredString,
+  slugField,
+} from "./shared/validation";
 
 type Values = {
   title: string;
   slug: string;
   content: string;
+  type: string;
   isActive: boolean;
 };
 
@@ -27,13 +34,20 @@ const initialValues: Values = {
   title: "",
   slug: "",
   content: "",
+  type: "",
   isActive: true,
 };
+
+const pageTypes = [
+  { label: "Information", value: "information" },
+  { label: "Policy", value: "policy" },
+];
 
 const schema = Yup.object({
   title: requiredString("Title", 3, 200),
   slug: slugField("Slug"),
   content: htmlMinLength("Content", 10),
+  type: Yup.string().oneOf(["", "information", "policy"]).optional(),
   isActive: activeField,
 });
 
@@ -48,6 +62,7 @@ export function CmsPageForm({ module, recordId }: AdminFormProps) {
       title: String(r.title ?? ""),
       slug: String(r.slug ?? ""),
       content: String(r.content ?? ""),
+      type: String(r.type ?? ""),
       isActive: Boolean(r.isActive ?? true),
     }),
   });
@@ -65,8 +80,20 @@ export function CmsPageForm({ module, recordId }: AdminFormProps) {
         <FormSection title="Page details">
           <FormInput formik={formik} name="title" label="Title" required />
           <FormInput formik={formik} name="slug" label="Slug" required />
+          <FormSelect
+            formik={formik}
+            name="type"
+            label="Page type"
+            options={pageTypes}
+            placeholder="No type"
+          />
           <FormFullWidth>
-            <FormQuill formik={formik} name="content" label="Content" required />
+            <FormQuill
+              formik={formik}
+              name="content"
+              label="Content"
+              required
+            />
           </FormFullWidth>
           <FormFullWidth>
             <FormToggle formik={formik} name="isActive" label="Active Status" />

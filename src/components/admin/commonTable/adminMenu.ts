@@ -1,4 +1,3 @@
-
 export type AdminMenuItem = {
   label: string;
   href: string;
@@ -9,7 +8,6 @@ export type AdminMenuSection = {
   title: string;
   items: AdminMenuItem[];
 };
-
 
 export const adminMenuSections: AdminMenuSection[] = [
   {
@@ -79,11 +77,6 @@ export const adminMenuSections: AdminMenuSection[] = [
         label: "Reviews",
         href: "/admin/reviews",
         icon: "star",
-      },
-      {
-        label: "Footer Settings",
-        href: "/admin/footer-settings",
-        icon: "panel-bottom",
       },
       {
         label: "Website layout",
