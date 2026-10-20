@@ -15,7 +15,9 @@ type HomePageSectionsProps = {
   banners: HomepageBanner[];
 };
 
-function mapProducts(products: HomepageSection["products"]): WebsiteProductCardData[] {
+function mapProducts(
+  products: HomepageSection["products"],
+): WebsiteProductCardData[] {
   return products.map((product) => ({
     id: product.id,
     slug: product.slug,
@@ -64,7 +66,9 @@ function mapBlogPosts(blogs: HomepageSection["blogs"]) {
   }));
 }
 
-export function getSectionHeadingProps(section: HomepageSection): SectionHeadingProps {
+export function getSectionHeadingProps(
+  section: HomepageSection,
+): SectionHeadingProps {
   const data = (section.data ?? {}) as HomepageSection["data"] &
     Record<string, unknown>;
 
@@ -88,16 +92,10 @@ function getViewAllLabel(section: HomepageSection): string | undefined {
   return title ? `View All ${title}` : undefined;
 }
 
-export function HomePageSections({
-  sections,
-  banners,
-}: HomePageSectionsProps) {
-  console.log("HomePageSections sections:", sections);
+export function HomePageSections({ sections, banners }: HomePageSectionsProps) {
   return (
     <>
-      {banners.length > 0 && (
-        <HeroBannerSection banners={banners}/>
-      )}
+      {banners.length > 0 && <HeroBannerSection banners={banners} />}
       {sections.map((section) => {
         const key = `${section.type}-${section.id}`;
         const heading = getSectionHeadingProps(section);
@@ -161,20 +159,16 @@ export function HomePageSections({
               .toLowerCase();
 
             if (customKey === "why_choose") {
-              return (
-                <WhyChooseSection
-                  key={key}
-                  heading={heading}
-                />
-              );
+              return <WhyChooseSection key={key} heading={heading} />;
             }
 
             if (customKey === "recently_viewed") {
-              return (<RecentlyViewedSection
-                key={key}
-                heading={heading}
-                viewAllLabel={getViewAllLabel(section)}
-              />
+              return (
+                <RecentlyViewedSection
+                  key={key}
+                  heading={heading}
+                  viewAllLabel={getViewAllLabel(section)}
+                />
               );
             }
 

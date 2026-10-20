@@ -21,10 +21,22 @@ export default function Page() {
 }
 
 async function HomePageContent() {
-  const [sections, banners] = await Promise.all([
+  const [sectionsResult, bannersResult] = await Promise.allSettled([
     fetchHomepageSections(),
     fetchHomepageBanners(),
   ]);
+  const sections =
+    sectionsResult.status === "fulfilled" ? sectionsResult.value : [];
+  const banners =
+    bannersResult.status === "fulfilled" ? bannersResult.value : [];
+
+  if (sectionsResult.status === "rejected") {
+    console.error("Failed to load homepage sections:", sectionsResult.reason);
+  }
+  if (bannersResult.status === "rejected") {
+    console.error("Failed to load homepage banners:", bannersResult.reason);
+  }
+
   const websiteLd = getWebSiteSchema();
 
   if (sections.length === 0 && banners.length === 0) {
