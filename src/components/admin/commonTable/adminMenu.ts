@@ -76,21 +76,6 @@ export const adminMenuSections: AdminMenuSection[] = [
         icon: "file-text",
       },
       {
-        label: "Blog Posts",
-        href: "/admin/blogs",
-        icon: "newspaper",
-      },
-      {
-        label: "Blog Categories",
-        href: "/admin/blog-categories",
-        icon: "folder-tree",
-      },
-      {
-        label: "Blog Tags",
-        href: "/admin/blog-tags",
-        icon: "hash",
-      },
-      {
         label: "Reviews",
         href: "/admin/reviews",
         icon: "star",
@@ -104,6 +89,26 @@ export const adminMenuSections: AdminMenuSection[] = [
         label: "Website layout",
         href: "/admin/website-layout",
         icon: "layout-template",
+      },
+    ],
+  },
+  {
+    title: "Blog",
+    items: [
+      {
+        label: "Blog Posts",
+        href: "/admin/blogs",
+        icon: "newspaper",
+      },
+      {
+        label: "Blog Categories",
+        href: "/admin/blog-categories",
+        icon: "folder-tree",
+      },
+      {
+        label: "Blog Tags",
+        href: "/admin/blog-tags",
+        icon: "hash",
       },
     ],
   },
