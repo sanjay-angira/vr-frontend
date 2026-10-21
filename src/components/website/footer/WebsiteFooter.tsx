@@ -1,7 +1,7 @@
-import { fetchFooterData } from "@/services/website/footerService";
+import { fetchFooterSections } from "@/services/website/footerService";
 import { WebsiteFooterView } from "@/components/common/WebsiteFooterView";
 
 export async function WebsiteFooter() {
-  const footerData = await fetchFooterData();
-  return <WebsiteFooterView data={footerData} />;
+  const sections = await fetchFooterSections();
+  return <WebsiteFooterView sections={sections} />;
 }

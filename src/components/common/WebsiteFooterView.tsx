@@ -1,9 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Mail, MapPin, Phone } from "lucide-react";
-import type { FooterData, FooterLinkItem, FooterSection } from "@/types/footer";
+import type { FooterLinkItem, FooterSection } from "@/types/footer";
 import { STATIC_FOOTER_SOCIAL } from "@/types/footer";
-import { getSectionLinks, sortByPosition } from "@/utils/footerHelpers";
 import razorpayLogo from "../../../public/social-icons/Razorpay.svg";
 import facebookIcon from "../../../public/social-icons/facebook.svg";
 import instagramIcon from "../../../public/social-icons/instagram.svg";
@@ -12,11 +11,11 @@ import pinterestIcon from "../../../public/social-icons/pinterest.svg";
 import youtubeIcon from "../../../public/social-icons/youtube.svg";
 
 type WebsiteFooterViewProps = {
-  data: FooterData;
+  sections: FooterSection[];
 };
 
 function FooterLink({ item }: { item: FooterLinkItem }) {
-  const href = item.url?.trim() || "#";
+  const href = item.url.trim();
   const isExternal = /^(https?:|mailto:|tel:)/i.test(href);
 
   if (isExternal) {
@@ -40,15 +39,11 @@ function FooterLink({ item }: { item: FooterLinkItem }) {
 }
 
 function MenuSection({ section }: { section: FooterSection }) {
-  console.log("Rendering MenuSection for section:", section);
-  const items = getSectionLinks(section);
-  if (!items.length) return null;
-
   return (
     <div className="footer-section">
       <h3 className="footer-section-title">{section.title}</h3>
       <ul className="footer-link-list">
-        {items.map((item) => (
+        {section.items.map((item) => (
           <li key={item.id}>
             <FooterLink item={item} />
           </li>
@@ -96,19 +91,7 @@ function StaticSocialLink({
   );
 }
 
-function renderFooterSection(section: FooterSection) {
-  return section.type === "menu" ? (
-    <MenuSection key={section.id} section={section} />
-  ) : null;
-}
-
-export function WebsiteFooterView({ data }: WebsiteFooterViewProps) {
-  const { settings, sections = [] } = data;
-  const gridSections = sortByPosition(sections);
-  const copyright =
-    settings?.copyrightText ||
-    `© ${new Date().getFullYear()} Vrindavan Rasa. All rights reserved.`;
-
+export function WebsiteFooterView({ sections }: WebsiteFooterViewProps) {
   return (
     <footer className="footer">
       <div className="container">
@@ -151,11 +134,13 @@ export function WebsiteFooterView({ data }: WebsiteFooterViewProps) {
               </div>
             </div>
           </div>
-          {gridSections.map((section) => renderFooterSection(section))}
+          {sections.map((section) => (
+            <MenuSection key={section.id} section={section} />
+          ))}
         </div>
 
         <div className="footer-bottom">
-          <p>{copyright}</p>
+          <p>© {new Date().getFullYear()} Vrindavan Rasa. All rights reserved.</p>
           <div className="footer-razorpay" title="Payments by Razorpay">
             <Image
               src={razorpayLogo}

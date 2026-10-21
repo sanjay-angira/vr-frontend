@@ -1,25 +1,9 @@
-export type FooterSectionType = "menu" | "contact";
-
 export interface FooterLinkItem {
   id: number;
   label: string;
-  url?: string;
+  url: string;
   position: number;
 }
-
-export interface FooterSettings {
-  email?: string;
-  phone?: string;
-  address?: string;
-  copyrightText?: string;
-}
-
-export const STATIC_FOOTER_SETTINGS: FooterSettings = {
-  email: "vrindavanrasa@gmail.com",
-  phone: "+91 9043534534",
-  address: "Mathura, India",
-  copyrightText: `© ${new Date().getFullYear()} Vrindavan Rasa. All rights reserved.`,
-};
 
 export const STATIC_FOOTER_SOCIAL = [
   { id: "facebook", label: "Facebook", url: "https://www.facebook.com/" },
@@ -32,12 +16,6 @@ export const STATIC_FOOTER_SOCIAL = [
 export interface FooterSection {
   id: number;
   title: string;
-  type: FooterSectionType | string;
   position: number;
   items: FooterLinkItem[];
-}
-
-export interface FooterData {
-  settings: FooterSettings | null;
-  sections: FooterSection[];
 }

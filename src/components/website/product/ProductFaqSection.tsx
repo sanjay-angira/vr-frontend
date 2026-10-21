@@ -4,7 +4,8 @@ import {
   Accordion,
   type AccordionItem,
 } from "@/components/website/shared/Accordion";
-import { STATIC_FOOTER_SETTINGS } from "@/types/footer";
+
+const SUPPORT_PHONE = "+91 9043534534";
 
 type ProductFaqSectionProps = {
   items: AccordionItem[];
@@ -12,7 +13,7 @@ type ProductFaqSectionProps = {
 };
 
 export function ProductFaqSection({ items, phone }: ProductFaqSectionProps) {
-  const displayPhone = phone?.trim() || STATIC_FOOTER_SETTINGS.phone || "";
+  const displayPhone = phone?.trim() || SUPPORT_PHONE;
   const telHref = displayPhone
     ? `tel:${displayPhone.replace(/[^\d+]/g, "")}`
     : undefined;
