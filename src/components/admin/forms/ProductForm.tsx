@@ -128,8 +128,34 @@ const schema = Yup.object({
     metaTitle: requiredString("Meta title", 2),
     metaDescription: requiredString("Meta description", 2),
     metaKeywords: Yup.string(),
+    focusKeyword: Yup.string(),
     canonicalUrl: Yup.string().url("Enter a valid URL").nullable().transform((v) => v || ""),
+    metaRobots: Yup.string(),
+    ogTitle: Yup.string(),
+    ogDescription: Yup.string(),
     ogImage: Yup.string(),
+    ogType: Yup.string(),
+    twitterCard: Yup.string(),
+    twitterTitle: Yup.string(),
+    twitterDescription: Yup.string(),
+    twitterImage: Yup.string(),
+    schemaType: Yup.string(),
+    schemaData: Yup.string().test(
+      "valid-schema-json",
+      "Enter valid JSON object data",
+      (value) => {
+        if (!value?.trim()) return true;
+        try {
+          const parsed: unknown = JSON.parse(value);
+          return typeof parsed === "object" && parsed !== null && !Array.isArray(parsed);
+        } catch {
+          return false;
+        }
+      },
+    ),
+    slug: Yup.string(),
+    breadcrumbsTitle: Yup.string(),
+    primaryKeywordDensity: Yup.string(),
   }),
 });
 
@@ -527,8 +553,25 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
           metaTitle: String(seo.metaTitle ?? record.metaTitle ?? ""),
           metaDescription: String(seo.metaDescription ?? record.metaDescription ?? ""),
           metaKeywords: String(seo.metaKeywords ?? record.metaKeywords ?? ""),
+          focusKeyword: String(seo.focusKeyword ?? ""),
           canonicalUrl: String(seo.canonicalUrl ?? ""),
+          metaRobots: String(seo.metaRobots ?? "index, follow"),
+          ogTitle: String(seo.ogTitle ?? ""),
+          ogDescription: String(seo.ogDescription ?? ""),
           ogImage: String(seo.ogImage ?? ""),
+          ogType: String(seo.ogType ?? "product"),
+          twitterCard: String(seo.twitterCard ?? "summary_large_image"),
+          twitterTitle: String(seo.twitterTitle ?? ""),
+          twitterDescription: String(seo.twitterDescription ?? ""),
+          twitterImage: String(seo.twitterImage ?? ""),
+          schemaType: String(seo.schemaType ?? "Product"),
+          schemaData:
+            seo.schemaData && typeof seo.schemaData === "object"
+              ? JSON.stringify(seo.schemaData, null, 2)
+              : "",
+          slug: String(seo.slug ?? ""),
+          breadcrumbsTitle: String(seo.breadcrumbsTitle ?? ""),
+          primaryKeywordDensity: String(seo.primaryKeywordDensity ?? ""),
         },
       };
     },
@@ -933,32 +976,167 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
           )}
 
           {currentStep === 3 && (
-            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-              <FormFullWidth>
-                <FormInput formik={formik} name="seo.metaTitle" label="Meta Title" required />
-              </FormFullWidth>
-              <FormFullWidth>
-                <FormTextarea
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                <FormFullWidth>
+                  <FormInput
+                    formik={formik}
+                    name="seo.metaTitle"
+                    label="Meta Title"
+                    required
+                  />
+                </FormFullWidth>
+                <FormFullWidth>
+                  <FormTextarea
+                    formik={formik}
+                    name="seo.metaDescription"
+                    label="Meta Description"
+                    required
+                    rows={3}
+                  />
+                </FormFullWidth>
+                <FormInput
                   formik={formik}
-                  name="seo.metaDescription"
-                  label="Meta Description"
-                  required
-                  rows={3}
+                  name="seo.metaKeywords"
+                  label="Meta Keywords"
+                  hint="Separate keywords with commas"
                 />
-              </FormFullWidth>
-              <FormInput
-                formik={formik}
-                name="seo.metaKeywords"
-                label="Meta Keywords"
-                hint="Separate keywords with commas"
-              />
-              <FormInput formik={formik} name="seo.canonicalUrl" label="Canonical URL" type="url" />
-              <FormImageUpload
-                formik={formik}
-                name="seo.ogImage"
-                label="OG Image"
-                uploadPath={UPLOAD_PATHS.products}
-              />
+                <FormInput
+                  formik={formik}
+                  name="seo.focusKeyword"
+                  label="Focus Keyword"
+                />
+                <FormInput
+                  formik={formik}
+                  name="seo.canonicalUrl"
+                  label="Canonical URL"
+                  type="url"
+                />
+                <FormInput
+                  formik={formik}
+                  name="seo.schemaType"
+                  label="Schema Type"
+                />
+                <FormFullWidth>
+                  <FormInput
+                    formik={formik}
+                    name="seo.primaryKeywordDensity"
+                    label="Primary Keyword Density"
+                    hint="Optional internal SEO tracking value."
+                  />
+                </FormFullWidth>
+                <FormFullWidth>
+                  <div className="flex flex-col gap-4 rounded-lg border border-zinc-200 p-4">
+                    <h3 className="text-sm font-semibold text-zinc-900">
+                      Search Engine Directives
+                    </h3>
+                    <FormInput
+                      formik={formik}
+                      name="seo.metaRobots"
+                      label="Robots Directive"
+                      hint="Examples: index, follow or noindex, nofollow"
+                    />
+                  </div>
+                </FormFullWidth>
+                <FormFullWidth>
+                  <div className="space-y-4 rounded-lg border border-zinc-200 p-4">
+                    <h3 className="text-sm font-semibold text-zinc-900">
+                      Open Graph (Social Sharing)
+                    </h3>
+                    <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                      <FormInput
+                        formik={formik}
+                        name="seo.ogTitle"
+                        label="OG Title"
+                      />
+                      <FormInput
+                        formik={formik}
+                        name="seo.ogType"
+                        label="OG Type"
+                      />
+                      <FormFullWidth>
+                        <FormTextarea
+                          formik={formik}
+                          name="seo.ogDescription"
+                          label="OG Description"
+                          rows={2}
+                        />
+                      </FormFullWidth>
+                      <FormFullWidth>
+                        <FormImageUpload
+                          formik={formik}
+                          name="seo.ogImage"
+                          label="OG Image"
+                          uploadPath={UPLOAD_PATHS.products}
+                        />
+                      </FormFullWidth>
+                    </div>
+                  </div>
+                </FormFullWidth>
+                <FormFullWidth>
+                  <div className="space-y-4 rounded-lg border border-zinc-200 p-4">
+                    <h3 className="text-sm font-semibold text-zinc-900">
+                      Twitter Card
+                    </h3>
+                    <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                      <FormInput
+                        formik={formik}
+                        name="seo.twitterCard"
+                        label="Card Type"
+                      />
+                      <FormInput
+                        formik={formik}
+                        name="seo.twitterTitle"
+                        label="Twitter Title"
+                      />
+                      <FormFullWidth>
+                        <FormTextarea
+                          formik={formik}
+                          name="seo.twitterDescription"
+                          label="Twitter Description"
+                          rows={2}
+                        />
+                      </FormFullWidth>
+                      <FormFullWidth>
+                        <FormImageUpload
+                          formik={formik}
+                          name="seo.twitterImage"
+                          label="Twitter Image"
+                          uploadPath={UPLOAD_PATHS.products}
+                        />
+                      </FormFullWidth>
+                    </div>
+                  </div>
+                </FormFullWidth>
+                <FormFullWidth>
+                  <div className="space-y-4 rounded-lg border border-zinc-200 p-4">
+                    <h3 className="text-sm font-semibold text-zinc-900">
+                      Structured Data and Breadcrumbs
+                    </h3>
+                    <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                      <FormInput
+                        formik={formik}
+                        name="seo.slug"
+                        label="SEO Slug Override"
+                      />
+                      <FormInput
+                        formik={formik}
+                        name="seo.breadcrumbsTitle"
+                        label="Breadcrumb Title"
+                      />
+                      <FormFullWidth>
+                        <FormTextarea
+                          formik={formik}
+                          name="seo.schemaData"
+                          label="Schema Data (JSON)"
+                          rows={6}
+                          hint="Optional JSON-LD overrides. Enter a JSON object."
+                        />
+                      </FormFullWidth>
+                    </div>
+                  </div>
+                </FormFullWidth>
+              </div>
             </div>
           )}
 

@@ -230,8 +230,22 @@ export type ProductSeoValues = {
   metaTitle: string;
   metaDescription: string;
   metaKeywords: string;
+  focusKeyword: string;
   canonicalUrl: string;
+  metaRobots: string;
+  ogTitle: string;
+  ogDescription: string;
   ogImage: string;
+  ogType: string;
+  twitterCard: string;
+  twitterTitle: string;
+  twitterDescription: string;
+  twitterImage: string;
+  schemaType: string;
+  schemaData: string;
+  slug: string;
+  breadcrumbsTitle: string;
+  primaryKeywordDensity: string;
 };
 
 export type ProductFormValues = {
@@ -288,7 +302,27 @@ export const productFormInitialValues: ProductFormValues = {
   attributeIds: [],
   attributeCustomerDisplay: {},
   variants: [emptyVariant()],
-  seo: { metaTitle: "", metaDescription: "", metaKeywords: "", canonicalUrl: "", ogImage: "" },
+  seo: {
+    metaTitle: "",
+    metaDescription: "",
+    metaKeywords: "",
+    focusKeyword: "",
+    canonicalUrl: "",
+    metaRobots: "index, follow",
+    ogTitle: "",
+    ogDescription: "",
+    ogImage: "",
+    ogType: "product",
+    twitterCard: "summary_large_image",
+    twitterTitle: "",
+    twitterDescription: "",
+    twitterImage: "",
+    schemaType: "Product",
+    schemaData: "",
+    slug: "",
+    breadcrumbsTitle: "",
+    primaryKeywordDensity: "",
+  },
 };
 
 export function syncVariantAttributes(
@@ -519,11 +553,24 @@ export function buildProductPayload(
       metaTitle: values.seo.metaTitle,
       metaDescription: values.seo.metaDescription,
       metaKeywords: values.seo.metaKeywords,
-      canonicalUrl: values.seo.canonicalUrl,
-      ogImage: values.seo.ogImage,
-      metaRobots: "index, follow",
-      twitterCard: "summary_large_image",
-      schemaType: "Product",
+      focusKeyword: values.seo.focusKeyword || null,
+      canonicalUrl: values.seo.canonicalUrl || null,
+      metaRobots: values.seo.metaRobots || "index, follow",
+      ogTitle: values.seo.ogTitle || null,
+      ogDescription: values.seo.ogDescription || null,
+      ogImage: values.seo.ogImage || null,
+      ogType: values.seo.ogType || "product",
+      twitterCard: values.seo.twitterCard || "summary_large_image",
+      twitterTitle: values.seo.twitterTitle || null,
+      twitterDescription: values.seo.twitterDescription || null,
+      twitterImage: values.seo.twitterImage || null,
+      schemaType: values.seo.schemaType || "Product",
+      schemaData: values.seo.schemaData.trim()
+        ? JSON.parse(values.seo.schemaData)
+        : null,
+      slug: values.seo.slug || null,
+      breadcrumbsTitle: values.seo.breadcrumbsTitle || null,
+      primaryKeywordDensity: values.seo.primaryKeywordDensity || null,
     },
   };
 }
