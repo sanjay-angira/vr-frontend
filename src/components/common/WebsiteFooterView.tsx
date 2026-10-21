@@ -15,11 +15,6 @@ type WebsiteFooterViewProps = {
   data: FooterData;
 };
 
-type SectionProps = {
-  section: FooterSection;
-  settings?: FooterData["settings"];
-};
-
 function FooterLink({ item }: { item: FooterLinkItem }) {
   const href = item.url?.trim() || "#";
   const isExternal = /^(https?:|mailto:|tel:)/i.test(href);
@@ -44,7 +39,8 @@ function FooterLink({ item }: { item: FooterLinkItem }) {
   );
 }
 
-function MenuSection({ section }: SectionProps) {
+function MenuSection({ section }: { section: FooterSection }) {
+  console.log("Rendering MenuSection for section:", section);
   const items = getSectionLinks(section);
   if (!items.length) return null;
 
@@ -100,88 +96,10 @@ function StaticSocialLink({
   );
 }
 
-function ContactSection({ section, settings }: SectionProps) {
-  const email = settings?.email;
-  const phone = settings?.phone;
-  const address = settings?.address;
-  const hasSettings = Boolean(email || phone || address);
-  const hasItems = (section.items ?? []).length > 0;
-  const hasContactContent = hasSettings || hasItems;
-
-  return (
-    <div className="footer-section">
-      {hasContactContent && (
-        <>
-          <h3 className="footer-section-title">{section.title}</h3>
-          <ul className="footer-contact-list">
-            {phone && (
-              <li>
-                <Phone size={16} />
-                <a
-                  href={`tel:${phone.replace(/\s/g, "")}`}
-                  className="footer-link"
-                >
-                  {phone}
-                </a>
-              </li>
-            )}
-            {email && (
-              <li>
-                <Mail size={16} />
-                <a href={`mailto:${email}`} className="footer-link">
-                  {email}
-                </a>
-              </li>
-            )}
-            {address && (
-              <li>
-                <MapPin size={16} />
-                <span>{address}</span>
-              </li>
-            )}
-            {(section.items ?? []).map((item) => (
-              <li key={item.id}>
-                <FooterLink item={item} />
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
-      <div className={hasContactContent ? "footer-social-block" : undefined}>
-        <h3 className="footer-section-title">Follow Us</h3>
-        <div className="footer-social-grid">
-          {STATIC_FOOTER_SOCIAL.map((item) => (
-            <StaticSocialLink
-              key={item.id}
-              id={item.id}
-              label={item.label}
-              url={item.url}
-            />
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function renderFooterSection(
-  section: FooterSection,
-  settings: FooterData["settings"],
-) {
-  switch (section.type) {
-    case "menu":
-      return <MenuSection key={section.id} section={section} />;
-    case "contact":
-      return (
-        <ContactSection
-          key={section.id}
-          section={section}
-          settings={settings}
-        />
-      );
-    default:
-      return null;
-  }
+function renderFooterSection(section: FooterSection) {
+  return section.type === "menu" ? (
+    <MenuSection key={section.id} section={section} />
+  ) : null;
 }
 
 export function WebsiteFooterView({ data }: WebsiteFooterViewProps) {
@@ -195,9 +113,45 @@ export function WebsiteFooterView({ data }: WebsiteFooterViewProps) {
     <footer className="footer">
       <div className="container">
         <div className="footer-grid">
-          {gridSections.map((section) =>
-            renderFooterSection(section, settings),
-          )}
+          <div className="footer-section">
+            <h3 className="footer-section-title">Contact Us</h3>
+            <ul className="footer-contact-list">
+              <li>
+                <Phone size={16} />
+                <a href="tel:+919410855992" className="footer-link">
+                  +91 9410855992
+                </a>
+              </li>
+              <li>
+                <Mail size={16} />
+                <a
+                  href="mailto:vrindavanrasa@gmail.com"
+                  className="footer-link"
+                >
+                  vrindavanrasa@gmail.com
+                </a>
+              </li>
+              <li>
+                <MapPin size={16} />
+                <span>Mathura, India</span>
+              </li>
+            </ul>
+
+            <div className="footer-social-block">
+              <h3 className="footer-section-title">Follow Us</h3>
+              <div className="footer-social-grid">
+                {STATIC_FOOTER_SOCIAL.map((item) => (
+                  <StaticSocialLink
+                    key={item.id}
+                    id={item.id}
+                    label={item.label}
+                    url={item.url}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+          {gridSections.map((section) => renderFooterSection(section))}
         </div>
 
         <div className="footer-bottom">

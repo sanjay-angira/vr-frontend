@@ -65,6 +65,10 @@ export function CmsPageForm({ module, recordId }: AdminFormProps) {
       type: String(r.type ?? ""),
       isActive: Boolean(r.isActive ?? true),
     }),
+    mapValuesToPayload: (values) => ({
+      ...values,
+      type: values.type || null,
+    }),
   });
   useSlugSync(formik, "title", "slug", !isEdit);
 
