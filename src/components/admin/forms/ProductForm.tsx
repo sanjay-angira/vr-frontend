@@ -78,9 +78,21 @@ const variantSchema = Yup.object({
   name: requiredString("Variant name", 1),
   slug: Yup.string(),
   description: Yup.string(),
-  sku: Yup.string(),
+  sku: Yup.string().trim().required("SKU is required"),
   price: Yup.number().min(0.01, "Selling price must be at least 0.01").required("Selling price is required"),
   stock: Yup.number().min(0, "Stock must be 0 or more").required("Stock is required"),
+  packageHeightCm: Yup.number()
+    .moreThan(0, "Height must be greater than zero")
+    .required("Package height is required"),
+  packageWidthCm: Yup.number()
+    .moreThan(0, "Width must be greater than zero")
+    .required("Package width is required"),
+  packageLengthCm: Yup.number()
+    .moreThan(0, "Length must be greater than zero")
+    .required("Package length is required"),
+  packageWeightGrams: Yup.number()
+    .moreThan(0, "Weight must be greater than zero")
+    .required("Package weight is required"),
   productVariantOffers: Yup.array().of(Yup.number()),
   images: Yup.array().of(Yup.string()),
   variantAttributes: Yup.array().of(
@@ -248,65 +260,139 @@ function VariantPanel({
       {expanded && (
         <div className="border-t border-zinc-100 px-5 py-5">
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-            <Input
-              label="Variant Name"
-              required
-              name={`${prefix}.name`}
-              value={variant.name}
-              onChange={(event) => handleVariantNameChange(event.target.value)}
-              onBlur={formik.handleBlur}
-              error={getNestedError(formik.touched, formik.errors, `${prefix}.name`)}
-            />
-            <Input
-              label="Variant Slug"
-              required
-              name={`${prefix}.slug`}
-              value={variant.slug}
-              onChange={(event) => handleVariantSlugChange(event.target.value)}
-              onBlur={formik.handleBlur}
-              error={getNestedError(formik.touched, formik.errors, `${prefix}.slug`)}
-            />
-            <Input
-              label="SKU"
-              name={`${prefix}.sku`}
-              value={variant.sku}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              error={getNestedError(formik.touched, formik.errors, `${prefix}.sku`)}
-            />
-            <Input
-              label="Selling price"
-              required
-              name={`${prefix}.price`}
-              type="number"
-              step="0.01"
-              min="0"
-              value={variant.price}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              error={getNestedError(formik.touched, formik.errors, `${prefix}.price`)}
-              hint="What the customer pays. Offers only raise the crossed MRP (e.g. ₹1000 + 50% off → MRP ₹2000)."
-            />
-            <Input
-              label="Stock"
-              required
-              name={`${prefix}.stock`}
-              type="number"
-              min="0"
-              value={variant.stock}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              error={getNestedError(formik.touched, formik.errors, `${prefix}.stock`)}
-            />
+            <div className="col-span-full grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
+              <Input
+                label="Variant Name"
+                required
+                name={`${prefix}.name`}
+                value={variant.name}
+                onChange={(event) => handleVariantNameChange(event.target.value)}
+                onBlur={formik.handleBlur}
+                error={getNestedError(formik.touched, formik.errors, `${prefix}.name`)}
+              />
+              <Input
+                label="Variant Slug"
+                required
+                name={`${prefix}.slug`}
+                value={variant.slug}
+                onChange={(event) => handleVariantSlugChange(event.target.value)}
+                onBlur={formik.handleBlur}
+                error={getNestedError(formik.touched, formik.errors, `${prefix}.slug`)}
+              />
+              <Input
+                label="SKU"
+                required
+                name={`${prefix}.sku`}
+                value={variant.sku}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={getNestedError(formik.touched, formik.errors, `${prefix}.sku`)}
+              />
+              <Input
+                label="Selling price"
+                required
+                name={`${prefix}.price`}
+                type="number"
+                step="0.01"
+                min="0"
+                value={variant.price}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={getNestedError(formik.touched, formik.errors, `${prefix}.price`)}
+              // hint="What the customer pays. Offers only raise the crossed MRP (e.g. ₹1000 + 50% off → MRP ₹2000)."
+              />
+            </div>
+            <div className="col-span-full grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
+              <Input
+                label="Package Height (cm)"
+                required
+                name={`${prefix}.packageHeightCm`}
+                type="number"
+                min="0.01"
+                step="0.01"
+                value={variant.packageHeightCm}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={getNestedError(
+                  formik.touched,
+                  formik.errors,
+                  `${prefix}.packageHeightCm`,
+                )}
+              />
+              <Input
+                label="Package Width (cm)"
+                required
+                name={`${prefix}.packageWidthCm`}
+                type="number"
+                min="0.01"
+                step="0.01"
+                value={variant.packageWidthCm}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={getNestedError(
+                  formik.touched,
+                  formik.errors,
+                  `${prefix}.packageWidthCm`,
+                )}
+              />
+              <Input
+                label="Package Length (cm)"
+                required
+                name={`${prefix}.packageLengthCm`}
+                type="number"
+                min="0.01"
+                step="0.01"
+                value={variant.packageLengthCm}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={getNestedError(
+                  formik.touched,
+                  formik.errors,
+                  `${prefix}.packageLengthCm`,
+                )}
+              />
+              <Input
+                label="Package Weight (g)"
+                required
+                name={`${prefix}.packageWeightGrams`}
+                type="number"
+                min="0.01"
+                step="0.01"
+                value={variant.packageWeightGrams}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={getNestedError(
+                  formik.touched,
+                  formik.errors,
+                  `${prefix}.packageWeightGrams`,
+                )}
+              />
+            </div>
 
-            <FormMultiDropdown
-              label="Variant Offers"
-              value={variant.productVariantOffers}
-              onChange={(values) => formik.setFieldValue(`${prefix}.productVariantOffers`, values)}
-              options={offers}
-            />
+            <div>
+              <Input
+                label="Stock"
+                required
+                name={`${prefix}.stock`}
+                type="number"
+                min="0"
+                value={variant.stock}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={getNestedError(formik.touched, formik.errors, `${prefix}.stock`)}
+              />
+            </div>
 
-            <div className="md:col-span-2">
+            <div>
+              <FormMultiDropdown
+                label="Variant Offers"
+                value={variant.productVariantOffers}
+                onChange={(values) => formik.setFieldValue(`${prefix}.productVariantOffers`, values)}
+                options={offers}
+              />
+            </div>
+
+            <div className="col-span-full">
               <FormQuillEditor
                 label="Variant Description"
                 value={variant.description}
@@ -318,16 +404,18 @@ function VariantPanel({
             </div>
 
 
-            <MultiImageUploadField
-              label="Variant Images"
-              values={variant.images}
-              onChange={(urls) => formik.setFieldValue(`${prefix}.images`, urls)}
-              uploadPath={UPLOAD_PATHS.variantImages}
-              imageType="product"
-            />
+            <div className="col-span-full">
+              <MultiImageUploadField
+                label="Variant Images"
+                values={variant.images}
+                onChange={(urls) => formik.setFieldValue(`${prefix}.images`, urls)}
+                uploadPath={UPLOAD_PATHS.variantImages}
+                imageType="product"
+              />
+            </div>
 
             {selectedAttributes.length > 0 && (
-              <div className="md:col-span-2 space-y-3 rounded-lg border border-zinc-100 bg-zinc-50 p-4">
+              <div className="col-span-full space-y-3 rounded-lg border border-zinc-100 bg-zinc-50 p-4">
                 <div>
                   <h4 className="text-sm font-medium text-zinc-900">Attribute Values</h4>
                   <p className="mt-1 text-xs text-zinc-500">
@@ -433,7 +521,7 @@ function VariantPanel({
               </div>
             )}
 
-            <div className="flex justify-end md:col-span-2">
+            <div className="col-span-full flex justify-end">
               {canRemove && (
                 <Button type="button" variant="secondary" onClick={onRemove}>
                   <Trash2 className="h-4 w-4" />
@@ -512,6 +600,22 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
           sku: String(variant.sku ?? ""),
           price: variant.price != null ? Number(variant.price) : ("" as const),
           stock: variant.stock != null ? Number(variant.stock) : (1 as const),
+          packageHeightCm:
+            variant.packageHeightCm != null
+              ? Number(variant.packageHeightCm)
+              : ("" as const),
+          packageWidthCm:
+            variant.packageWidthCm != null
+              ? Number(variant.packageWidthCm)
+              : ("" as const),
+          packageLengthCm:
+            variant.packageLengthCm != null
+              ? Number(variant.packageLengthCm)
+              : ("" as const),
+          packageWeightGrams:
+            variant.packageWeightGrams != null
+              ? Number(variant.packageWeightGrams)
+              : ("" as const),
           productVariantOffers: normalizeIds(variant.productVariantOffers ?? variant.productOffers),
           images: normalizeImageArray(
             variant.images ?? variant.variantImages ?? variant.image
@@ -807,7 +911,7 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
 
 
 
-              <FormFullWidth>
+              {/* <FormFullWidth> */}
                 <FormMultiDropdown
                   label="Product Tags"
                   value={formik.values.productTags}
@@ -821,10 +925,10 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
                   deletable
                   onDeleteOption={handleDeleteTag}
                 />
-              </FormFullWidth>
+              {/* </FormFullWidth> */}
 
 
-              <FormFullWidth>
+              {/* <FormFullWidth> */}
                 <FormMultiDropdown
                   label="Product Attributes"
                   value={formik.values.attributeIds}
@@ -889,9 +993,9 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
                     })}
                   </div>
                 )}
-              </FormFullWidth>
+              {/* </FormFullWidth> */}
 
-              <FormFullWidth>
+              {/* <FormFullWidth> */}
                 <FormMultiDropdown
                   label="Apply Offers"
                   value={formik.values.productOffers}
@@ -899,16 +1003,16 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
                   onBlur={() => formik.setFieldTouched("productOffers", true)}
                   options={offers}
                 />
-              </FormFullWidth>
+              {/* </FormFullWidth> */}
 
-              <FormFullWidth>
+              {/* <FormFullWidth> */}
                 <FormMultiDropdown
                   label="Frequently Bought Together"
                   value={formik.values.frequentlyBoughtTogether}
                   onChange={(values) => formik.setFieldValue("frequentlyBoughtTogether", values)}
                   options={products}
                 />
-              </FormFullWidth>
+              {/* </FormFullWidth> */}
             </div>
           )}
 

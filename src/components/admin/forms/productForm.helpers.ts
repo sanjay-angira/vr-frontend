@@ -221,6 +221,10 @@ export type ProductVariant = {
   sku: string;
   price: number | "";
   stock: number | "";
+  packageHeightCm: number | "";
+  packageWidthCm: number | "";
+  packageLengthCm: number | "";
+  packageWeightGrams: number | "";
   productVariantOffers: number[];
   images: string[];
   variantAttributes: VariantAttributeValue[];
@@ -281,6 +285,10 @@ export const emptyVariant = (): ProductVariant => ({
   sku: "",
   price: "",
   stock: 1,
+  packageHeightCm: "",
+  packageWidthCm: "",
+  packageLengthCm: "",
+  packageWeightGrams: "",
   productVariantOffers: [],
   images: [],
   variantAttributes: [],
@@ -509,7 +517,11 @@ export function buildProductPayload(
         description: variant.description || undefined,
         price: Number(variant.price),
         stock: Number(variant.stock),
-        ...(variant.sku ? { sku: variant.sku } : {}),
+        packageHeightCm: Number(variant.packageHeightCm),
+        packageWidthCm: Number(variant.packageWidthCm),
+        packageLengthCm: Number(variant.packageLengthCm),
+        packageWeightGrams: Number(variant.packageWeightGrams),
+        sku: variant.sku.trim(),
       };
       const variantImages = normalizeImageArray(variant.images).map((url, idx) =>
         imagePayloadFromUrl(url, idx + 1),
