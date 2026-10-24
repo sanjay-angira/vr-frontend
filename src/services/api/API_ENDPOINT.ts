@@ -190,6 +190,12 @@ export const API_ENDPOINTS = {
     RESEND_EMAIL_OTP: "customer/auth/resend-email-otp",
   },
 
+  SHIPPING: {
+    CHECK_PIN: "shipping/serviceability",
+    REVERSE_GEOCODE: "shipping/location",
+    ESTIMATE: "shipping/estimate",
+  },
+
   CUSTOMER: {
     HOMEPAGE: "customer/homepage",
     HOMEPAGE_BANNERS: "customer/banners",

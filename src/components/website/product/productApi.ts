@@ -40,6 +40,10 @@ export type ProductVariantView = {
   price: number | null;
   stock: number | null;
   sku: string | null;
+  packageWeightGrams?: number | null;
+  packageLengthCm?: number | null;
+  packageWidthCm?: number | null;
+  packageHeightCm?: number | null;
   description?: string | null;
   images: string[];
   variantAttributes: VariantAttributeView[];
@@ -251,6 +255,10 @@ export function normalizeVariants(
     price?: string | number | null;
     stock?: string | number | null;
     sku?: string | null;
+    packageWeightGrams?: string | number | null;
+    packageLengthCm?: string | number | null;
+    packageWidthCm?: string | number | null;
+    packageHeightCm?: string | number | null;
     description?: string | null;
     images?: Array<{
       id: number;
@@ -306,6 +314,10 @@ export function normalizeVariants(
       price: toNumber(variant.price),
       stock: toNumber(variant.stock),
       sku: variant.sku || null,
+      packageWeightGrams: toNumber(variant.packageWeightGrams),
+      packageLengthCm: toNumber(variant.packageLengthCm),
+      packageWidthCm: toNumber(variant.packageWidthCm),
+      packageHeightCm: toNumber(variant.packageHeightCm),
       description: variant.description ? String(variant.description).trim() || null : null,
       images: (variant.images || [])
         .slice()
