@@ -165,6 +165,7 @@ export default function ProductDetail({
           packageHeightCm,
           packageWidthCm,
           packageLengthCm,
+          variantId: selectedVariant?.id,
           paymentMode: "Pre-paid",
         })) as { success?: boolean; message?: string; data?: DeliveryStatus };
 
@@ -331,7 +332,7 @@ export default function ProductDetail({
     try {
       setIsAdding(true);
       await addOrUpdateCartItem(selectedVariant.id, quantity);
-      // @ts-ignore
+      // @ts-expect-error Redux thunk dispatch typing is not inferred here.
       dispatch(fetchWebsiteCart());
       setAddedFlash(true);
       window.setTimeout(() => setAddedFlash(false), 1600);
@@ -348,7 +349,7 @@ export default function ProductDetail({
     try {
       setIsAdding(true);
       await addOrUpdateCartItem(selectedVariant.id, quantity);
-      // @ts-ignore
+      // @ts-expect-error Redux thunk dispatch typing is not inferred here.
       dispatch(fetchWebsiteCart());
       router.push("/checkout");
     } catch (error) {

@@ -70,6 +70,19 @@ export const API_ENDPOINTS = {
     DELETE: (id: number | string) => `brands/${id}`,
   },
 
+  WAREHOUSES: {
+    LIST_BY_BRAND: (brandId: number | string) =>
+      `admin/brands/${brandId}/warehouses`,
+    CREATE_FOR_BRAND: (brandId: number | string) =>
+      `admin/brands/${brandId}/warehouses`,
+    DETAILS: (id: number | string) => `admin/warehouses/${id}`,
+    UPDATE: (id: number | string) => `admin/warehouses/${id}`,
+    SET_DEFAULT: (id: number | string) => `admin/warehouses/${id}/default`,
+    STATUS: (id: number | string) => `admin/warehouses/${id}/status`,
+    SYNC_DELHIVERY: (id: number | string) =>
+      `admin/warehouses/${id}/sync-delhivery`,
+  },
+
   ATTRIBUTES: {
     LIST: "attributes",
     CREATE: "attributes",

@@ -1,4 +1,5 @@
 import { deleteData, getData, postData } from "@/services/api/apiService";
+import { API_ENDPOINTS } from "@/services/api/API_ENDPOINT";
 import { generateSlug } from "./generateSlug";
 
 type ListOption = { label: string; value: string | number };
@@ -6,6 +7,45 @@ type ListOption = { label: string; value: string | number };
 export type AttributeOption = ListOption & {
   supportsImage: boolean;
 };
+
+export type WarehouseOption = ListOption & {
+  registrationStatus: string;
+  isActive: boolean;
+};
+
+export async function fetchRegisteredWarehousesOptions(
+  brandId: string | number
+): Promise<WarehouseOption[]> {
+  const response = await getData(API_ENDPOINTS.WAREHOUSES.LIST_BY_BRAND(brandId));
+  const rows = response?.data;
+  if (!Array.isArray(rows)) {
+    throw new Error("Could not load pickup addresses for this brand");
+  }
+
+  return rows
+    .filter(
+      (warehouse: Record<string, unknown>) =>
+        warehouse.registrationStatus === "REGISTERED" &&
+        warehouse.isActive === true
+    )
+    .map((warehouse: Record<string, unknown>) => {
+      const address = [
+        warehouse.addressLine1,
+        warehouse.addressLine2,
+        warehouse.city,
+        warehouse.state,
+        warehouse.pincode,
+      ]
+        .filter((part) => typeof part === "string" && part.trim())
+        .join(", ");
+      return {
+        label: `${String(warehouse.name ?? "Warehouse")} — ${address}`,
+        value: Number(warehouse.id),
+        registrationStatus: String(warehouse.registrationStatus),
+        isActive: Boolean(warehouse.isActive),
+      };
+    });
+}
 
 
 export async function fetchListOptions(

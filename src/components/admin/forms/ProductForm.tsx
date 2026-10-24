@@ -37,7 +37,9 @@ import {
   createProductTag,
   deleteProductTag,
   fetchRootCategoriesOptions,
+  fetchRegisteredWarehousesOptions,
   type AttributeOption,
+  type WarehouseOption,
 } from "./shared/fetchOptions";
 import { useAdminCrudForm } from "./shared/useAdminCrudForm";
 import { useSlugSync } from "./shared/useSlugSync";
@@ -113,6 +115,7 @@ const schema = Yup.object({
   description: htmlMinLength("Description", 2),
   publishStatus: Yup.string().oneOf(["draft", "published", "scheduled"]).required(),
   brandId: Yup.string().required("Brand is required"),
+  warehouseId: Yup.string().required("Pickup address is required"),
   category: Yup.string(),
   childCategories: Yup.array().of(Yup.string()),
   isActive: activeField,
@@ -541,6 +544,9 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
   const [expandedVariant, setExpandedVariant] = useState<number | null>(0);
 
   const [brands, setBrands] = useState<Array<{ label: string; value: string | number }>>([]);
+  const [warehouses, setWarehouses] = useState<WarehouseOption[]>([]);
+  const [warehousesLoading, setWarehousesLoading] = useState(false);
+  const [warehouseLoadError, setWarehouseLoadError] = useState("");
   const [rootCategories, setRootCategories] = useState<
     Array<{ label: string; value: string | number }>
   >([]);
@@ -549,12 +555,6 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
   const [tags, setTags] = useState<Array<{ label: string; value: string | number }>>([]);
   const [products, setProducts] = useState<Array<{ label: string; value: string | number }>>([]);
   const [attributes, setAttributes] = useState<AttributeOption[]>([]);
-
-  const loadTags = useCallback(async () => {
-    const nextTags = await fetchProductTagsOptions();
-    setTags(nextTags);
-    return nextTags;
-  }, []);
 
   const handleCreateTag = useCallback(async (tagName: string) => {
     const created = await createProductTag(tagName);
@@ -578,10 +578,10 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
     fetchBrandsOptions().then(setBrands);
     fetchRootCategoriesOptions().then(setRootCategories);
     fetchOffersOptions().then(setOffers);
-    void loadTags();
+    fetchProductTagsOptions().then(setTags);
     fetchProductsOptions().then(setProducts);
     fetchAttributesOptions().then(setAttributes);
-  }, [loadTags]);
+  }, []);
 
   const { formik, loading, loadError, isEdit } = useAdminCrudForm<ProductFormValues>({
     module,
@@ -644,6 +644,9 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
         description: String(record.description ?? ""),
         publishStatus: String(record.publishStatus ?? "draft"),
         brandId: String(record.brandId ?? (record.brand as { id?: number })?.id ?? ""),
+        warehouseId: String(
+          record.warehouseId ?? (record.warehouse as { id?: number })?.id ?? ""
+        ),
         category: String((record.category as { id?: number })?.id ?? record.category ?? ""),
         childCategories: [],
         isActive: Boolean(record.isActive ?? true),
@@ -682,6 +685,49 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
     mapValuesToPayload: (values) =>
       buildProductPayload(values, buildAttributeMetaById(attributes)),
   });
+  const selectedWarehouseId = useRef(formik.values.warehouseId);
+  const setFieldValue = formik.setFieldValue;
+
+  useEffect(() => {
+    selectedWarehouseId.current = formik.values.warehouseId;
+  }, [formik.values.warehouseId]);
+
+  useEffect(() => {
+    let active = true;
+    const brandId = formik.values.brandId;
+
+    void Promise.resolve().then(async () => {
+      if (!brandId) return;
+      if (active) setWarehousesLoading(true);
+      try {
+        const options = await fetchRegisteredWarehousesOptions(brandId);
+        if (!active) return;
+        setWarehouses(options);
+        if (
+          selectedWarehouseId.current &&
+          !options.some(
+            (option) =>
+              String(option.value) === String(selectedWarehouseId.current)
+          )
+        ) {
+          void setFieldValue("warehouseId", "", false);
+        }
+      } catch (error: unknown) {
+        if (!active) return;
+        const message =
+          error && typeof error === "object" && "message" in error
+            ? String(error.message)
+            : "Could not load pickup addresses for this brand";
+        setWarehouseLoadError(message);
+      } finally {
+        if (active) setWarehousesLoading(false);
+      }
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [formik.values.brandId, setFieldValue]);
 
   useSlugSync(formik, "productName", "productSlug", !isEdit);
 
@@ -858,11 +904,41 @@ export function ProductForm({ module, recordId }: AdminFormProps) {
                 label="Brand"
                 required
                 value={formik.values.brandId}
-                onChange={(value) => formik.setFieldValue("brandId", value)}
+                onChange={(value) => {
+                  void formik.setFieldValue("brandId", value);
+                  void formik.setFieldValue("warehouseId", "");
+                  setWarehouses([]);
+                  setWarehouseLoadError("");
+                  setWarehousesLoading(Boolean(value));
+                }}
                 onBlur={() => formik.setFieldTouched("brandId", true)}
                 error={getNestedError(formik.touched, formik.errors, "brandId")}
                 options={brands}
                 placeholder="Select a brand"
+              />
+
+              <FormDropdown
+                label="Pickup address"
+                required
+                value={formik.values.warehouseId}
+                onChange={(value) => formik.setFieldValue("warehouseId", value)}
+                onBlur={() => formik.setFieldTouched("warehouseId", true)}
+                error={
+                  getNestedError(formik.touched, formik.errors, "warehouseId") ||
+                  warehouseLoadError
+                }
+                options={warehouses}
+                placeholder={
+                  !formik.values.brandId
+                    ? "Select a brand first"
+                    : warehousesLoading
+                      ? "Loading pickup addresses..."
+                      : warehouses.length
+                        ? "Select a pickup address"
+                        : "No active registered pickup addresses"
+                }
+                disabled={!formik.values.brandId || warehousesLoading || !warehouses.length}
+                hint="Only active, Delhivery-registered warehouses are available."
               />
 
               <FormDropdown

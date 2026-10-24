@@ -8,7 +8,6 @@ import { AdminFormLayout } from "./shared/AdminFormLayout";
 import {
   FormActions,
   FormFullWidth,
-  FormGrid,
   FormInput,
   FormMultiSelect,
   FormSection,
@@ -119,6 +118,20 @@ export function BrandForm({ module, recordId }: AdminFormProps) {
       submitError={formik.status as string | undefined}
     >
       <form onSubmit={formik.handleSubmit} className="space-y-8">
+        {isEdit && recordId && (
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={() =>
+                router.push(`/admin/brands/${recordId}/warehouses`)
+              }
+              className="rounded-md border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
+            >
+              Manage Warehouses
+            </button>
+          </div>
+        )}
+
         <FormSection title="Brand details">
           <FormInput formik={formik} name="brandName" label="Brand Name" required />
           <FormInput formik={formik} name="brandSlug" label="Brand Slug" required />

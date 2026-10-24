@@ -259,6 +259,7 @@ export type ProductFormValues = {
   description: string;
   publishStatus: string;
   brandId: string;
+  warehouseId: string;
   category: string;
   childCategories: string[];
   isActive: boolean;
@@ -301,6 +302,7 @@ export const productFormInitialValues: ProductFormValues = {
   description: "",
   publishStatus: "draft",
   brandId: "",
+  warehouseId: "",
   category: "",
   childCategories: [],
   isActive: true,
@@ -503,6 +505,7 @@ export function buildProductPayload(
     publishStatus: values.publishStatus,
     isActive: values.isActive,
     brandId: Number(values.brandId),
+    warehouseId: Number(values.warehouseId),
     category: getDeepestCategoryId(values),
     productOffers,
     productTags,
@@ -628,6 +631,7 @@ export function isProductStepValid(
         Boolean(values.shortDescription?.trim()) &&
         Boolean(descriptionText) &&
         Boolean(values.brandId) &&
+        Boolean(values.warehouseId) &&
         categorySelected &&
         displayValid &&
         !hasFieldError(errors, "productName") &&
@@ -635,6 +639,7 @@ export function isProductStepValid(
         !hasFieldError(errors, "shortDescription") &&
         !hasFieldError(errors, "description") &&
         !hasFieldError(errors, "brandId") &&
+        !hasFieldError(errors, "warehouseId") &&
         !hasFieldError(errors, "category")
       );
     }
@@ -680,7 +685,7 @@ export function isProductStepValid(
 }
 
 export const STEP_TOUCH_FIELDS: Record<number, string[]> = {
-  1: ["productName", "productSlug", "shortDescription", "description", "brandId", "category", "childCategories", "attributeIds", "attributeCustomerDisplay"],
+  1: ["productName", "productSlug", "shortDescription", "description", "brandId", "warehouseId", "category", "childCategories", "attributeIds", "attributeCustomerDisplay"],
   2: ["variants"],
   3: ["seo.metaTitle", "seo.metaDescription", "seo.metaKeywords", "seo.canonicalUrl", "seo.ogImage"],
   4: ["publishStatus", "isActive"],
