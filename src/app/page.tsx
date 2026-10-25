@@ -6,7 +6,7 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import {
   fetchHomepageBanners,
   fetchHomepageSections,
-} from "@/services/website/homepageService";
+} from "@/services/homepageService";
 import { getWebSiteSchema } from "@/lib/schema";
 import { getStaticPageMetadata } from "@/lib/seo";
 

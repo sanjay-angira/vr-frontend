@@ -6,7 +6,7 @@ import type { WebsiteProductCardData } from "@/components/cards/ProductCard";
 import {
   listRecentlyViewedProducts,
   mapRecentlyViewedToCard,
-} from "@/services/website/recentlyViewedService";
+} from "@/services/recentlyViewedService";
 import { SectionHeadingProps } from "../shared/SectionHeading";
 
 const HOME_LIMIT = 8;

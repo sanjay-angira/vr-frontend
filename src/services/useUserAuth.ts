@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useEffect } from "react";
-import { userAuthService } from "@/services/website/userAuthService";
-import type { CompleteProfilePayload } from "@/services/website/userAuthService";
+import { userAuthService } from "@/services/userAuthService";
+import type { CompleteProfilePayload } from "@/services/userAuthService";
 import { STORAGE_KEYS, getJson, setJson, tokenStorage } from "@/services/api/storage";
 import {
   clearUserAuth,
@@ -13,7 +13,7 @@ import {
 } from "@/services/redux/slices/userAuthSlice";
 import { useAppDispatch, useAppSelector } from "@/services/redux/hooks";
 import { selectUserAuth } from "@/services/redux/selectors";
-import type { User } from "../../types/user";
+import type { User } from "../types/user";
 
 export function useUserAuth() {
   const dispatch = useAppDispatch();

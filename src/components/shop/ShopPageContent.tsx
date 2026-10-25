@@ -29,7 +29,7 @@ import {
 import { categorySlugsToExpandedIds } from "@/utils/categoryFilterHelpers";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import type { CategoryShopInitialData } from "@/services/website/shopCatalogApi";
+import type { CategoryShopInitialData } from "@/services/shopCatalogApi";
 
 const STORE_GRID_STYLES = `
 .store-catalog__grid {

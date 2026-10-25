@@ -6,7 +6,7 @@ import { User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAppDispatch } from "@/services/redux/hooks";
 import { setAuthModalOpen } from "@/services/redux/slices/modalSlice";
-import { useUserAuth } from "@/services/website/useUserAuth";
+import { useUserAuth } from "@/services/useUserAuth";
 
 export function HeaderUser() {
   const [mounted, setMounted] = useState(false);

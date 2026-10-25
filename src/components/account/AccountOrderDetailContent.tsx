@@ -8,7 +8,7 @@ import { ArrowLeft } from "lucide-react";
 import {
   getOrderByNumber,
   type PlacedOrder,
-} from "@/services/website/checkoutService";
+} from "@/services/checkoutService";
 import { AccountOrderDetailSkeleton } from "@/components/account/AccountSkeletons";
 import {
   formatInr,

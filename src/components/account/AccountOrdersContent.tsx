@@ -7,7 +7,7 @@ import { Package } from "lucide-react";
 import {
   getUserOrders,
   type PlacedOrder,
-} from "@/services/website/checkoutService";
+} from "@/services/checkoutService";
 import { AccountOrdersSkeleton } from "@/components/account/AccountSkeletons";
 
 function formatInr(value: number) {

@@ -12,7 +12,7 @@ import {
   Phone,
   UserRound,
 } from "lucide-react";
-import { useUserAuth } from "@/services/website/useUserAuth";
+import { useUserAuth } from "@/services/useUserAuth";
 import { useAppDispatch } from "@/services/redux/hooks";
 import { setAuthModalOpen } from "@/services/redux/slices/modalSlice";
 

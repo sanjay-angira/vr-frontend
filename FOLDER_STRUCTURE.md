@@ -40,8 +40,9 @@ src/
 ├── services/
 │   ├── api/                   # API client, customer auth, and endpoint constants
 │   ├── redux/                 # Storefront state and customer auth
-│   └── website/               # Storefront API and business logic
-├── styles/website/            # Storefront styles
+│   ├── *Service.ts            # Storefront API and business logic
+│   └── useUserAuth.ts         # Customer authentication hook
+├── styles/                    # Storefront styles
 ├── types/                     # Storefront TypeScript types
 └── utils/                     # Storefront helpers
 ```

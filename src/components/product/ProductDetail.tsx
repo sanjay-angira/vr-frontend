@@ -18,7 +18,7 @@ import ProductPriceBlock from "@/components/product/ProductPriceBlock";
 import { ProductOffersSection } from "@/components/product/ProductOffersSection";
 import { ProductCouponBanner } from "@/components/product/ProductCouponBanner";
 import type { ProductVariantView } from "@/components/product/productApi";
-import type { WebsiteCoupon } from "@/services/website/couponService";
+import type { WebsiteCoupon } from "@/services/couponService";
 import {
   buildAttributeGroups,
   findVariantBySlug,
@@ -27,8 +27,8 @@ import {
   resolveInitialVariant,
 } from "@/components/product/productVariantUtils";
 import { fetchWebsiteCart } from "@/services/redux/slices/cartSlice";
-import { addOrUpdateCartItem } from "@/services/website/cartService";
-import { trackRecentlyViewedProduct } from "@/services/website/recentlyViewedService";
+import { addOrUpdateCartItem } from "@/services/cartService";
+import { trackRecentlyViewedProduct } from "@/services/recentlyViewedService";
 import { useWishlist } from "@/components/wishlist/useWishlist";
 import { useRouter } from "next/navigation";
 import { getData } from "@/services/api/apiService";

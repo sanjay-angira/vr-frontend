@@ -11,7 +11,7 @@ import { ProductGridSkeleton } from "@/components/shared/ProductGridSkeleton";
 import {
   listRecentlyViewedProducts,
   mapRecentlyViewedToCard,
-} from "@/services/website/recentlyViewedService";
+} from "@/services/recentlyViewedService";
 
 export function RecentlyViewedPageContent() {
   const [products, setProducts] = useState<WebsiteProductCardData[]>([]);

@@ -1,4 +1,4 @@
-import type { RazorpayCheckoutPayload } from "@/services/website/checkoutService";
+import type { RazorpayCheckoutPayload } from "@/services/checkoutService";
 
 type RazorpaySuccessResponse = {
   razorpay_order_id: string;

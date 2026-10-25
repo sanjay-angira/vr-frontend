@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import type { WebsiteCoupon } from "@/services/website/couponService";
-import { addOrUpdateCartItem } from "@/services/website/cartService";
+import type { WebsiteCoupon } from "@/services/couponService";
+import { addOrUpdateCartItem } from "@/services/cartService";
 import { useDispatch } from "react-redux";
 import { fetchWebsiteCart } from "@/services/redux/slices/cartSlice";
 

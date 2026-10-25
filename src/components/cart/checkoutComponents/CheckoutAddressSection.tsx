@@ -11,7 +11,7 @@ import {
   addressToDeliveryFields,
   listUserAddresses,
   type UserAddress,
-} from "@/services/website/addressService";
+} from "@/services/addressService";
 
 type CheckoutAddressSectionProps = {
   enabled: boolean;

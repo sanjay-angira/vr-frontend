@@ -12,7 +12,7 @@ import {
   normalizeVariants,
   toNumber,
 } from "@/components/product/productApi";
-import { fetchWebsiteCoupons } from "@/services/website/couponService";
+import { fetchWebsiteCoupons } from "@/services/couponService";
 import { ShopSeedLink } from "@/components/shop/ShopSeedLink";
 import { ScrollToTopOnMount } from "@/components/shared/ScrollToTopOnMount";
 import { JsonLd } from "@/components/seo/JsonLd";

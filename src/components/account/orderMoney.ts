@@ -1,4 +1,4 @@
-import type { PlacedOrder } from "@/services/website/checkoutService";
+import type { PlacedOrder } from "@/services/checkoutService";
 
 export function formatInr(value: number) {
   return new Intl.NumberFormat("en-IN", {

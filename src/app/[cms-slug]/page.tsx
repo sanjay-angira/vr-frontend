@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { fetchCmsPageBySlug } from "@/services/website/cmsPageService";
+import { fetchCmsPageBySlug } from "@/services/cmsPageService";
 import {
   DEFAULT_SITE_FAQS,
   getBreadcrumbSchema,

@@ -1,4 +1,4 @@
-import { fetchFooterSections } from "@/services/website/footerService";
+import { fetchFooterSections } from "@/services/footerService";
 import { WebsiteFooterView } from "@/components/common/WebsiteFooterView";
 
 export async function WebsiteFooter() {

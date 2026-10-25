@@ -10,7 +10,7 @@ import {
   getCollectionPageSchema,
 } from "@/lib/schema";
 import { getCategoryPageMetadata } from "@/lib/seo";
-import { fetchCategoryShopPage } from "@/services/website/shopCatalogApi";
+import { fetchCategoryShopPage } from "@/services/shopCatalogApi";
 
 type PageProps = {
   params: Promise<{ slug: string }>;

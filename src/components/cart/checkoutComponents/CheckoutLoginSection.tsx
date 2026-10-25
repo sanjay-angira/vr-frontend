@@ -7,7 +7,7 @@
 
 import { Bell, Check, Star, Truck } from "lucide-react";
 import { useAppSelector } from "@/services/redux/hooks";
-import { useUserAuth } from "@/services/website/useUserAuth";
+import { useUserAuth } from "@/services/useUserAuth";
 import { usePlaceOrderContext } from "@/components/cart/PlaceOrderFlowWrapper";
 import LogInForm from "@/components/auth/LogInForm";
 

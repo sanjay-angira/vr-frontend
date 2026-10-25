@@ -12,7 +12,7 @@ import { CartHydrator } from "@/components/cart/CartHydrator";
 import { WishlistHydrator } from "@/components/wishlist/useWishlist";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import "@/styles/website/index.css";
+import "@/styles/index.css";
 import "./globals.css";
 
 export const dynamic = "force-dynamic";

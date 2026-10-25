@@ -11,7 +11,7 @@ import {
   updateUserAddress,
   type UserAddress,
   type UserAddressPayload,
-} from "@/services/website/addressService";
+} from "@/services/addressService";
 
 const EMPTY_FORM: UserAddressPayload = {
   label: "",

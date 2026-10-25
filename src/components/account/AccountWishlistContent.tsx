@@ -12,8 +12,8 @@ import {
   removeWishlistEntry,
 } from "@/services/redux/slices/wishlistSlice";
 import { fetchWebsiteCart } from "@/services/redux/slices/cartSlice";
-import { addOrUpdateCartItem } from "@/services/website/cartService";
-import type { WishlistItem } from "@/services/website/wishlistService";
+import { addOrUpdateCartItem } from "@/services/cartService";
+import type { WishlistItem } from "@/services/wishlistService";
 
 export function AccountWishlistContent() {
   const dispatch = useAppDispatch();

@@ -10,20 +10,20 @@ import React, {
   type ReactNode,
 } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import type { CartItemData } from "@/services/website/cartService";
+import type { CartItemData } from "@/services/cartService";
 import { useCart } from "@/components/hooks/useCart";
 import { OrderSummary } from "@/components/cart/OrderSummary";
 import {
   placeOrder,
   verifyRazorpayPayment,
   type CheckoutPayload,
-} from "@/services/website/checkoutService";
+} from "@/services/checkoutService";
 import { openRazorpayCheckout } from "@/utils/razorpayCheckout";
 import {
   applyCouponCode,
   computeCouponDiscountAmount,
   type AppliedCoupon,
-} from "@/services/website/couponService";
+} from "@/services/couponService";
 import { getOrderSummaryTotals } from "@/components/cart/commerceUtils";
 
 export type OrderSummaryShippingMode = "threshold" | "free";

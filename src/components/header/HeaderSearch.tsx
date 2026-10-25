@@ -16,7 +16,7 @@ import {
   type StoreSearchCategory,
   type StoreSearchProduct,
   type StoreSearchResult,
-} from "@/services/website/searchService";
+} from "@/services/searchService";
 
 function isAbortError(error: unknown) {
   return (

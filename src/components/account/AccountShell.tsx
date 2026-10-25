@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { useUserAuth } from "@/services/website/useUserAuth";
+import { useUserAuth } from "@/services/useUserAuth";
 import { AccountChromeSkeleton } from "@/components/account/AccountSkeletons";
 import { getAccountMeta } from "@/components/account/accountMeta";
 

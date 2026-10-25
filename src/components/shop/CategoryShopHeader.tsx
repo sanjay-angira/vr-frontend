@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import type { ShopCategoryInfo } from "@/services/website/shopCatalogApi";
+import type { ShopCategoryInfo } from "@/services/shopCatalogApi";
 
 type CategoryShopHeaderProps = {
   category: ShopCategoryInfo;

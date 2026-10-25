@@ -8,8 +8,8 @@ import { CheckCircle2, Package } from "lucide-react";
 import {
   getOrderByNumber,
   type PlacedOrder,
-} from "@/services/website/checkoutService";
-import { useUserAuth } from "@/services/website/useUserAuth";
+} from "@/services/checkoutService";
+import { useUserAuth } from "@/services/useUserAuth";
 import {
   formatInr,
   getOrderItemMoney,

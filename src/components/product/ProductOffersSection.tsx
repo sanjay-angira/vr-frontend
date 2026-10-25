@@ -12,7 +12,7 @@ import {
   Wallet,
 } from "lucide-react";
 import type { VariantPricingView } from "@/components/product/productApi";
-import type { WebsiteCoupon } from "@/services/website/couponService";
+import type { WebsiteCoupon } from "@/services/couponService";
 
 type Offer = VariantPricingView["availableOffers"][number];
 

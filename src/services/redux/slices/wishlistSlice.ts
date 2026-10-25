@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import * as wishlistApi from "@/services/website/wishlistService";
-import type { WishlistItem } from "@/services/website/wishlistService";
+import * as wishlistApi from "@/services/wishlistService";
+import type { WishlistItem } from "@/services/wishlistService";
 
 interface WishlistState {
   items: WishlistItem[];
