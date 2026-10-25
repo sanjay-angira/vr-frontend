@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { CheckoutPageContent } from "@/components/website/cart/CheckoutPageContent";
+import { CheckoutPageContent } from "@/components/cart/CheckoutPageContent";
 import { NOINDEX_ROBOTS, buildPageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildPageMetadata({

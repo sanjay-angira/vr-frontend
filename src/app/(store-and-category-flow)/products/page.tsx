@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { ShopPageContent } from "@/components/website/shop/ShopPageContent";
-import { JsonLd } from "@/components/website/seo/JsonLd";
+import { ShopPageContent } from "@/components/shop/ShopPageContent";
+import { JsonLd } from "@/components/seo/JsonLd";
 import {
   getBreadcrumbSchema,
   getCollectionPageSchema,

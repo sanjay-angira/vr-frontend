@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { CategoryShopDescription } from "@/components/website/shop/CategoryShopDescription";
-import { CategoryShopHeader } from "@/components/website/shop/CategoryShopHeader";
-import { ShopPageContent } from "@/components/website/shop/ShopPageContent";
-import { JsonLd } from "@/components/website/seo/JsonLd";
+import { CategoryShopDescription } from "@/components/shop/CategoryShopDescription";
+import { CategoryShopHeader } from "@/components/shop/CategoryShopHeader";
+import { ShopPageContent } from "@/components/shop/ShopPageContent";
+import { JsonLd } from "@/components/seo/JsonLd";
 import {
   getBreadcrumbSchema,
   getCollectionPageSchema,

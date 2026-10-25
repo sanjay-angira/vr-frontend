@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { AccountShell } from "@/components/website/account/AccountShell";
+import { AccountShell } from "@/components/account/AccountShell";
 import { NOINDEX_ROBOTS, buildPageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildPageMetadata({

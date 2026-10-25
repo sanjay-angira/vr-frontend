@@ -1,4 +1,4 @@
-import { AccountRouteLoading } from "@/components/website/account/AccountRouteLoading";
+import { AccountRouteLoading } from "@/components/account/AccountRouteLoading";
 
 export default function AccountPanelLoading() {
   return <AccountRouteLoading />;

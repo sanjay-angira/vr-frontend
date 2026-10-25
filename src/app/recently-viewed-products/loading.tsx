@@ -1,5 +1,5 @@
-import { SectionHeading } from "@/components/website/shared/SectionHeading";
-import { ProductGridSkeleton } from "@/components/website/shared/ProductGridSkeleton";
+import { SectionHeading } from "@/components/shared/SectionHeading";
+import { ProductGridSkeleton } from "@/components/shared/ProductGridSkeleton";
 
 export default function RecentlyViewedLoading() {
   return (

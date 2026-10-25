@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { JsonLd } from "@/components/website/seo/JsonLd";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { fetchCmsPageBySlug } from "@/services/website/cmsPageService";
 import {
   DEFAULT_SITE_FAQS,

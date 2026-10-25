@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { BlogDetailContent } from "@/components/website/blog/BlogDetailContent";
-import { JsonLd } from "@/components/website/seo/JsonLd";
-import { fetchBlogBySlug } from "@/components/website/blog/blogApi";
+import { BlogDetailContent } from "@/components/blog/BlogDetailContent";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { fetchBlogBySlug } from "@/components/blog/blogApi";
 import {
   getBlogPostingSchema,
   getBreadcrumbSchema,

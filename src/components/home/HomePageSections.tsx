@@ -1,0 +1,220 @@
+import type { HomepageBanner, HomepageSection } from "@/types/homepage";
+import type { WebsiteProductCardData } from "@/components/cards/ProductCard";
+import type { Category } from "@/components/cards/CategoryCard";
+import type { SectionHeadingProps } from "@/components/shared/SectionHeading";
+import { HeroBannerSection } from "@/components/sections/HeroBannerSection";
+import { CategorySection } from "@/components/sections/CategorySection";
+import { ProductSection } from "@/components/sections/ProductSection";
+import { BlogSection } from "@/components/sections/BlogSection";
+import { ProductReviewsShowcase } from "@/components/sections/ProductReviewsShowcase";
+import { WhyChooseSection } from "@/components/sections/WhyChooseSection";
+import { RecentlyViewedSection } from "@/components/sections/RecentlyViewedSection";
+
+type HomePageSectionsProps = {
+  sections: HomepageSection[];
+  banners: HomepageBanner[];
+};
+
+function mapProducts(
+  products: HomepageSection["products"],
+): WebsiteProductCardData[] {
+  return products.map((product) => ({
+    id: product.id,
+    slug: product.slug,
+    variantSlug: product.variantSlug ?? undefined,
+    name: product.name,
+    description: product.description,
+    price: product.price,
+    originalPrice:
+      product.originalPrice && product.originalPrice > product.price
+        ? product.originalPrice
+        : undefined,
+    discountPercentage:
+      Number.isFinite(Number(product.discountPercentage)) &&
+      Number(product.discountPercentage) > 0
+        ? Number(product.discountPercentage)
+        : undefined,
+    image: product.image,
+    category: product.category,
+    rating: product.rating,
+    reviewCount: product.reviewCount,
+    inStock: product.inStock,
+  }));
+}
+
+function mapCategories(categories: HomepageSection["categories"]): Category[] {
+  return categories.map((category) => ({
+    id: category.id,
+    name: category.name,
+    slug: category.slug,
+    description: category.description,
+    image: category.image,
+    mobileImage: category.mobileImage || "",
+    href: category.href,
+  }));
+}
+
+function mapBlogPosts(blogs: HomepageSection["blogs"]) {
+  return blogs.map((blog) => ({
+    id: blog.id,
+    title: blog.title,
+    excerpt: blog.excerpt,
+    image: blog.image,
+    category: blog.category,
+    date: blog.date,
+    href: blog.href,
+  }));
+}
+
+export function getSectionHeadingProps(
+  section: HomepageSection,
+): SectionHeadingProps {
+  const data = (section.data ?? {}) as HomepageSection["data"] &
+    Record<string, unknown>;
+
+  const title = String(data.heading || section.title || "").trim();
+  const accent = String(
+    data.headingAccent || data.accent || data.accentWord || "",
+  ).trim();
+  const eyebrow = String(data.subHeading || data.eyebrow || "").trim();
+  const description = String(data.description || "").trim();
+
+  return {
+    eyebrow: eyebrow || undefined,
+    title,
+    accent: accent || undefined,
+    description: description || undefined,
+  };
+}
+
+function getViewAllLabel(section: HomepageSection): string | undefined {
+  const title = String(section.title || "").trim();
+  return title ? `View All ${title}` : undefined;
+}
+
+export function HomePageSections({ sections, banners }: HomePageSectionsProps) {
+  return (
+    <>
+      {banners.length > 0 && <HeroBannerSection banners={banners} />}
+      {sections.map((section) => {
+        const key = `${section.type}-${section.id}`;
+        const heading = getSectionHeadingProps(section);
+
+        switch (section.type) {
+          case "hero_banner":
+            return null;
+
+          case "product_slider":
+            if (section.products.length === 0) return null;
+            return (
+              <ProductSection
+                key={key}
+                heading={heading}
+                products={mapProducts(section.products)}
+                viewAllLink="/products"
+                viewAllLabel={getViewAllLabel(section)}
+                viewAllSeed={
+                  section.slug ? { sectionSlugs: [section.slug] } : undefined
+                }
+              />
+            );
+
+          case "category_slider":
+            if (section.categories.length === 0) return null;
+            return (
+              <CategorySection
+                key={key}
+                heading={heading}
+                categories={mapCategories(section.categories)}
+                viewAllLabel={getViewAllLabel(section)}
+              />
+            );
+
+          case "blog_section":
+            if (section.blogs.length === 0) return null;
+            return (
+              <BlogSection
+                key={key}
+                heading={heading}
+                posts={mapBlogPosts(section.blogs)}
+                viewAllLabel={getViewAllLabel(section)}
+              />
+            );
+
+          case "review_section":
+            if (section.reviews.length === 0) return null;
+            return (
+              <ProductReviewsShowcase
+                key={key}
+                heading={heading}
+                reviews={section.reviews}
+              />
+            );
+
+          case "custom": {
+            const customKey = String(
+              section.data?.customSection || section.data?.sectionName || "",
+            )
+              .trim()
+              .toLowerCase();
+
+            if (customKey === "why_choose") {
+              return <WhyChooseSection key={key} heading={heading} />;
+            }
+
+            if (customKey === "recently_viewed") {
+              return (
+                <RecentlyViewedSection
+                  key={key}
+                  heading={heading}
+                  viewAllLabel={getViewAllLabel(section)}
+                />
+              );
+            }
+
+            return (
+              <div key={key}>
+                {section.categories.length > 0 && (
+                  <CategorySection
+                    heading={heading}
+                    categories={mapCategories(section.categories)}
+                    viewAllLabel={getViewAllLabel(section)}
+                  />
+                )}
+                {section.products.length > 0 && (
+                  <ProductSection
+                    heading={heading}
+                    products={mapProducts(section.products)}
+                    viewAllLink="/products"
+                    viewAllLabel={getViewAllLabel(section)}
+                    viewAllSeed={
+                      section.slug
+                        ? { sectionSlugs: [section.slug] }
+                        : undefined
+                    }
+                  />
+                )}
+                {section.blogs.length > 0 && (
+                  <BlogSection
+                    heading={heading}
+                    posts={mapBlogPosts(section.blogs)}
+                    viewAllLabel={getViewAllLabel(section)}
+                  />
+                )}
+                {section.reviews.length > 0 && (
+                  <ProductReviewsShowcase
+                    heading={heading}
+                    reviews={section.reviews}
+                  />
+                )}
+              </div>
+            );
+          }
+
+          default:
+            return null;
+        }
+      })}
+    </>
+  );
+}

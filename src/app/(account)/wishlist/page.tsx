@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { AccountWishlistContent } from "@/components/website/account/AccountWishlistContent";
+import { AccountWishlistContent } from "@/components/account/AccountWishlistContent";
 import { NOINDEX_ROBOTS, buildPageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildPageMetadata({

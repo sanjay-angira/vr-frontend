@@ -1,4 +1,4 @@
-import { AccountProfileContent } from "@/components/website/account/AccountProfileContent";
+import { AccountProfileContent } from "@/components/account/AccountProfileContent";
 
 export default function AccountProfilePage() {
   return <AccountProfileContent />;

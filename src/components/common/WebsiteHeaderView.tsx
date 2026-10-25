@@ -1,5 +1,5 @@
-import { WebsiteHeaderBar } from "@/components/website/header/WebsiteHeaderBar";
-import type { HeaderParentCategory } from "@/components/website/categories/categoriesApi";
+import { WebsiteHeaderBar } from "@/components/header/WebsiteHeaderBar";
+import type { HeaderParentCategory } from "@/components/categories/categoriesApi";
 
 type WebsiteHeaderViewProps = {
   categories: HeaderParentCategory[];

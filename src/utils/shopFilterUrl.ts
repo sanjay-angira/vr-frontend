@@ -1,4 +1,4 @@
-import type { StoreFilterState } from "@/components/website/shop/StoreFiltersSidebar";
+import type { StoreFilterState } from "@/components/shop/StoreFiltersSidebar";
 
 /** Shared by URL parsing (server) and the shop sidebar (client). */
 export const DISCOUNT_FILTER_OPTIONS = [50, 40, 30, 20, 10] as const;

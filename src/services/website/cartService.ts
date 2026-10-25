@@ -9,7 +9,7 @@ import {
   fetchProductBySlug,
   normalizeVariants,
   type VariantPricingView,
-} from "@/components/website/product/productApi";
+} from "@/components/product/productApi";
 
 export interface CartItemData {
   id: number;

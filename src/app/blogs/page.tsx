@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { BlogsPageContent } from "@/components/website/blog/BlogsPageContent";
-import { JsonLd } from "@/components/website/seo/JsonLd";
+import { BlogsPageContent } from "@/components/blog/BlogsPageContent";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { getBlogListingSchema, getBreadcrumbSchema } from "@/lib/schema";
 import { getStaticPageMetadata } from "@/lib/seo";
 

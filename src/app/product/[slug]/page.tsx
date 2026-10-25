@@ -1,28 +1,28 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import ReviewSection from "@/components/website/product/ReviewSection";
-import ProductDetail from "@/components/website/product/ProductDetail";
-import { ProductFaqSection } from "@/components/website/product/ProductFaqSection";
-import { ProductSection } from "@/components/website/sections/ProductSection";
+import ReviewSection from "@/components/product/ReviewSection";
+import ProductDetail from "@/components/product/ProductDetail";
+import { ProductFaqSection } from "@/components/product/ProductFaqSection";
+import { ProductSection } from "@/components/sections/ProductSection";
 import {
   fetchProductBySlug,
   fetchSameCategoryProducts,
   normalizeAttributes,
   normalizeVariants,
   toNumber,
-} from "@/components/website/product/productApi";
+} from "@/components/product/productApi";
 import { fetchWebsiteCoupons } from "@/services/website/couponService";
-import { ShopSeedLink } from "@/components/website/shop/ShopSeedLink";
-import { ScrollToTopOnMount } from "@/components/website/shared/ScrollToTopOnMount";
-import { JsonLd } from "@/components/website/seo/JsonLd";
+import { ShopSeedLink } from "@/components/shop/ShopSeedLink";
+import { ScrollToTopOnMount } from "@/components/shared/ScrollToTopOnMount";
+import { JsonLd } from "@/components/seo/JsonLd";
 import {
   getBreadcrumbSchema,
   getFaqPageSchema,
   getProductSchema,
 } from "@/lib/schema";
 import { getProductPageMetadata } from "@/lib/seo";
-import { buildProductVariantUrl } from "@/components/website/product/productVariantUtils";
+import { buildProductVariantUrl } from "@/components/product/productVariantUtils";
 import { getProductWebpImageUrl } from "@/utils/optimizedImage";
 
 type PageProps = {

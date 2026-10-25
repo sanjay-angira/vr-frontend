@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { CategoriesPageContent } from "@/components/website/categories/CategoriesPageContent";
-import { fetchAllCategories } from "@/components/website/categories/categoriesApi";
-import { JsonLd } from "@/components/website/seo/JsonLd";
+import { CategoriesPageContent } from "@/components/categories/CategoriesPageContent";
+import { fetchAllCategories } from "@/components/categories/categoriesApi";
+import { JsonLd } from "@/components/seo/JsonLd";
 import {
   getBreadcrumbSchema,
   getCollectionPageSchema,

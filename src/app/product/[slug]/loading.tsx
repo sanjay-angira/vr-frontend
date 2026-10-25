@@ -1,5 +1,5 @@
-import { ProductDetailSkeleton } from "@/components/website/shared/ProductDetailSkeleton";
-import { ScrollToTopOnMount } from "@/components/website/shared/ScrollToTopOnMount";
+import { ProductDetailSkeleton } from "@/components/shared/ProductDetailSkeleton";
+import { ScrollToTopOnMount } from "@/components/shared/ScrollToTopOnMount";
 
 export default function Loading() {
   return (

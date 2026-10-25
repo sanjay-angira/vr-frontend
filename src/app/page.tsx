@@ -1,8 +1,8 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import { HomePageSkeleton } from "@/components/website/shared/HomePageSkeleton";
-import { HomePageSections } from "@/components/website/home/HomePageSections";
-import { JsonLd } from "@/components/website/seo/JsonLd";
+import { HomePageSkeleton } from "@/components/shared/HomePageSkeleton";
+import { HomePageSections } from "@/components/home/HomePageSections";
+import { JsonLd } from "@/components/seo/JsonLd";
 import {
   fetchHomepageBanners,
   fetchHomepageSections,

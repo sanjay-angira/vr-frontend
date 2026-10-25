@@ -1,11 +1,3 @@
-.website-layout {
-  display: flex;
-  min-height: 100vh;
-  flex-direction: column;
-  background: var(--cream-background, var(--vr-cream));
-  font-family: var(--font-body);
-}
-
 /* Gap utility helpers (class names avoid Tailwind gap-* collision) */
 .vr-gap-xs {
   gap: var(--gap-xs);
@@ -22,4 +14,3 @@
 .vr-gap-xl {
   gap: var(--gap-xl);
 }
-

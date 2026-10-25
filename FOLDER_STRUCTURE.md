@@ -26,8 +26,16 @@ src/
 │   ├── robots.ts              # Search crawler rules
 │   └── sitemap.ts             # Storefront sitemap
 ├── components/
+│   ├── account/               # Customer account components
+│   ├── auth/                  # Customer authentication and modals
+│   ├── blog/                  # Blog features
+│   ├── cart/                  # Cart and checkout features
 │   ├── common/                # Shared storefront UI and controls
-│   └── website/               # Storefront pages and feature components
+│   ├── header/                # Storefront navigation
+│   ├── product/               # Product details and cards
+│   ├── sections/              # Homepage sections
+│   ├── shop/                  # Catalog and filters
+│   └── ...                    # Other storefront feature components
 ├── lib/                       # Link previews, SEO, schema, and site helpers
 ├── services/
 │   ├── api/                   # API client, customer auth, and endpoint constants

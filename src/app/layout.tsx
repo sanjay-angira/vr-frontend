@@ -2,10 +2,18 @@ import { getOgImage, SEO_PAGES, SITE_NAME } from "@/lib/seo";
 import { getOrganizationSchema } from "@/lib/schema";
 import { getSiteUrl } from "@/lib/site";
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { StoreProvider } from "@/services/redux/provider";
+import { WebsiteProgressBar } from "@/components/shared/WebsiteProgressBar";
+import AuthModals from "@/components/auth/AuthModals";
+import { WebsiteFooter } from "@/components/footer/WebsiteFooter";
+import { WebsiteHeader } from "@/components/header/WebsiteHeader";
+import { CartHydrator } from "@/components/cart/CartHydrator";
+import { WishlistHydrator } from "@/components/wishlist/useWishlist";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import "@/styles/website/index.css";
 import "./globals.css";
-import { WebsiteShell } from "@/components/website/WebsiteShell";
 
 export const dynamic = "force-dynamic";
 
@@ -58,7 +66,7 @@ export default function RootLayout({
 
   return (
     <html lang="en" className="h-full antialiased">
-      <body className="min-h-full flex flex-col">
+      <body className="website-layout min-h-full flex flex-col">
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"
@@ -76,9 +84,26 @@ export default function RootLayout({
           }}
         />
         <StoreProvider>
-          <div className="website-font-root">
-            <WebsiteShell>{children}</WebsiteShell>
-          </div>
+          <WebsiteProgressBar />
+          <CartHydrator />
+          <WishlistHydrator />
+          <AuthModals />
+          <Suspense fallback={null}>
+            <WebsiteHeader />
+          </Suspense>
+          <main className="flex-1">{children}</main>
+          <Suspense fallback={null}>
+            <WebsiteFooter />
+          </Suspense>
+          <ToastContainer
+            position="top-right"
+            autoClose={4000}
+            newestOnTop
+            closeOnClick
+            pauseOnHover
+            theme="colored"
+            style={{ zIndex: 10000 }}
+          />
         </StoreProvider>
       </body>
     </html>

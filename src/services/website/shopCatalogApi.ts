@@ -3,8 +3,8 @@ import type {
   StoreCategoryOption,
   StoreFilterState,
   StoreProductSectionOption,
-} from "@/components/website/shop/StoreFiltersSidebar";
-import type { StoreListProduct } from "@/components/website/shop/StoreProductCard";
+} from "@/components/shop/StoreFiltersSidebar";
+import type { StoreListProduct } from "@/components/shop/StoreProductCard";
 import { categorySlugsToExpandedIds } from "@/utils/categoryFilterHelpers";
 import { parseShopSearchParams } from "@/utils/shopFilterUrl";
 

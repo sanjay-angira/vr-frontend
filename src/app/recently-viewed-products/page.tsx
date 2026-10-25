@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { RecentlyViewedPageContent } from "@/components/website/sections/RecentlyViewedPageContent";
+import { RecentlyViewedPageContent } from "@/components/sections/RecentlyViewedPageContent";
 import { NOINDEX_ROBOTS, buildPageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildPageMetadata({

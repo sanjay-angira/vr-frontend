@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import PlaceOrderFlowWrapper from "@/components/website/cart/PlaceOrderFlowWrapper";
+import PlaceOrderFlowWrapper from "@/components/cart/PlaceOrderFlowWrapper";
 import { NOINDEX_ROBOTS, buildPageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildPageMetadata({

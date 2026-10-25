@@ -55,15 +55,13 @@ export const API_ENDPOINTS = {
     ORDERS: "customer/orders",
     ADDRESSES: "customer/addresses",
     ADDRESS_BY_ID: (id: number | string) => `customer/addresses/${id}`,
-    ADDRESS_DEFAULT: (id: number | string) =>
-      `customer/addresses/${id}/default`,
+    ADDRESS_DEFAULT: (id: number | string) => `customer/addresses/${id}/default`,
     WISHLIST: "customer/wishlist",
     WISHLIST_IDS: "customer/wishlist/ids",
     WISHLIST_COUNT: "customer/wishlist/count",
     WISHLIST_TOGGLE: "customer/wishlist/toggle",
     WISHLIST_BY_ID: (id: number | string) => `customer/wishlist/${id}`,
-    WISHLIST_BY_VARIATION: (variationId: number | string) =>
-      `customer/wishlist/by-variation/${variationId}`,
+    WISHLIST_BY_VARIATION: (variationId: number | string) => `customer/wishlist/by-variation/${variationId}`,
     RECENTLY_VIEWED: "customer/recently-viewed",
     REVIEWS: "customer/reviews",
   },

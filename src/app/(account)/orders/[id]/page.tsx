@@ -1,4 +1,4 @@
-import { AccountOrderDetailContent } from "@/components/website/account/AccountOrderDetailContent";
+import { AccountOrderDetailContent } from "@/components/account/AccountOrderDetailContent";
 
 export default function AccountOrderDetailPage() {
   return <AccountOrderDetailContent />;

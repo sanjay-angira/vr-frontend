@@ -1,7 +1,7 @@
 import { getData, postData } from "@/services/api/apiService";
 import { API_ENDPOINTS } from "@/services/api/API_ENDPOINT";
 import { getCartIdentity } from "@/utils/cartIdentity";
-import type { WebsiteProductCardData } from "@/components/website/cards/ProductCard";
+import type { WebsiteProductCardData } from "@/components/cards/ProductCard";
 
 export type RecentlyViewedProduct = {
   id: string;

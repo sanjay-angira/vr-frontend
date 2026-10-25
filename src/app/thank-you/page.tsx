@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import { OrderSuccessContent } from "@/components/website/cart/OrderSuccessContent";
+import { OrderSuccessContent } from "@/components/cart/OrderSuccessContent";
 import { NOINDEX_ROBOTS, buildPageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildPageMetadata({
