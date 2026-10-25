@@ -1,10 +1,8 @@
 @import "tailwindcss";
 
-/* Ensure admin/website TSX are scanned for utility classes (Turbopack + Tailwind v4) */
+/* Ensure storefront TSX is scanned for utility classes (Turbopack + Tailwind v4) */
 @source "../components/**/*.{tsx,ts}";
 @source "../app/**/*.{tsx,ts}";
-
-@import "../styles/admin/theme.css";
 
 :root {
   --background: #ffffff;

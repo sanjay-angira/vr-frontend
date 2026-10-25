@@ -10,9 +10,6 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@dnd-kit/core": "^6.3.1",
-    "@dnd-kit/sortable": "^10.0.0",
-    "@dnd-kit/utilities": "^3.2.2",
     "@reduxjs/toolkit": "^2.12.0",
     "axios": "^1.18.0",
     "formik": "^2.4.9",
@@ -20,16 +17,12 @@
     "lucide-react": "^1.21.0",
     "next": "16.2.9",
     "nprogress": "^0.2.0",
-    "quill": "^2.0.3",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-otp-input": "^3.1.1",
-    "react-quill-new": "^3.8.3",
     "react-redux": "^9.3.0",
     "react-slick": "^0.31.0",
     "react-toastify": "^11.1.0",
-    "recharts": "^3.10.0",
-    "redux-persist": "^6.0.0",
     "slick-carousel": "^1.8.1",
     "yup": "^1.7.1"
   },

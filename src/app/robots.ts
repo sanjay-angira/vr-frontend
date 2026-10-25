@@ -3,7 +3,7 @@ import { getSiteUrl } from "@/lib/site";
 
 /**
  * Public storefront crawl rules.
- * Blocks admin, account, and checkout flows that should not be indexed.
+ * Blocks account and checkout flows that should not be indexed.
  * Google ignores the non-standard Host directive, so it is omitted.
  */
 export default function robots(): MetadataRoute.Robots {
@@ -15,8 +15,6 @@ export default function robots(): MetadataRoute.Robots {
         userAgent: "*",
         allow: "/",
         disallow: [
-          "/admin",
-          "/admin/",
           "/profile",
           "/orders",
           "/wishlist",

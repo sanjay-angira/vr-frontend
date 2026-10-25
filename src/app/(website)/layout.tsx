@@ -1,5 +1,4 @@
 import "@/styles/website/index.css";
-import "react-quill-new/dist/quill.snow.css";
 import { WebsiteShell } from "@/components/website/WebsiteShell";
 
 /**

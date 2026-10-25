@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { FormDropdown } from "@/components/admin/forms/shared/FormDropdown";
-import { DeleteConfirmationModal } from "@/components/admin/shared/DeleteConfirmationModal";
 import { Button } from "@/components/common/Button";
+import { DeleteConfirmationModal } from "@/components/common/DeleteConfirmationModal";
+import { FormDropdown } from "@/components/common/FormDropdown";
 import { getRowDisplayName } from "@/components/common/getRowDisplayName";
 
 export type DataTableColumn<T extends object> = {
@@ -257,7 +257,7 @@ export function DataTable<T extends object>({
                   value={query}
                   onChange={(event) => handleSearchChange(event.target.value)}
                   placeholder={searchPlaceholder}
-                  className="w-full rounded-lg border border-zinc-300 bg-white py-2.5 pl-9 pr-10 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-admin-primary focus:outline-none focus:ring-2 focus:ring-admin-primary/15"
+                  className="w-full rounded-lg border border-zinc-300 bg-white py-2.5 pl-9 pr-10 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-500/15"
                   aria-label="Search table"
                 />
                 {isSearching && (

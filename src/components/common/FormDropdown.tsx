@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronDown } from "lucide-react";
-import { useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { FormLabel } from "./FormLabel";
 
 export type DropdownOption = {
@@ -55,12 +55,14 @@ export function FormDropdown({
     return Math.min(options.length * OPTION_HEIGHT + 8, MENU_MAX_HEIGHT);
   }
 
-  function updateMenuPlacement() {
+  const updateMenuPlacement = useCallback(() => {
     const trigger = triggerRef.current;
     if (!trigger) return;
 
     const rect = trigger.getBoundingClientRect();
-    const estimatedHeight = listRef.current?.offsetHeight ?? estimateMenuHeight();
+    const estimatedHeight =
+      listRef.current?.offsetHeight ??
+      Math.min(options.length * OPTION_HEIGHT + 8, MENU_MAX_HEIGHT);
     const spaceBelow = window.innerHeight - rect.bottom - MENU_GAP;
     const spaceAbove = rect.top - MENU_GAP;
     const openUpward = spaceBelow < estimatedHeight && spaceAbove > spaceBelow;
@@ -69,7 +71,7 @@ export function FormDropdown({
     setMenuMaxHeight(
       Math.max(120, Math.min(MENU_MAX_HEIGHT, openUpward ? spaceAbove : spaceBelow))
     );
-  }
+  }, [options.length]);
 
   function handleToggle() {
     if (disabled) return;
@@ -128,7 +130,7 @@ export function FormDropdown({
       window.removeEventListener("resize", handleReposition);
       window.removeEventListener("scroll", handleReposition, true);
     };
-  }, [open, options.length]);
+  }, [open, updateMenuPlacement]);
 
   return (
     <div className={`relative ${className ?? ""}`} ref={rootRef}>
@@ -142,7 +144,7 @@ export function FormDropdown({
         aria-expanded={open}
         aria-controls={listId}
         onClick={handleToggle}
-        className={`flex w-full items-center justify-between rounded-lg border bg-white px-3.5 py-2.5 text-left text-sm transition-colors focus:border-admin-primary focus:outline-none focus:ring-2 focus:ring-admin-primary/15 disabled:cursor-not-allowed disabled:opacity-60 ${
+        className={`flex w-full items-center justify-between rounded-lg border bg-white px-3.5 py-2.5 text-left text-sm transition-colors focus:border-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-500/15 disabled:cursor-not-allowed disabled:opacity-60 ${
           error ? "border-red-500" : "border-zinc-300"
         }`}
       >
@@ -174,7 +176,7 @@ export function FormDropdown({
                   <button
                     type="button"
                     className={`flex w-full px-3.5 py-2.5 text-left text-sm transition-colors hover:bg-zinc-50 ${
-                      isSelected ? "bg-admin-primary/5 font-medium text-admin-primary" : "text-zinc-700"
+                      isSelected ? "bg-zinc-100 font-medium text-zinc-900" : "text-zinc-700"
                     }`}
                     onClick={() => {
                       onChange(String(option.value));
