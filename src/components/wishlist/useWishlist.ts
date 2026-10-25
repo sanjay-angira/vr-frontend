@@ -6,8 +6,8 @@ import {
   clearWishlist,
   fetchWishlistIds,
   toggleWishlistItem,
-} from "@/services/redux/slices/websiteSlices/wishlistSlice";
-import { setAuthModalOpen } from "@/services/redux/slices/websiteSlices/modalSlice";
+} from "@/services/redux/slices/wishlistSlice";
+import { setAuthModalOpen } from "@/services/redux/slices/modalSlice";
 import { toast } from "react-toastify";
 
 /** Hydrates wishlist ids when the user is authenticated; clears on logout. */

@@ -13,8 +13,8 @@ import { toast } from "react-toastify";
 import { API_ENDPOINTS } from "@/services/api/API_ENDPOINT";
 import { setJson, STORAGE_KEYS, tokenStorage } from "@/services/api/storage";
 import { useDispatch } from "react-redux";
-import { setUserCredentials } from "@/services/redux/slices/websiteSlices/userAuthSlice";
-import { setAuthModalOpen } from "@/services/redux/slices/websiteSlices/modalSlice";
+import { setUserCredentials } from "@/services/redux/slices/userAuthSlice";
+import { setAuthModalOpen } from "@/services/redux/slices/modalSlice";
 import type { User } from "../../types/user";
 import { Button } from "@/components/auth/buttons";
 import {

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { ShoppingCart } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/services/redux/hooks";
-import { toggleCartDrawer } from "@/services/redux/slices/websiteSlices/modalSlice";
+import { toggleCartDrawer } from "@/services/redux/slices/modalSlice";
 
 export function HeaderCart() {
   const [mounted, setMounted] = useState(false);

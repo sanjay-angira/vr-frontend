@@ -10,7 +10,7 @@ import {
   setUserAuthLoading,
   setUserCredentials,
   updateUser,
-} from "@/services/redux/slices/websiteSlices/userAuthSlice";
+} from "@/services/redux/slices/userAuthSlice";
 import { useAppDispatch, useAppSelector } from "@/services/redux/hooks";
 import { selectUserAuth } from "@/services/redux/selectors";
 import type { User } from "../../types/user";

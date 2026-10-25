@@ -10,8 +10,8 @@ import { useAppDispatch, useAppSelector } from "@/services/redux/hooks";
 import {
   fetchWishlistItems,
   removeWishlistEntry,
-} from "@/services/redux/slices/websiteSlices/wishlistSlice";
-import { fetchWebsiteCart } from "@/services/redux/slices/websiteSlices/cartSlice";
+} from "@/services/redux/slices/wishlistSlice";
+import { fetchWebsiteCart } from "@/services/redux/slices/cartSlice";
 import { addOrUpdateCartItem } from "@/services/website/cartService";
 import type { WishlistItem } from "@/services/website/wishlistService";
 

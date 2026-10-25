@@ -26,7 +26,7 @@ import {
   replaceProductVariantInUrl,
   resolveInitialVariant,
 } from "@/components/product/productVariantUtils";
-import { fetchWebsiteCart } from "@/services/redux/slices/websiteSlices/cartSlice";
+import { fetchWebsiteCart } from "@/services/redux/slices/cartSlice";
 import { addOrUpdateCartItem } from "@/services/website/cartService";
 import { trackRecentlyViewedProduct } from "@/services/website/recentlyViewedService";
 import { useWishlist } from "@/components/wishlist/useWishlist";

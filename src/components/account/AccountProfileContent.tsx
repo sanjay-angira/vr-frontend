@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { useUserAuth } from "@/services/website/useUserAuth";
 import { useAppDispatch } from "@/services/redux/hooks";
-import { setAuthModalOpen } from "@/services/redux/slices/websiteSlices/modalSlice";
+import { setAuthModalOpen } from "@/services/redux/slices/modalSlice";
 
 function getInitials(name?: string) {
   if (!name?.trim()) return "VR";

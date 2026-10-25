@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useAppDispatch } from "@/services/redux/hooks";
-import { fetchWebsiteCart } from "@/services/redux/slices/websiteSlices/cartSlice";
+import { fetchWebsiteCart } from "@/services/redux/slices/cartSlice";
 
 /** Hydrates cart count/items once the website shell mounts. */
 export function CartHydrator() {

@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAppDispatch } from "@/services/redux/hooks";
-import { setAuthModalOpen } from "@/services/redux/slices/websiteSlices/modalSlice";
+import { setAuthModalOpen } from "@/services/redux/slices/modalSlice";
 import { useUserAuth } from "@/services/website/useUserAuth";
 
 export function HeaderUser() {

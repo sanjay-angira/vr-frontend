@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import type { WebsiteCoupon } from "@/services/website/couponService";
 import { addOrUpdateCartItem } from "@/services/website/cartService";
 import { useDispatch } from "react-redux";
-import { fetchWebsiteCart } from "@/services/redux/slices/websiteSlices/cartSlice";
+import { fetchWebsiteCart } from "@/services/redux/slices/cartSlice";
 
 type ProductCouponBannerProps = {
   coupons: WebsiteCoupon[];

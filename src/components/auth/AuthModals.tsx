@@ -2,7 +2,7 @@
 
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/services/redux/index";
-import { toggleModal } from "@/services/redux/slices/websiteSlices/modalSlice";
+import { toggleModal } from "@/services/redux/slices/modalSlice";
 import LogIn from "./logIn";
 
 const AuthModals = () => {

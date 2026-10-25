@@ -10,7 +10,7 @@ import {
   clearWebsiteCart,
   setWebsiteCartItems,
   clearWebsiteCartError,
-} from "@/services/redux/slices/websiteSlices/cartSlice";
+} from "@/services/redux/slices/cartSlice";
 
 export function useCart() {
   const dispatch = useAppDispatch();

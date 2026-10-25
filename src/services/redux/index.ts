@@ -1,9 +1,9 @@
 import { configureStore } from "@reduxjs/toolkit";
-import userAuthReducer from "@/services/redux/slices/websiteSlices/userAuthSlice";
-import websiteCartReducer from "@/services/redux/slices/websiteSlices/cartSlice";
-import cartReducer from "@/services/redux/slices/websiteSlices/cartSlice";
-import modalReducer from "@/services/redux/slices/websiteSlices/modalSlice";
-import wishlistReducer from "@/services/redux/slices/websiteSlices/wishlistSlice";
+import userAuthReducer from "@/services/redux/slices/userAuthSlice";
+import websiteCartReducer from "@/services/redux/slices/cartSlice";
+import cartReducer from "@/services/redux/slices/cartSlice";
+import modalReducer from "@/services/redux/slices/modalSlice";
+import wishlistReducer from "@/services/redux/slices/wishlistSlice";
 
 export function makeStore() {
   return configureStore({

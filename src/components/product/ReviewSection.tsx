@@ -13,7 +13,7 @@ import { postData } from "@/services/api/apiService";
 import { API_ENDPOINTS } from "@/services/api/API_ENDPOINT";
 import { useAppDispatch, useAppSelector } from "@/services/redux/hooks";
 import { selectUserAuth } from "@/services/redux/selectors";
-import { setAuthModalOpen } from "@/services/redux/slices/websiteSlices/modalSlice";
+import { setAuthModalOpen } from "@/services/redux/slices/modalSlice";
 
 export type Review = {
   id: string;

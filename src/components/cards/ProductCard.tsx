@@ -9,7 +9,7 @@ import { useAppDispatch } from "@/services/redux/hooks";
 import {
   addWebsiteCartItem,
   fetchWebsiteCart,
-} from "@/services/redux/slices/websiteSlices/cartSlice";
+} from "@/services/redux/slices/cartSlice";
 import { useWishlist } from "@/components/wishlist/useWishlist";
 
 export interface WebsiteProductCardData {
