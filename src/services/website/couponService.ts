@@ -64,13 +64,12 @@ export function computeCouponDiscountAmount(
 }
 
 /**
- * Loads coupons from GET /coupons and keeps only active,
- * non-user-specific codes for the storefront.
+ * Loads only active, public coupons from the storefront endpoint.
  */
 export async function fetchWebsiteCoupons(): Promise<WebsiteCoupon[]> {
   try {
     const response = await getData(
-      API_ENDPOINTS.COUPONS.LIST,
+      API_ENDPOINTS.COUPONS.PUBLIC_LIST,
       {
         pageNumber: 1,
         pageSize: 50,
@@ -127,8 +126,7 @@ export async function applyCouponCode(code: string): Promise<AppliedCoupon> {
     {
       code: trimmed,
       ...(identity.userId ? { userId: identity.userId } : {}),
-    },
-    { auth: false }
+    }
   );
 
   if (!response?.success || !response?.data?.id) {

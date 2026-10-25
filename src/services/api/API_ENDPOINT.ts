@@ -7,7 +7,7 @@ export const API_ENDPOINTS = {
     VERIFY_OTP: "auth/verify-otp",
     RESET_PASSWORD: "auth/reset-password",
     CHANGE_PASSWORD: "auth/change-password",
-    REFRESH_TOKEN: "user/refresh-token",
+    REFRESH_TOKEN: "auth/refresh-token",
     CHECK_EMAIL_EXISTS: (email: string) => `auth/checkEmailExists/${email}`,
     GET_USER: (id: number | string) => `auth/${id}`,
   },
@@ -109,6 +109,7 @@ export const API_ENDPOINTS = {
 
   COUPONS: {
     LIST: "coupons",
+    PUBLIC_LIST: "coupons/public",
     CREATE: "coupons",
     DETAILS: (id: number | string) => `coupons/${id}`,
     BY_CODE: (code: string) => `coupons/code/${code}`,
@@ -180,6 +181,7 @@ export const API_ENDPOINTS = {
 
   CMS_PAGES: {
     LIST: "cms-pages",
+    PUBLIC_LIST: "cms-pages/public",
     CREATE: "cms-pages",
     DETAILS: (id: number | string) => `cms-pages/${id}`,
     UPDATE: (id: number | string) => `cms-pages/${id}`,
@@ -201,6 +203,7 @@ export const API_ENDPOINTS = {
     COMPLETE_PROFILE: "customer/auth/complete-profile",
     VERIFY_EMAIL_OTP: "customer/auth/verify-email-otp",
     RESEND_EMAIL_OTP: "customer/auth/resend-email-otp",
+    REFRESH_TOKEN: "customer/auth/refresh-token",
   },
 
   SHIPPING: {

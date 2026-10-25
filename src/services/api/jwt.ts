@@ -1,43 +1,53 @@
 import axios from "axios";
-import Cookies from "js-cookie";
-import { STORAGE_KEYS } from "./storage";
+import { tokenStorage } from "./storage";
 import { API_BASE_URL } from "./config";
 import API_ENDPOINTS from "./API_ENDPOINT";
 
-export function saveAccessToken(token: string) {
-  Cookies.set(STORAGE_KEYS.accessToken, token, { expires: 365 });
-}
+type AuthScope = "admin" | "customer";
 
-export function saveRefreshToken(refreshToken: string) {
-  Cookies.set(STORAGE_KEYS.refreshToken, refreshToken, { expires: 365 });
-}
+export async function getNewAccessToken(
+  refreshToken: string,
+  scope: AuthScope,
+): Promise<string> {
+  const endpoint =
+    scope === "customer"
+      ? API_ENDPOINTS.CUSTOMER_AUTH.REFRESH_TOKEN
+      : API_ENDPOINTS.AUTH.REFRESH_TOKEN;
 
-export function destroyTokens() {
-  Cookies.remove(STORAGE_KEYS.accessToken);
-  Cookies.remove(STORAGE_KEYS.refreshToken);
-}
-
-export async function getNewAccessToken(refreshToken: string) {
   try {
     const response = await axios.post(
-      `${API_BASE_URL}/${API_ENDPOINTS.AUTH.REFRESH_TOKEN}`,
+      `${API_BASE_URL}/${endpoint}`,
       { refreshToken },
-      { headers: { "Content-Type": "application/json" } }
+      { headers: { "Content-Type": "application/json" } },
     );
-    const parsedResponse = response.data;
-
+    const accessToken = response.data?.data?.accessToken;
+    const returnedRefreshToken = response.data?.data?.refreshToken;
     if (
-      parsedResponse?.data?.token &&
-      parsedResponse?.data?.refreshToken
+      typeof accessToken !== "string" ||
+      typeof returnedRefreshToken !== "string"
     ) {
-      saveAccessToken(parsedResponse.data.token);
-      saveRefreshToken(parsedResponse.data.refreshToken);
-      return { success: true, data: parsedResponse.data.token as string };
+      throw new Error("Refresh token response was invalid");
     }
 
-    throw new Error("Refresh token response was invalid");
-  } catch {
-    destroyTokens();
-    return { success: false, data: null };
+    if (scope === "customer") {
+      tokenStorage.setUserAccessToken(accessToken);
+      tokenStorage.setUserRefreshToken(returnedRefreshToken);
+    } else {
+      tokenStorage.setAdminAccessToken(accessToken);
+      tokenStorage.setAdminRefreshToken(returnedRefreshToken);
+    }
+    return accessToken;
+  } catch (error) {
+    if (
+      axios.isAxiosError(error) &&
+      [401, 403].includes(error.response?.status ?? 0)
+    ) {
+      if (scope === "customer") {
+        tokenStorage.clearUser();
+      } else {
+        tokenStorage.clearAdmin();
+      }
+    }
+    throw error;
   }
 }

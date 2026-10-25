@@ -26,7 +26,7 @@ async function loadFooterSections(): Promise<FooterSection[]> {
 
   do {
     const response = (await getData(
-      API_ENDPOINTS.CMS_PAGES.LIST,
+      API_ENDPOINTS.CMS_PAGES.PUBLIC_LIST,
       { pageNumber, pageSize: 100, column: "id", order: "ASC" },
       { auth: false },
     )) as CmsPagesResponse;
