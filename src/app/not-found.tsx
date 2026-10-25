@@ -1,16 +1,73 @@
+import Image from "next/image";
+import Link from "next/link";
+import {
+  ArrowRight,
+  Headphones,
+  House,
+  Leaf,
+  ShieldCheck,
+  Truck,
+} from "lucide-react";
+
+const assurances = [
+  { icon: Leaf, title: "Authentic finds", detail: "Rooted in tradition" },
+  { icon: ShieldCheck, title: "Secure checkout", detail: "Shop with confidence" },
+  { icon: Truck, title: "Reliable delivery", detail: "Across India" },
+  { icon: Headphones, title: "Here to help", detail: "We are one message away" },
+];
+
 export default function NotFound() {
   return (
-    <main className="grid min-h-screen place-items-center bg-gray-900 px-6 py-24 sm:py-32 lg:px-8">
-      <div className="text-center">
-        <p className="text-base font-semibold text-indigo-400" style={{ fontSize: "100px" }}>404</p>
-        <h1 className="mt-4 text-5xl font-semibold tracking-tight text-balance text-white sm:text-7xl">Page not found</h1>
-        <p className="mt-6 text-lg font-medium text-pretty text-gray-400 sm:text-xl/8">Sorry, we couldn’t find the page you’re looking for.</p>
-        <div className="mt-10 flex items-center justify-center gap-x-6">
-          <a href="/" className="rounded-md bg-indigo-500 px-3.5 py-2.5 text-sm font-semibold text-white shadow-xs hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">Go back home</a>
-          <a href="/contact" className="text-sm font-semibold text-white">Contact support <span aria-hidden="true">&rarr;</span></a>
-        </div>
-      </div>
-    </main>
+    <main className="not-found-page">
+      <section className="not-found-hero" aria-labelledby="not-found-title">
+        <div className="not-found-sun" aria-hidden="true" />
 
+        <div className="not-found-content">
+          <p className="not-found-eyebrow">A little detour</p>
+          <Image
+            src="/images/404-error.png"
+            alt="404 with a peacock feather and an overflowing decorated clay pot"
+            width={1625}
+            height={968}
+            priority
+            sizes="(max-width: 760px) 92vw, 780px"
+            className="not-found-art"
+          />
+          <h1 id="not-found-title">
+            Page <span>not</span> found
+          </h1>
+          <p className="not-found-message">
+            This page seems to have wandered off the path.
+            <br className="not-found-desktop-break" /> Let’s help you find your
+            way back.
+          </p>
+          <div className="not-found-actions">
+            <Link href="/" className="not-found-home-link">
+              <House size={18} aria-hidden="true" />
+              Back to home
+            </Link>
+            <Link href="/contact-us" className="not-found-support-link">
+              <Headphones size={18} aria-hidden="true" />
+              Contact support
+              <ArrowRight size={15} aria-hidden="true" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <ul className="not-found-assurances" aria-label="Why shop with us">
+        {assurances.map(({ icon: Icon, title, detail }) => (
+          <li key={title} className="not-found-assurance">
+            <span className="not-found-assurance-icon" aria-hidden="true">
+              <Icon size={23} strokeWidth={1.6} />
+            </span>
+            <span className="not-found-assurance-copy">
+              <strong>{title}</strong>
+              <span>{detail}</span>
+            </span>
+          </li>
+        ))}
+      </ul>
+    </main>
   );
 }
