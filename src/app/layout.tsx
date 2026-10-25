@@ -3,8 +3,11 @@ import { getOrganizationSchema } from "@/lib/schema";
 import { getSiteUrl } from "@/lib/site";
 import type { Metadata } from "next";
 import { StoreProvider } from "@/services/redux/provider";
+import "@/styles/website/index.css";
 import "./globals.css";
+import { WebsiteShell } from "@/components/website/WebsiteShell";
 
+export const dynamic = "force-dynamic";
 
 const home = SEO_PAGES.home;
 const siteUrl = getSiteUrl();
@@ -56,13 +59,27 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full antialiased">
       <body className="min-h-full flex flex-col">
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700&family=Poppins:wght@500;600;700&display=swap"
+          rel="stylesheet"
+        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify(organizationLd),
           }}
         />
-        <StoreProvider>{children}</StoreProvider>
+        <StoreProvider>
+          <div className="website-font-root">
+            <WebsiteShell>{children}</WebsiteShell>
+          </div>
+        </StoreProvider>
       </body>
     </html>
   );

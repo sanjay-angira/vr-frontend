@@ -19,7 +19,9 @@ vr-frontend/
 ```text
 src/
 ├── app/                       # Storefront routes, layouts, SEO, and metadata
-│   ├── (website)/             # Storefront, account, cart, and checkout routes
+│   ├── (account)/             # Customer account routes
+│   ├── (place-order-flow)/    # Cart and checkout routes
+│   ├── (store-and-category-flow)/ # Catalog routes
 │   ├── globals.css            # Tailwind and global styles
 │   ├── robots.ts              # Search crawler rules
 │   └── sitemap.ts             # Storefront sitemap

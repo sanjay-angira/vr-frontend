@@ -188,7 +188,7 @@ export function getBlogPostingSchema(options: {
     ...(options.datePublished ? { datePublished: options.datePublished } : {}),
     author: {
       "@type": "Person",
-      name: options.authorName || "Admin",
+      name: options.authorName || SITE_NAME,
     },
     publisher: {
       "@type": "Organization",

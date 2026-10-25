@@ -45,7 +45,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       : "border-zinc-300";
 
     const inputClassName = [
-      "w-full rounded-lg border text-sm transition-colors focus:border-admin-primary focus:outline-none focus:ring-2 focus:ring-admin-primary/15",
+      "w-full rounded-lg border text-sm transition-colors focus:border-[#c59d5f] focus:outline-none focus:ring-2 focus:ring-[#c59d5f]/15",
       borderClass,
       isColorField
         ? COLOR_INPUT_CLASS

@@ -1,8 +1,8 @@
 /* Storefront stylesheet entry */
 @import "./theme.css";
 @import "./globals.css";
-@import "./footer-preview.css";
-@import "./header-preview.css";
+@import "./footer.css";
+@import "./header.css";
 @import "./modal.css";
 @import "./store-catalog.css";
 @import "./blog-pages.css";

@@ -1,4 +1,4 @@
-/* Website header — single source of truth for live site + admin preview */
+/* Storefront header styles */
 
 .announcement-bar {
   background: var(--announcement-bg);
@@ -963,31 +963,6 @@
 
 .mobile-nav-panel .nav-button.is-category {
   font-weight: 600;
-}
-
-.website-header-preview {
-  overflow: hidden;
-  border-radius: 0;
-}
-
-.website-header-preview .header {
-  position: relative;
-  top: auto;
-  z-index: 1;
-}
-
-.website-header-preview .nav {
-  display: flex;
-}
-
-.website-header-preview .header-menu-toggle {
-  display: none;
-}
-
-.website-header-preview .nav-button,
-.website-header-preview .dropdown-item,
-.website-header-preview .icon-button {
-  cursor: default;
 }
 
 .header-menu-toggle {

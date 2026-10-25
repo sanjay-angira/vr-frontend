@@ -23,11 +23,6 @@ body {
   color: var(--primary-text);
 }
 
-#root {
-  width: 100%;
-  min-height: 100vh;
-}
-
 .container {
   max-width: var(--container-max, 1920px);
   margin: 0 auto;

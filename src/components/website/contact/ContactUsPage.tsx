@@ -179,7 +179,7 @@ export function ContactUsPage() {
               {[
                 { id: 1, title: "Fill Details", note: "Add your message and contact details." },
                 { id: 2, title: "Verify Email", note: "We send a 6-digit OTP to your inbox." },
-                { id: 3, title: "Lead Created", note: "Your verified request reaches our admin team." },
+                { id: 3, title: "Request Submitted", note: "Your verified request reaches our support team." },
               ].map((step) => (
                 <div
                   key={step.id}
@@ -237,7 +237,7 @@ export function ContactUsPage() {
               </div>
               <div className="contact-page-contact-chip">
                 <Send size={15} />
-                <span>Admin Lead Ready</span>
+                <span>Request Ready</span>
               </div>
             </div>
           </div>
