@@ -7,6 +7,7 @@ import {
   MapPin,
   RefreshCw,
   Repeat2,
+  Share2,
   ShieldCheck,
   ShoppingCart,
   Star,
@@ -116,6 +117,7 @@ export default function ProductDetail({
   const [quantity, setQuantity] = useState(1);
   const [isAdding, setIsAdding] = useState(false);
   const [addedFlash, setAddedFlash] = useState(false);
+  const [shareStatus, setShareStatus] = useState("");
   const [pincode, setPincode] = useState("");
   const [deliveryStatus, setDeliveryStatus] = useState<DeliveryStatus | null>(null);
   const [deliveryMessage, setDeliveryMessage] = useState<string>("");
@@ -359,6 +361,54 @@ export default function ProductDetail({
     }
   };
 
+  const handleShare = async () => {
+    const url = window.location.href;
+    const shareData = {
+      title: displayTitle,
+      text: `Check out ${displayTitle}`,
+      url,
+    };
+
+    try {
+      if (navigator.share) {
+        try {
+          await navigator.share(shareData);
+          setShareStatus("Product shared.");
+          return;
+        } catch (error) {
+          if (error instanceof DOMException && error.name === "AbortError") {
+            return;
+          }
+        }
+      }
+
+      try {
+        await navigator.clipboard.writeText(url);
+      } catch {
+        const input = document.createElement("textarea");
+        input.value = url;
+        input.style.position = "fixed";
+        input.style.opacity = "0";
+        document.body.appendChild(input);
+        let copied = false;
+        try {
+          input.select();
+          copied = document.execCommand("copy");
+        } finally {
+          input.remove();
+        }
+        if (!copied) {
+          throw new Error("Clipboard copy was not successful.");
+        }
+      }
+
+      setShareStatus("Product link copied.");
+    } catch (error) {
+      console.error("Unable to share product link", error);
+      setShareStatus("Unable to share the product link. Please copy it from the address bar.");
+    }
+  };
+
   const handleVariantSelect = (variant: ProductVariantView) => {
     selectVariant(variant);
   };
@@ -437,7 +487,23 @@ export default function ProductDetail({
           )}
         </div>
 
-        <h1 className="product-detail-title">{displayTitle}</h1>
+        <div className="product-detail-title-row">
+          <h1 className="product-detail-title">{displayTitle}</h1>
+          <button
+            type="button"
+            className="product-share-button"
+            onClick={() => void handleShare()}
+            aria-label="Share this product"
+          >
+            <Share2 size={17} aria-hidden="true" />
+            <span>Share</span>
+          </button>
+        </div>
+        {shareStatus && (
+          <p className="product-share-status" role="status" aria-live="polite">
+            {shareStatus}
+          </p>
+        )}
 
         {(product.rating > 0 || product.reviewCount > 0) && (
           <div className="product-detail-rating-row">
