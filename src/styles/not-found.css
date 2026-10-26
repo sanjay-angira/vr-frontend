@@ -1,6 +1,7 @@
 .not-found-page {
   --not-found-ink: #0a2a1b;
   --not-found-gold: #a67c3d;
+  background-color: var(--cream-background);
   color: var(--not-found-ink);
 }
 
@@ -14,7 +15,12 @@
   isolation: isolate;
   background:
     radial-gradient(ellipse at 50% 42%, rgba(255, 255, 255, 0.86), transparent 43%),
-    linear-gradient(180deg, #fcf8eb 0%, #fff9ec 66%, #f3e6cf 100%);
+    linear-gradient(
+      180deg,
+      var(--cream-background) 0%,
+      #fff9ec 66%,
+      var(--vr-cream-dark) 100%
+    );
 }
 
 .not-found-hero::before,

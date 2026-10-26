@@ -255,59 +255,61 @@ export default async function ProductDetailPage({
   return (
     <>
       <JsonLd data={schemas} />
-      <div className="container product-page-shell">
-        <ScrollToTopOnMount />
+      <div className="product-detail-page">
+        <div className="container product-page-shell">
+          <ScrollToTopOnMount />
 
-        <div className="product-breadcrumbs">
-          <Link href="/">Home</Link>
-          <span>›</span>
-          <ShopSeedLink seed={categoryShopSeed}>
-            {product.category?.categoryName || "Shop"}
-          </ShopSeedLink>
-          <span>›</span>
-          <span className="is-current">{product.productName}</span>
+          <div className="product-breadcrumbs">
+            <Link href="/">Home</Link>
+            <span>›</span>
+            <ShopSeedLink seed={categoryShopSeed}>
+              {product.category?.categoryName || "Shop"}
+            </ShopSeedLink>
+            <span>›</span>
+            <span className="is-current">{product.productName}</span>
+          </div>
+
+          <ProductDetail
+            product={detailProduct}
+            fallbackImages={baseImages}
+            initialVariantSlug={requestedVariantSlug}
+          />
+
+          {(product.description || product.shortDescription) && (
+            <section className="product-section-block product-copy-block">
+              <h2 className="product-section-heading">Product Description</h2>
+              <div
+                className="product-copy-content rich-html"
+                dangerouslySetInnerHTML={{
+                  __html: (product.description || product.shortDescription || "").trim(),
+                }}
+              />
+            </section>
+          )}
+
+          {faqItems.length > 0 && <ProductFaqSection items={faqItems} />}
+
+          <div className="product-reviews-wrap">
+            <ReviewSection productId={product.id} reviews={reviewList} />
+          </div>
         </div>
 
-        <ProductDetail
-          product={detailProduct}
-          fallbackImages={baseImages}
-          initialVariantSlug={requestedVariantSlug}
-        />
-
-        {(product.description || product.shortDescription) && (
-          <section className="product-section-block product-copy-block">
-            <h2 className="product-section-heading">Product Description</h2>
-            <div
-              className="product-copy-content rich-html"
-              dangerouslySetInnerHTML={{
-                __html: (product.description || product.shortDescription || "").trim(),
-              }}
-            />
-          </section>
+        {recommendedCards.length > 0 && (
+          <ProductSection
+            heading={{
+              title: "You May Also Like",
+              accent: "Like",
+              eyebrow: "RECOMMENDED FOR YOU",
+              description: product.category?.categoryName
+                ? `More from ${product.category.categoryName}`
+                : "Products from the same category",
+            }}
+            products={recommendedCards}
+            viewAllLink="/products"
+            viewAllSeed={categoryShopSeed}
+          />
         )}
-
-        {faqItems.length > 0 && <ProductFaqSection items={faqItems} />}
-
-        <div className="product-reviews-wrap">
-          <ReviewSection productId={product.id} reviews={reviewList} />
-        </div>
       </div>
-
-      {recommendedCards.length > 0 && (
-        <ProductSection
-          heading={{
-            title: "You May Also Like",
-            accent: "Like",
-            eyebrow: "RECOMMENDED FOR YOU",
-            description: product.category?.categoryName
-              ? `More from ${product.category.categoryName}`
-              : "Products from the same category",
-          }}
-          products={recommendedCards}
-          viewAllLink="/products"
-          viewAllSeed={categoryShopSeed}
-        />
-      )}
     </>
   );
 }

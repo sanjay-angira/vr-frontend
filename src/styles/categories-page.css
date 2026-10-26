@@ -2,9 +2,7 @@
 
 .categories-page {
   padding: 1.5rem 0 4rem;
-  background:
-    radial-gradient(circle at top left, rgba(197, 157, 95, 0.1), transparent 42%),
-    linear-gradient(180deg, var(--vr-cream) 0%, #fff 42%, var(--vr-cream-dark) 100%);
+  background: var(--storefront-section-background);
 }
 
 .categories-page__inner {

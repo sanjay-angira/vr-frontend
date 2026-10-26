@@ -2,9 +2,7 @@
 
 .store-catalog {
   padding: 1.25rem 0 3.5rem;
-  background:
-    radial-gradient(circle at top left, rgba(197, 157, 95, 0.12), transparent 42%),
-    linear-gradient(180deg, var(--vr-cream) 0%, #fff 38%, var(--vr-cream-dark) 100%);
+  background: var(--storefront-section-background);
 }
 
 .store-catalog__inner {

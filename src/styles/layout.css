@@ -1,3 +1,12 @@
+/* Storefront page layout */
+.website-layout {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+  background: var(--storefront-section-background);
+  font-family: var(--font-body);
+}
+
 /* Gap utility helpers (class names avoid Tailwind gap-* collision) */
 .vr-gap-xs {
   gap: var(--gap-xs);
