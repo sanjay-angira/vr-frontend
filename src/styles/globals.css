@@ -403,10 +403,6 @@ body {
   background: var(--storefront-section-background);
 }
 
-.home-product-section {
-  background: var(--storefront-section-background);
-}
-
 .home-section+.home-section {
   border-top: 1px solid rgba(184, 164, 131, 0.14);
 }
@@ -1177,9 +1173,6 @@ body {
   border: 1px solid rgba(166, 124, 82, 0.22);
 }
 
-.product-detail-page {
-  background: var(--storefront-section-background);
-}
 
 .product-page-shell {
   max-width: var(--container-max, 1920px);

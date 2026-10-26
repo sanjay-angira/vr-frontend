@@ -32,9 +32,7 @@
   --announcement-text: var(--vr-cream);
 
   --cream-background: var(--vr-cream);
-  --storefront-section-background:
-    radial-gradient(circle at top left, rgba(197, 157, 95, 0.08), transparent 42%),
-    linear-gradient(180deg, var(--vr-cream-dark) 0%, var(--vr-cream) 100%);
+  --storefront-section-background: var(--cream-background);
   --primary-text: var(--vr-text);
   --text-gray: var(--vr-text);
   --text-muted: var(--vr-text-muted);
