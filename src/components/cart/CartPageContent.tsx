@@ -96,7 +96,7 @@ export function CartPageContent() {
       headerAction={
         <button
           type="button"
-          className="cart-clear-btn"
+          className="cart-clear-btn commerce-home-cta"
           onClick={() => void clearCart()}
           disabled={loading}
         >

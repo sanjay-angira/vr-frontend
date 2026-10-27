@@ -84,7 +84,7 @@ export function CheckoutPageContent() {
       subtitle={`${formatItemCountLabel(itemCount, unitCount)} · Login, confirm address, then place your order.`}
       error={checkoutError}
       headerAction={
-        <Link href="/cart" className="cart-clear-btn">
+        <Link href="/cart" className="cart-clear-btn commerce-home-cta">
           <ArrowLeft size={15} strokeWidth={2} />
           Back to cart
         </Link>

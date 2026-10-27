@@ -356,6 +356,7 @@
   display: flex;
   align-items: stretch;
   width: 100%;
+  height: var(--control-height);
   border: 1px solid #d8d4ce;
   border-radius: 0;
   background: #fff;
@@ -402,9 +403,10 @@
 .auth-phone-input {
   flex: 1;
   min-width: 0;
+  height: 100%;
   border: none;
   outline: none;
-  padding: 0.85rem 0.9rem;
+  padding: 0 0.9rem;
   font-size: 0.92rem;
   font-weight: 500;
   color: var(--vr-text, #2d2926);
@@ -424,6 +426,7 @@
   display: flex;
   align-items: stretch;
   width: 100%;
+  height: var(--control-height);
   border: 1px solid #d8d4ce;
   border-radius: 0;
   background: #fff;
@@ -443,10 +446,11 @@
 .auth-text-input {
   flex: 1;
   min-width: 0;
+  height: 100%;
   border: none;
   outline: none;
   background: transparent;
-  padding: 0.85rem 0.9rem;
+  padding: 0 0.9rem;
   font-size: 0.92rem;
   font-weight: 500;
   color: var(--vr-text, #2d2926);
@@ -545,8 +549,8 @@
   justify-content: center;
   gap: var(--gap-xs);
   width: 100%;
-  min-height: 48px;
-  height: 48px;
+  min-height: var(--control-height);
+  height: var(--control-height);
   padding: 0 1rem;
   border: none;
   border-radius: 0;

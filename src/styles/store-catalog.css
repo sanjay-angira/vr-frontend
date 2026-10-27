@@ -342,6 +342,7 @@
 .store-filters__price-inputs input,
 .store-filters__select-wrap select {
   width: 100%;
+  height: var(--control-height);
   border: 1px solid rgba(197, 157, 95, 0.28);
   border-radius: 0;
   padding: 0.55rem 0.65rem;

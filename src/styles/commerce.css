@@ -40,6 +40,14 @@
   text-transform: uppercase;
 }
 
+.commerce-eyebrow--blog {
+  margin-bottom: 0.45rem;
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+
 .commerce-header h1,
 .commerce-empty h1,
 .commerce-success h1,
@@ -340,6 +348,10 @@
   color: var(--vr-text);
   padding: 0.7rem 0.8rem;
   font: inherit;
+}
+
+.commerce-form-grid input {
+  height: var(--control-height);
 }
 
 .commerce-form-grid input:focus,
@@ -840,6 +852,36 @@
   background: var(--vr-cream);
 }
 
+.cart-btn.commerce-home-cta,
+.cart-clear-btn.commerce-home-cta {
+  justify-content: center;
+  gap: 0.5rem;
+  height: 44px;
+  padding: 0 2.75rem;
+  border: 1px solid var(--vr-forest);
+  background: transparent;
+  box-shadow: none;
+  color: var(--vr-forest);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.2;
+  transition: background 0.25s ease, color 0.25s ease;
+}
+
+.cart-btn.commerce-home-cta:hover,
+.cart-clear-btn.commerce-home-cta:hover:not(:disabled) {
+  border-color: var(--vr-forest);
+  background: var(--vr-forest);
+  color: #fff;
+}
+
+.commerce-home-cta svg {
+  flex-shrink: 0;
+}
+
 .cart-trust {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -1099,6 +1141,7 @@
 .order-summary-coupon__input {
   flex: 1;
   min-width: 0;
+  height: var(--control-height);
   padding: 0.55rem 0.7rem;
   border: 1px solid rgba(15, 61, 50, 0.18);
   background: #fff;
@@ -1115,6 +1158,7 @@
 
 .order-summary-coupon__apply {
   flex: 0 0 auto;
+  height: var(--control-height);
   padding: 0.55rem 0.9rem;
   border: none;
   background: var(--vr-forest, #0f3d32);
@@ -1407,7 +1451,7 @@
 
 .checkout-skeleton-input {
   width: 100%;
-  height: 2.85rem;
+  height: var(--control-height);
 }
 
 .checkout-skeleton-login-actions {

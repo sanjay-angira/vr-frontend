@@ -22,6 +22,17 @@ body {
   color: var(--primary-text);
 }
 
+:where(
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="search"]),
+  select
+) {
+  height: var(--control-height);
+}
+
+:where(button[type="submit"]) {
+  height: var(--control-height);
+}
+
 .container {
   max-width: var(--container-max, 1920px);
   margin: 0 auto;
@@ -33,7 +44,8 @@ body {
 
 /* Button Styles */
 .btn {
-  padding: 0.75rem 1.5rem;
+  height: var(--control-height);
+  padding: 0 1.5rem;
   border: none;
   border-radius: 0;
   font-family: var(--font-ui);
@@ -72,12 +84,12 @@ body {
 }
 
 .btn-lg {
-  padding: 1rem 2rem;
+  padding: 0 2rem;
   font-size: 1.125rem;
 }
 
 .btn-sm {
-  padding: 0.5rem 1rem;
+  padding: 0 1rem;
   font-size: 0.875rem;
 }
 
@@ -1301,8 +1313,9 @@ body {
 .product-delivery-check__input {
   width: 100%;
   min-width: 0;
-  min-height: 46px;
-  padding: 0.7rem 0.85rem;
+  min-height: var(--control-height);
+  height: var(--control-height);
+  padding: 0 0.85rem;
   border: 1px solid rgba(166, 124, 82, 0.38);
   border-radius: 0;
   background: #fff;
@@ -1322,8 +1335,9 @@ body {
   align-items: center;
   justify-content: center;
   gap: 0.45rem;
-  min-height: 44px;
-  padding: 0.65rem 1rem;
+  min-height: var(--control-height);
+  height: var(--control-height);
+  padding: 0 1rem;
   border: 1px solid var(--vr-gold);
   border-radius: 0;
   font: inherit;
@@ -2954,7 +2968,7 @@ body {
   display: inline-flex;
   align-items: stretch;
   flex: 0 0 auto;
-  height: 52px;
+  height: var(--control-height);
   border: 1px solid rgba(10, 42, 27, 0.14);
   border-radius: 0;
   background: #fff;
@@ -3092,8 +3106,9 @@ body {
 .product-action-row .btn {
   flex: 1 1 0;
   min-width: 0;
-  min-height: 52px;
-  padding: 0.85rem 1.2rem !important;
+  min-height: var(--control-height);
+  height: var(--control-height);
+  padding: 0 1.2rem !important;
   font-size: 0.95rem !important;
   line-height: 1.2;
   border-radius: 0;
@@ -3717,8 +3732,9 @@ body {
   .product-cta-bar .btn {
     flex: 1 1 0;
     min-width: 0;
-    min-height: 48px;
-    padding: 0.75rem 0.7rem !important;
+    min-height: var(--control-height);
+    height: var(--control-height);
+    padding: 0 0.7rem !important;
     font-size: 0.88rem !important;
   }
 
@@ -4027,7 +4043,8 @@ body {
   align-items: center;
   justify-content: center;
   gap: 0.45rem;
-  padding: 0.7rem 1.15rem;
+  height: var(--control-height);
+  padding: 0 1.15rem;
   border: 0;
   background: var(--vr-forest);
   color: #fff;
@@ -5492,9 +5509,8 @@ body {
 .contact-page-submit,
 .contact-page-secondary {
   min-width: 170px;
-  min-height: 48px;
   border-radius: 0;
-  padding: 0.82rem 1.2rem;
+  padding: 0 1.2rem;
   font-size: 0.88rem;
   font-weight: 700;
   border: 1px solid transparent;
@@ -5502,9 +5518,16 @@ body {
 }
 
 .contact-page-submit {
+  min-height: var(--control-height);
+  height: var(--control-height);
   background: linear-gradient(135deg, #15324a 0%, #1d4e6f 100%);
   color: #fff;
   box-shadow: 0 14px 28px rgba(21, 50, 74, 0.14);
+}
+
+.contact-page-secondary {
+  min-height: 48px;
+  padding: 0.82rem 1.2rem;
 }
 
 .contact-page-submit:disabled {
@@ -5564,9 +5587,10 @@ body {
 
 .combo-btn {
   width: 100%;
+  height: var(--control-height);
   border: 0;
   border-radius: 0;
-  padding: 8px 16px;
+  padding: 0 16px;
   background: var(--primary-background);
   color: #fff;
   font-size: 14px;
@@ -6726,7 +6750,7 @@ body {
 
 .product-detail-skeleton__qty-control {
   width: 144px;
-  height: 52px;
+  height: var(--control-height);
   border-radius: 0;
   flex: 0 0 auto;
 }
@@ -6734,7 +6758,7 @@ body {
 .product-detail-skeleton__cta {
   flex: 1 1 0;
   min-width: 0;
-  height: 52px;
+  height: var(--control-height);
   border-radius: 0;
 }
 

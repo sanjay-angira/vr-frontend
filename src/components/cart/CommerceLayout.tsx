@@ -39,7 +39,7 @@ export function CommerceLayout({
   if (loadingMessage) {
     return (
       <div className="place-order-main-loading">
-        <p className="commerce-eyebrow">{eyebrow}</p>
+        <p className="commerce-eyebrow commerce-eyebrow--blog">{eyebrow}</p>
         <h1 className="vr-page-title">{title}</h1>
         <p className="commerce-muted">{loadingMessage}</p>
       </div>
@@ -63,7 +63,7 @@ export function CommerceLayout({
     <>
       <header className="commerce-header cart-header">
         <div>
-          <p className="commerce-eyebrow">{eyebrow}</p>
+          <p className="commerce-eyebrow commerce-eyebrow--blog">{eyebrow}</p>
           <h1 className="vr-page-title">{title}</h1>
           {subtitleLoading ? (
             <p className="commerce-muted commerce-muted-skeleton" aria-hidden="true">

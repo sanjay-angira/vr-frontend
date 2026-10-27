@@ -1,6 +1,8 @@
 /* Vrindavan Rasa — brand palette (from storefront design) */
 
 :root {
+  --control-height: 44px;
+
   /* Core brand */
   --vr-cream: #fcf9f2;
   --vr-cream-dark: #f5efe4;

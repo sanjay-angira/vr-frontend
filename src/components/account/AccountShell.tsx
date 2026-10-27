@@ -42,7 +42,7 @@ export function AccountShell({ children }: { children: ReactNode }) {
     <div className="account-page">
       <div className="account-container">
         <header className="account-header">
-          <p className="commerce-eyebrow">My account</p>
+          <p className="commerce-eyebrow commerce-eyebrow--blog">My account</p>
           <h1>{title}</h1>
           <p className="commerce-muted">Signed in as {user.name}</p>
         </header>
@@ -59,6 +59,7 @@ export function AccountShell({ children }: { children: ReactNode }) {
                   key={item.href}
                   href={item.href}
                   className={`account-nav-link${active ? " is-active" : ""}`}
+                  aria-current={active ? "page" : undefined}
                 >
                   {item.label}
                 </Link>

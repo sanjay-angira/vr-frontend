@@ -71,6 +71,10 @@
   font-size: clamp(1.4rem, 2.2vw, 1.75rem);
 }
 
+.account-header h1 {
+  font-weight: 700;
+}
+
 .account-layout {
   display: grid;
   grid-template-columns: 200px minmax(0, 1fr);
@@ -93,10 +97,14 @@
   border-left: 2px solid transparent;
 }
 
-.account-nav-link:hover,
-.account-nav-link.is-active {
+.account-nav-link:hover {
   background: rgba(255, 255, 255, 0.55);
+}
+
+.account-nav-link.is-active {
+  background: rgba(255, 255, 255, 0.7);
   border-left-color: var(--vr-gold-dark);
+  font-weight: 600;
 }
 
 .account-main {

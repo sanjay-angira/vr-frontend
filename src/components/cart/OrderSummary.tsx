@@ -340,7 +340,10 @@ export function OrderSummary() {
                     ? `Pay now · ${formatInr(payableTotal)}`
                     : `Place order · ${formatInr(payableTotal)}`}
               </button>
-              <Link href="/cart" className="cart-btn cart-btn-secondary">
+              <Link
+                href="/cart"
+                className="cart-btn cart-btn-secondary commerce-home-cta"
+              >
                 <ArrowLeft size={16} strokeWidth={2.25} aria-hidden />
                 Edit cart
               </Link>
@@ -356,7 +359,10 @@ export function OrderSummary() {
                 <Lock size={16} strokeWidth={2.25} aria-hidden />
                 {checkoutLoading ? "Checking…" : "Place Order"}
               </button>
-              <Link href="/products" className="cart-btn cart-btn-secondary">
+              <Link
+                href="/products"
+                className="cart-btn cart-btn-secondary commerce-home-cta"
+              >
                 <ArrowLeft size={16} strokeWidth={2.25} aria-hidden />
                 Continue Shopping
               </Link>
