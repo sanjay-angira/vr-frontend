@@ -71,7 +71,7 @@ export function CheckoutOrderSection({ enabled }: CheckoutOrderSectionProps) {
         </div>
       </div>
 
-      <ul className="checkout-order-list">
+      <div className="commerce-list cart-list checkout-order-list">
         {items.map((item) => {
           const { unit, listUnit, line, listLine, hasDiscount, offerName } =
             getCartItemPricing(item);
@@ -80,14 +80,20 @@ export function CheckoutOrderSection({ enabled }: CheckoutOrderSectionProps) {
           const busy = busyId === item.id || loading;
 
           return (
-            <li key={item.id} className="checkout-order-item">
-              <Link href={href} className="checkout-order-thumb">
+            <article
+              key={item.id}
+              className="commerce-line cart-line"
+            >
+              <Link
+                href={href}
+                className="commerce-line-media cart-line-media"
+              >
                 {item.image ? (
                   <Image
                     src={item.image}
                     alt={item.productName || "Product"}
-                    width={64}
-                    height={64}
+                    width={112}
+                    height={112}
                     unoptimized
                   />
                 ) : (
@@ -95,8 +101,8 @@ export function CheckoutOrderSection({ enabled }: CheckoutOrderSectionProps) {
                 )}
               </Link>
 
-              <div className="checkout-order-body">
-                <div className="checkout-order-top">
+              <div className="commerce-line-body">
+                <div className="commerce-line-top">
                   <div>
                     <Link href={href} className="commerce-line-title">
                       {item.productName || "Product"}
@@ -108,17 +114,17 @@ export function CheckoutOrderSection({ enabled }: CheckoutOrderSectionProps) {
                       <p className="cart-line-offer">{offerName}</p>
                     ) : null}
                   </div>
-                  <div className="commerce-line-price-wrap checkout-order-price">
-                    <strong>{formatInr(line)}</strong>
+                  <div className="commerce-line-price-wrap">
+                    <p className="commerce-line-price">{formatInr(line)}</p>
                     {hasDiscount ? (
-                      <span className="commerce-line-mrp">
+                      <p className="commerce-line-mrp">
                         {formatInr(listLine)}
-                      </span>
+                      </p>
                     ) : null}
                   </div>
                 </div>
 
-                <div className="checkout-order-actions">
+                <div className="commerce-line-actions cart-line-actions">
                   <div className="commerce-qty cart-qty">
                     <button
                       type="button"
@@ -164,10 +170,10 @@ export function CheckoutOrderSection({ enabled }: CheckoutOrderSectionProps) {
                   </button>
                 </div>
               </div>
-            </li>
+            </article>
           );
         })}
-      </ul>
+      </div>
 
       <div className="commerce-payment-options checkout-payment-block">
         <label

@@ -9,6 +9,8 @@ import { usePlaceOrderContext } from "@/components/cart/PlaceOrderFlowWrapper";
 import { CheckoutLoginSection } from "@/components/cart/checkoutComponents/CheckoutLoginSection";
 import { CheckoutAddressSection } from "@/components/cart/checkoutComponents/CheckoutAddressSection";
 import { CheckoutOrderSection } from "@/components/cart/checkoutComponents/CheckoutOrderSection";
+import { CheckoutSkeleton } from "@/components/cart/checkoutComponents/CheckoutSkeleton";
+import { CartClearSkeleton } from "@/components/cart/CartSkeleton";
 import {
   formatItemCountLabel,
   getCartCounts,
@@ -47,8 +49,11 @@ export function CheckoutPageContent() {
       <CommerceLayout
         eyebrow="Checkout"
         title="Complete your order"
-        loadingMessage="Preparing checkout…"
-      />
+        subtitleLoading
+        headerAction={<CartClearSkeleton />}
+      >
+        <CheckoutSkeleton />
+      </CommerceLayout>
     );
   }
 

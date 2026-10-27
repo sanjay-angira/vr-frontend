@@ -35,19 +35,56 @@ const TRUST_STRIP = [
   { icon: Heart, label: "Made with love in Vrindavan, India" },
 ] as const;
 
-function OrderSummarySkeleton() {
+function OrderSummarySkeleton({
+  isCheckout,
+  secureNote,
+}: {
+  isCheckout: boolean;
+  secureNote: boolean;
+}) {
   return (
     <aside
       className="commerce-summary cart-summary order-summary orderbg"
       aria-busy="true"
       aria-label="Loading order summary"
     >
-      <div className="order-summary-skel order-summary-skel--title" />
-      <div className="order-summary-skel" />
-      <div className="order-summary-skel" />
-      <div className="order-summary-skel" />
-      <div className="order-summary-skel order-summary-skel--total" />
+      <div className="order-summary-skel-heading">
+        <span className="order-summary-skel order-summary-skel--title" />
+      </div>
+      <div className="commerce-summary-row order-summary-skel-row">
+        <span className="order-summary-skel order-summary-skel--label" />
+        <span className="order-summary-skel order-summary-skel--value" />
+      </div>
+      <div className="commerce-summary-row order-summary-skel-row">
+        <span className="order-summary-skel order-summary-skel--label order-summary-skel--shipping-label" />
+        <span className="order-summary-skel order-summary-skel--value order-summary-skel--shipping-value" />
+      </div>
+      <div className="commerce-summary-row total order-summary-skel-row order-summary-skel-row--total">
+        <span className="order-summary-skel order-summary-skel--total-label" />
+        <span className="order-summary-skel order-summary-skel--total-value" />
+      </div>
+      <div className="order-summary-coupon order-summary-skel-coupon">
+        <div className="order-summary-skel order-summary-skel--coupon-label" />
+        <div className="order-summary-skel-coupon__form">
+          <span className="order-summary-skel order-summary-skel--coupon-input" />
+          <span className="order-summary-skel order-summary-skel--coupon-apply" />
+        </div>
+      </div>
+      <div className="cart-shipping-banner order-summary-skel-shipping">
+        <span className="order-summary-skel order-summary-skel--shipping-icon" />
+        <span className="order-summary-skel order-summary-skel--shipping-copy" />
+      </div>
+      {secureNote ? (
+        <div className="order-summary-skel-note">
+          <span className="order-summary-skel order-summary-skel--note-icon" />
+          <span className="order-summary-skel order-summary-skel--note-copy" />
+        </div>
+      ) : null}
+      {isCheckout ? (
+        <div className="order-summary-skel order-summary-skel--hint" />
+      ) : null}
       <div className="order-summary-skel order-summary-skel--cta" />
+      <div className="order-summary-skel order-summary-skel--secondary-cta" />
     </aside>
   );
 }
@@ -120,7 +157,7 @@ export function OrderSummary() {
   if (loading && !hasItems) {
     return (
       <div className="order-summary-stack">
-        <OrderSummarySkeleton />
+        <OrderSummarySkeleton isCheckout={isCheckout} secureNote={secureNote} />
         <OrderSummaryTrust />
       </div>
     );

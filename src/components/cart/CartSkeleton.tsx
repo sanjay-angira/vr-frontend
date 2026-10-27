@@ -1,4 +1,4 @@
-/** Cart line-item skeleton — shown while the initial cart fetch runs. */
+/** Cart line-item skeleton — mirrors the cart row dimensions while loading. */
 
 const ROWS = 3;
 

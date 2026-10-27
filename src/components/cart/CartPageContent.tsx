@@ -58,6 +58,7 @@ export function CartPageContent() {
       <CommerceLayout
         eyebrow="Shopping bag"
         title="Your Cart"
+        subtitleLoading
         headerAction={<CartClearSkeleton />}
       >
         <CartSkeleton />
@@ -90,6 +91,7 @@ export function CartPageContent() {
       eyebrow="Shopping bag"
       title="Your Cart"
       subtitle={itemCountLabel}
+      subtitleLoading={loading}
       error={error}
       headerAction={
         <button

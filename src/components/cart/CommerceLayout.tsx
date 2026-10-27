@@ -13,6 +13,7 @@ type CommerceLayoutProps = {
   eyebrow: string;
   title: string;
   subtitle?: string;
+  subtitleLoading?: boolean;
   headerAction?: ReactNode;
   error?: string | null;
   loadingMessage?: string | null;
@@ -28,6 +29,7 @@ export function CommerceLayout({
   eyebrow,
   title,
   subtitle,
+  subtitleLoading = false,
   headerAction,
   error,
   loadingMessage,
@@ -63,7 +65,13 @@ export function CommerceLayout({
         <div>
           <p className="commerce-eyebrow">{eyebrow}</p>
           <h1 className="vr-page-title">{title}</h1>
-          {subtitle ? <p className="commerce-muted">{subtitle}</p> : null}
+          {subtitleLoading ? (
+            <p className="commerce-muted commerce-muted-skeleton" aria-hidden="true">
+              <span className="commerce-muted-skeleton__bar" />
+            </p>
+          ) : subtitle ? (
+            <p className="commerce-muted">{subtitle}</p>
+          ) : null}
         </div>
         {headerAction}
       </header>
