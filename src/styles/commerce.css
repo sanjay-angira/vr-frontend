@@ -804,10 +804,12 @@
   justify-content: center;
   gap: var(--gap-xs);
   width: 100%;
-  padding: 0.9rem 1.1rem;
+  height: 44px;
+  padding: 0 1.1rem;
   border-radius: 0;
   font: inherit;
   font-size: 0.95rem;
+  line-height: 1.2;
   font-weight: 600;
   text-decoration: none;
   cursor: pointer;
@@ -1329,13 +1331,13 @@
 
 .order-summary-skel--cta {
   width: 100%;
-  height: 3.5rem;
+  height: 44px;
   margin-bottom: 0.7rem;
 }
 
 .order-summary-skel--secondary-cta {
   width: 100%;
-  height: 3.5rem;
+  height: 44px;
   margin-bottom: 0;
 }
 
@@ -1417,7 +1419,7 @@
 
 .checkout-skeleton-button {
   width: min(100%, 12rem);
-  height: 3.1rem;
+  height: 44px;
 }
 
 .checkout-skeleton-button--secondary {
