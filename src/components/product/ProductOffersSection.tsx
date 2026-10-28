@@ -148,7 +148,20 @@ export function ProductOffersSection({
 
                   <h4 className="product-offers-card__name">{offer.offerName}</h4>
                   <p className="product-offers-card__discount">
-                    {formatOfferDiscount(offer)}
+                    {getOfferPercentage(offer) !== null ? (
+                      <span className="product-offers-card__discount-badge">
+                        <span className="product-offers-card__discount-value">
+                          {getOfferPercentage(offer)}%
+                        </span>
+                        <span className="product-offers-card__discount-label">
+                          OFF
+                        </span>
+                      </span>
+                    ) : (
+                      <span className="product-offers-card__discount-badge">
+                        {formatOfferDiscount(offer)}
+                      </span>
+                    )}
                   </p>
                   <p className="product-offers-card__hint">{sourceHint(offer)}</p>
 
