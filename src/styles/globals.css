@@ -3072,7 +3072,6 @@ body {
 }
 
 .product-description-card__body {
-  padding: 1rem 1.1rem 1.15rem;
   color: #000;
 }
 
@@ -3093,7 +3092,6 @@ body {
   margin-top: 1.35rem;
   background: rgba(255, 255, 255, 0.78);
   border-radius: 0;
-  border: 1px solid rgba(197, 157, 95, 0.22);
   overflow: hidden;
 }
 
@@ -3308,7 +3306,6 @@ body {
   padding: 1.15rem 1.35rem;
   background: color-mix(in srgb, var(--vr-forest) 6%, #fff);
   border: 1px solid rgba(10, 42, 27, 0.08);
-  border-radius: 14px;
 }
 
 .product-faq-support-item {
