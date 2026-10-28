@@ -166,7 +166,7 @@ export function ProductOffersSection({
                         Applied
                       </>
                     ) : (
-                      "Apply"
+                      "Available"
                     )}
                   </button>
                 </article>

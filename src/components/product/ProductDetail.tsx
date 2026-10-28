@@ -10,6 +10,7 @@ import {
   Share2,
   ShieldCheck,
   ShoppingCart,
+  Sparkles,
   Star,
   Zap,
 } from "lucide-react";
@@ -209,9 +210,9 @@ export default function ProductDetail({
         setDeliveryMode(status.serviceable ? "success" : "error");
         setDeliveryMessage(
           status?.message ||
-            (status && status.serviceable
-              ? `Delivery available to ${normalizedPin}`
-              : `Delivery is unavailable for ${normalizedPin}.`)
+          (status && status.serviceable
+            ? `Delivery available to ${normalizedPin}`
+            : `Delivery is unavailable for ${normalizedPin}.`)
         );
       } catch (error) {
         setDeliveryStatus(null);
@@ -251,8 +252,8 @@ export default function ProductDetail({
             setDeliveryMode("error");
             setDeliveryMessage(
               response?.data?.message ||
-                response?.message ||
-                "We could not find a postal code for your current location. Please enter the PIN code manually."
+              response?.message ||
+              "We could not find a postal code for your current location. Please enter the PIN code manually."
             );
             return;
           }
@@ -705,9 +706,8 @@ export default function ProductDetail({
           <div className="product-cta-bar">
             <button
               type="button"
-              className={`btn btn-primary btn-lg product-cta-button${
-                addedFlash ? " is-added" : ""
-              }`}
+              className={`btn btn-primary btn-lg product-cta-button${addedFlash ? " is-added" : ""
+                }`}
               disabled={!inStock || !selectedVariant || isAdding}
               onClick={handleAddToCart}
             >
@@ -747,8 +747,13 @@ export default function ProductDetail({
         </ul>
 
         {variantDescription && (
+
+
           <div className="product-specs-card product-description-card">
-            <div className="product-specs-card__header">Variant details</div>
+            <div className="product-variation-head product-description-card__header">
+              <Sparkles size={15} color="var(--vr-forest)" aria-hidden="true" />
+              <h3 className="product-variation-title">Variant details</h3>
+            </div>
             <div
               className="product-copy-content product-description-card__body rich-html"
               dangerouslySetInnerHTML={{ __html: variantDescription }}
