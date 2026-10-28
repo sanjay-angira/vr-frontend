@@ -1152,12 +1152,21 @@ body {
   box-shadow: none;
 }
 
+.product-detail-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gap-s);
+  margin-bottom: 0.35rem;
+}
+
 .product-detail-meta-chips {
   display: flex;
+  flex: 1 1 auto;
   flex-wrap: wrap;
   align-items: center;
   gap: var(--gap-xs);
-  margin-bottom: 0.35rem;
+  min-width: 0;
 }
 
 .product-detail-chip {
@@ -1242,7 +1251,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: 0.4rem;
-  min-height: 40px;
+  min-height: 32px;
   padding: 0.5rem 0.75rem;
   border: 1px solid rgba(10, 42, 27, 0.18);
   border-radius: 0;

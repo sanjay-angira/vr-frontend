@@ -114,11 +114,46 @@ export type PlacedOrder = {
   createdAt?: string;
 };
 
+export type CartShippingEstimate = {
+  pincode: string;
+  serviceable: boolean;
+  shippingFee: number;
+  freeShipping: boolean;
+  message: string;
+};
+
 type ApiEnvelope<T> = {
   success?: boolean;
   message?: string;
   data?: T;
 };
+
+export async function estimateCartShipping(
+  deliveryPincode: string,
+  paymentMethod: "cod" | "online",
+  signal?: AbortSignal,
+): Promise<CartShippingEstimate> {
+  const url = appendCartIdentity(API_ENDPOINTS.CUSTOMER.SHIPPING_ESTIMATE);
+  const response = (await getData(
+    url,
+    {
+      deliveryPincode,
+      paymentMode: paymentMethod === "cod" ? "COD" : "Pre-paid",
+    },
+    { signal },
+  )) as CartShippingEstimate;
+
+  if (
+    !response ||
+    typeof response.serviceable !== "boolean" ||
+    typeof response.shippingFee !== "number" ||
+    typeof response.freeShipping !== "boolean"
+  ) {
+    throw new Error("Invalid shipping estimate response");
+  }
+
+  return response;
+}
 
 export async function placeOrder(
   payload: CheckoutPayload

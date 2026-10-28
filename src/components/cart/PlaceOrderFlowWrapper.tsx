@@ -101,7 +101,7 @@ export function usePlaceOrderContext() {
 
 function configForPath(pathname: string | null): OrderSummaryConfig {
   if (pathname?.startsWith("/checkout")) {
-    return { shippingMode: "free", secureNote: true };
+    return { shippingMode: "threshold", secureNote: true };
   }
   return { shippingMode: "threshold", secureNote: false };
 }

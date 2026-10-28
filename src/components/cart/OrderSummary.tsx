@@ -6,6 +6,7 @@
  * right column (.price-details). Only CTA / copy changes by route.
  */
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ShopSeedLink } from "@/components/shop/ShopSeedLink";
 import {
@@ -22,6 +23,10 @@ import {
   Zap,
 } from "lucide-react";
 import { usePlaceOrderContext } from "@/components/cart/PlaceOrderFlowWrapper";
+import {
+  estimateCartShipping,
+  type CartShippingEstimate,
+} from "@/services/checkoutService";
 import {
   FREE_SHIPPING_THRESHOLD,
   formatInr,
@@ -129,26 +134,109 @@ export function OrderSummary() {
     itemCount,
     unitCount,
     listTotal,
+    merchandiseTotal,
     payableTotal,
     offerDiscount,
     couponDiscount: appliedCouponDiscount,
     discount,
   } = getOrderSummaryTotals(items, couponDiscount);
 
-  const shippingGap = Math.max(0, FREE_SHIPPING_THRESHOLD - payableTotal);
-  const qualifiesFreeShipping =
-    shippingMode === "free" || shippingGap === 0;
+  const shippingGap = Math.max(0, FREE_SHIPPING_THRESHOLD - merchandiseTotal);
+  const deliveryPincode =
+    confirmDeliveryAddress?.pincode.replace(/\D/g, "").slice(0, 6) ?? "";
+  const cartContentsKey = items
+    .map(({ id, variationId, quantity }) => `${id}:${variationId}:${quantity}`)
+    .join("|");
+  const estimateKey =
+    isCheckout &&
+    confirmDeliveryAddress &&
+    deliveryPincode.length === 6
+      ? `${deliveryPincode}:${paymentMethod}:${merchandiseTotal}:${cartContentsKey}`
+      : null;
+  const [shippingEstimateState, setShippingEstimateState] = useState<{
+    key: string;
+    estimate?: CartShippingEstimate;
+    error?: string;
+  } | null>(null);
 
-  const shippingLabel = qualifiesFreeShipping
-    ? "FREE"
-    : "Calculated at checkout";
+  useEffect(() => {
+    if (!estimateKey) return;
 
-  const bannerMessage =
-    shippingMode === "free"
-      ? "Free shipping applied on this order."
-      : qualifiesFreeShipping
-        ? "You’ve unlocked FREE shipping on this order!"
-        : `Add items worth ${formatInr(shippingGap)} more to get FREE shipping!`;
+    const controller = new AbortController();
+    void estimateCartShipping(
+      deliveryPincode,
+      paymentMethod,
+      controller.signal,
+    )
+      .then((estimate) => {
+        setShippingEstimateState({ key: estimateKey, estimate });
+      })
+      .catch((error: unknown) => {
+        if (controller.signal.aborted) return;
+        setShippingEstimateState({
+          key: estimateKey,
+          error:
+            error instanceof Error
+              ? error.message
+              : typeof error === "object" &&
+                  error !== null &&
+                  "message" in error &&
+                  typeof error.message === "string"
+                ? error.message
+                : "Shipping estimate could not be calculated.",
+        });
+      });
+
+    return () => controller.abort();
+  }, [deliveryPincode, estimateKey, paymentMethod]);
+
+  const currentShippingEstimate =
+    shippingEstimateState?.key === estimateKey ? shippingEstimateState : null;
+  const estimatePending = Boolean(estimateKey) && !currentShippingEstimate;
+  const shippingEstimate = currentShippingEstimate?.estimate;
+  const qualifiesFreeShipping = shippingEstimate
+    ? shippingEstimate.serviceable && shippingEstimate.freeShipping
+    : estimateKey
+      ? false
+      : shippingMode === "free" || shippingGap === 0;
+  const shippingLabel = shippingEstimate
+    ? shippingEstimate.serviceable
+      ? shippingEstimate.freeShipping
+        ? "FREE"
+        : formatInr(shippingEstimate.shippingFee)
+      : "Unavailable"
+    : currentShippingEstimate?.error
+      ? "Unavailable"
+      : estimatePending
+        ? "Calculating…"
+        : qualifiesFreeShipping
+          ? "FREE"
+          : "Calculated at checkout";
+
+  const bannerMessage = estimatePending
+    ? `Calculating shipping charges for ${deliveryPincode}…`
+    : currentShippingEstimate?.error
+      ? `Unable to calculate shipping: ${currentShippingEstimate.error}`
+      : shippingEstimate && !shippingEstimate.serviceable
+        ? shippingEstimate.message
+        : shippingEstimate
+          ? shippingEstimate.freeShipping
+            ? `Free shipping is available to ${deliveryPincode}.`
+            : `Shipping to ${deliveryPincode}: ${formatInr(shippingEstimate.shippingFee)}.`
+          : shippingMode === "free"
+            ? "Free shipping applied on this order."
+            : qualifiesFreeShipping
+              ? "You’ve unlocked FREE shipping on this order!"
+              : `Add items worth ${formatInr(shippingGap)} more to get FREE shipping!`;
+  const totalLabel = estimatePending
+    ? "Calculating…"
+    : currentShippingEstimate?.error ||
+        (shippingEstimate && !shippingEstimate.serviceable)
+      ? "Unavailable"
+      : formatInr(
+          payableTotal +
+            (shippingEstimate?.serviceable ? shippingEstimate.shippingFee : 0),
+        );
 
   const hasItems = items.length > 0;
   const canPlaceOrder =
@@ -224,7 +312,12 @@ export function OrderSummary() {
         ) : null}
 
         <div className="commerce-summary-row">
-          <span>Shipping Charges</span>
+          <span>
+            Shipping Charges
+            {isCheckout
+              ? ` (${paymentMethod === "cod" ? "COD" : "Pre-paid"})`
+              : ""}
+          </span>
           <span
             className={qualifiesFreeShipping ? "order-summary-free" : undefined}
           >
@@ -234,7 +327,7 @@ export function OrderSummary() {
 
         <div className="commerce-summary-row total">
           <span>Total</span>
-          <strong>{formatInr(payableTotal)}</strong>
+          <strong>{totalLabel}</strong>
         </div>
 
         {discount > 0 ? (
@@ -296,6 +389,7 @@ export function OrderSummary() {
 
         <div
           className={`cart-shipping-banner${qualifiesFreeShipping ? " is-free" : ""}`}
+          role="status"
         >
           <Truck size={18} strokeWidth={1.75} aria-hidden />
           <p>{bannerMessage}</p>
@@ -337,8 +431,8 @@ export function OrderSummary() {
                     ? "Opening Razorpay…"
                     : "Placing order…"
                   : paymentMethod === "online"
-                    ? `Pay now · ${formatInr(payableTotal)}`
-                    : `Place order · ${formatInr(payableTotal)}`}
+                    ? `Pay now · ${totalLabel}`
+                    : `Place order · ${totalLabel}`}
               </button>
               <Link
                 href="/cart"

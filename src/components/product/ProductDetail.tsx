@@ -69,6 +69,8 @@ type DeliveryStatus = {
   freeShipping: boolean;
   codAvailable: boolean;
   prepaidAvailable: boolean;
+  codShippingFee?: number;
+  codShippingError?: string;
   estimatedDeliveryDate?: string | null;
   city?: string | null;
   message: string;
@@ -160,24 +162,51 @@ export default function ProductDetail({
       setPincode(normalizedPin);
 
       try {
-        const response = (await getData(API_ENDPOINTS.SHIPPING.CHECK_PIN, {
-          pincode: normalizedPin,
-          subtotal: amount,
-          weightGrams: weight,
-          packageHeightCm,
-          packageWidthCm,
-          packageLengthCm,
-          variantId: selectedVariant?.id,
-          paymentMode: "Pre-paid",
-        })) as { success?: boolean; message?: string; data?: DeliveryStatus };
+        const getQuote = async (paymentMode: "Pre-paid" | "COD") => {
+          const response = (await getData(API_ENDPOINTS.SHIPPING.CHECK_PIN, {
+            pincode: normalizedPin,
+            subtotal: amount,
+            weightGrams: weight,
+            packageHeightCm,
+            packageWidthCm,
+            packageLengthCm,
+            variantId: selectedVariant?.id,
+            paymentMode,
+          })) as { success?: boolean; message?: string; data?: DeliveryStatus };
 
-        if (response?.success === false || (!response?.data && response?.message)) {
-          throw new Error(response?.message || "Unable to check delivery availability");
+          if (response?.success === false || (!response?.data && response?.message)) {
+            throw new Error(
+              response?.message || "Unable to check delivery availability",
+            );
+          }
+
+          return response?.data ?? null;
+        };
+
+        const status = await getQuote("Pre-paid");
+        if (!status) {
+          throw new Error("Unable to check delivery availability");
         }
-
-        const status = response?.data ?? null;
-        setDeliveryStatus(status);
-        setDeliveryMode(status && status.serviceable ? "success" : "error");
+        let codShippingFee: number | undefined;
+        let codShippingError: string | undefined;
+        if (status.serviceable && status.codAvailable) {
+          try {
+            const codStatus = await getQuote("COD");
+            if (codStatus?.serviceable) {
+              codShippingFee = codStatus.freeShipping ? 0 : codStatus.shippingFee;
+            } else {
+              codShippingError =
+                codStatus?.message || "COD shipping rate is unavailable.";
+            }
+          } catch (error) {
+            codShippingError =
+              error instanceof Error
+                ? error.message
+                : "COD shipping rate is unavailable.";
+          }
+        }
+        setDeliveryStatus({ ...status, codShippingFee, codShippingError });
+        setDeliveryMode(status.serviceable ? "success" : "error");
         setDeliveryMessage(
           status?.message ||
             (status && status.serviceable
@@ -474,21 +503,19 @@ export default function ProductDetail({
       </div>
 
       <div className="product-detail-content product-detail-panel">
-        <div className="product-detail-meta-chips">
-          {product.categoryName && (
-            <span className="product-detail-chip product-detail-chip--olive">
-              {product.categoryName}
-            </span>
-          )}
-          {product.brandName && (
-            <span className="product-detail-chip product-detail-chip--saffron">
-              {product.brandName}
-            </span>
-          )}
-        </div>
-
-        <div className="product-detail-title-row">
-          <h1 className="product-detail-title">{displayTitle}</h1>
+        <div className="product-detail-meta-row">
+          <div className="product-detail-meta-chips">
+            {product.categoryName && (
+              <span className="product-detail-chip product-detail-chip--olive">
+                {product.categoryName}
+              </span>
+            )}
+            {product.brandName && (
+              <span className="product-detail-chip product-detail-chip--saffron">
+                {product.brandName}
+              </span>
+            )}
+          </div>
           <button
             type="button"
             className="product-share-button"
@@ -498,6 +525,10 @@ export default function ProductDetail({
             <Share2 size={17} aria-hidden="true" />
             <span>Share</span>
           </button>
+        </div>
+
+        <div className="product-detail-title-row">
+          <h1 className="product-detail-title">{displayTitle}</h1>
         </div>
         {shareStatus && (
           <p className="product-share-status" role="status" aria-live="polite">
@@ -595,11 +626,25 @@ export default function ProductDetail({
                 {deliveryStatus.serviceable ? "✓ Delivery available to this PIN code" : "✕ Delivery unavailable for this PIN code"}
               </div>
               <div className="product-delivery-check__detail">
-                Shipping: <strong>{deliveryStatus.freeShipping ? "Free" : formatInr(deliveryStatus.shippingFee)}</strong>
+                Pre-paid shipping: <strong>{deliveryStatus.freeShipping ? "Free" : formatInr(deliveryStatus.shippingFee)}</strong>
               </div>
-              {deliveryStatus.codAvailable !== undefined && (
+              {deliveryStatus.codAvailable && (
                 <div className="product-delivery-check__detail">
-                  COD: <strong>{deliveryStatus.codAvailable ? "Available" : "Not available"}</strong>
+                  COD shipping: <strong>
+                    {deliveryStatus.codShippingFee !== undefined
+                      ? formatInr(deliveryStatus.codShippingFee)
+                      : deliveryStatus.codShippingError || "Checking…"}
+                  </strong>
+                </div>
+              )}
+              {!deliveryStatus.codAvailable && (
+                <div className="product-delivery-check__detail">
+                  COD: <strong>Not available</strong>
+                </div>
+              )}
+              {deliveryStatus.codAvailable && (
+                <div className="product-delivery-check__detail">
+                  COD: <strong>Available</strong>
                 </div>
               )}
               {deliveryStatus.estimatedDeliveryDate && (

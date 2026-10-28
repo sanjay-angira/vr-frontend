@@ -6,7 +6,7 @@ export function formatInr(value: number) {
   }).format(value || 0);
 }
 
-export const FREE_SHIPPING_THRESHOLD = 499;
+export const FREE_SHIPPING_THRESHOLD = 500;
 
 export function getCartCounts(items: { quantity: number }[]) {
   const itemCount = items.length;
