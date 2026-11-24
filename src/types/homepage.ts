@@ -1,8 +1,7 @@
 export type HomepageBanner = {
   id: number;
-  title: string;
-  subtitle: string;
-  image: string;
+  desktopImage: string;
+  tabletImage: string;
   mobileImage: string;
   link: string;
 };
@@ -82,7 +81,6 @@ export type HomepageSection = {
   products: HomepageProduct[];
   categories: HomepageCategory[];
   blogs: HomepageBlogPost[];
-  banners: HomepageBanner[];
   reviews: HomepageReview[];
 };
 

@@ -60,7 +60,14 @@ export function HeroBannerSection({banners}: HeroBannerSectionProps) {
   const slides = useMemo(
     () =>
       Array.isArray(banners)
-        ? banners.filter((banner) => Boolean(banner?.image || banner?.mobileImage))
+        ? banners.filter(
+            (banner) =>
+              Boolean(
+                banner?.desktopImage ||
+                  banner?.tabletImage ||
+                  banner?.mobileImage
+              )
+          )
         : [],
     [banners]
   );
@@ -135,45 +142,28 @@ export function HeroBannerSection({banners}: HeroBannerSectionProps) {
 }
 
 function HeroSlide({ banner }: { banner: HomepageBanner }) {
-  const desktopSrc = banner.image || banner.mobileImage || "";
-  const mobileSrc = banner.mobileImage || banner.image || "";
-  const hasDistinctMobile = Boolean(
-    mobileSrc && desktopSrc && mobileSrc !== desktopSrc
-  );
+  const desktopSrc =
+    banner.desktopImage || banner.tabletImage || banner.mobileImage || "";
+  const tabletSrc =
+    banner.tabletImage || banner.desktopImage || banner.mobileImage || "";
+  const mobileSrc =
+    banner.mobileImage || banner.tabletImage || banner.desktopImage || "";
   const link = banner.link?.trim() || "";
-  const alt = (banner.title || "Banner").trim();
+  const alt = "Banner";
 
   const media = (
     <div className="cms-hero-banner__media">
       {desktopSrc ? (
-        hasDistinctMobile ? (
-          <>
-            <div className="cms-hero-banner__variant cms-hero-banner__variant--mobile">
-              <Image
-                src={mobileSrc}
-                alt={alt}
-                width={900}
-                height={900}
-                className="cms-hero-banner__image"
-                sizes="100vw"
-                priority
-                style={{ width: "100%", height: "auto" }}
-              />
-            </div>
-            <div className="cms-hero-banner__variant cms-hero-banner__variant--desktop">
-              <Image
-                src={desktopSrc}
-                alt={alt}
-                width={1920}
-                height={700}
-                className="cms-hero-banner__image"
-                sizes="100vw"
-                priority
-                style={{ width: "100%", height: "auto" }}
-              />
-            </div>
-          </>
-        ) : (
+        <picture>
+          {mobileSrc !== desktopSrc && (
+            <source media="(max-width: 767px)" srcSet={mobileSrc} />
+          )}
+          {tabletSrc !== desktopSrc && (
+            <source
+              media="(min-width: 768px) and (max-width: 1199px)"
+              srcSet={tabletSrc}
+            />
+          )}
           <Image
             src={desktopSrc}
             alt={alt}
@@ -184,7 +174,7 @@ function HeroSlide({ banner }: { banner: HomepageBanner }) {
             priority
             style={{ width: "100%", height: "auto" }}
           />
-        )
+        </picture>
       ) : (
         <div className="cms-hero-banner__fallback" aria-hidden />
       )}
