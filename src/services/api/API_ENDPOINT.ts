@@ -31,7 +31,6 @@ export const API_ENDPOINTS = {
   },
 
   CUSTOMER: {
-    HOMEPAGE: "customer/homepage",
     HOMEPAGE_BANNERS: "customer/banners",
     SITEMAP: "customer/sitemap",
     STORE_PRODUCTS: "customer/all-products",
