@@ -6,11 +6,11 @@ import {
 
 type ReviewItem = {
   id: number;
-  quote: string;
-  product: string;
-  name: string;
-  location: string;
   rating: number;
+  comment: string;
+  userName: string;
+  productName: string;
+  createdAt: string;
 };
 
 function authorInitials(name: string) {
@@ -39,7 +39,7 @@ export function ProductReviewsShowcase({
               </div>
               <div
                 className="product-review-quote rich-html"
-                dangerouslySetInnerHTML={{ __html: review.quote || "" }}
+                dangerouslySetInnerHTML={{ __html: review.comment || "" }}
               />
               <div className="product-review-stars" aria-label={`Rated ${review.rating} out of 5`}>
                 {[...Array(5)].map((_, index) => (
@@ -55,15 +55,12 @@ export function ProductReviewsShowcase({
               </div>
               <div className="product-review-author">
                 <span className="product-review-avatar" aria-hidden>
-                  {authorInitials(review.name || "")}
+                  {authorInitials(review.userName || "")}
                 </span>
                 <div className="product-review-author-copy">
-                  <p className="product-review-name">{review.name}</p>
-                  {review.location ? (
-                    <p className="product-review-location">{review.location}</p>
-                  ) : null}
-                  {review.product ? (
-                    <p className="product-review-product">{review.product}</p>
+                  <p className="product-review-name">{review.userName}</p>
+                  {review.productName ? (
+                    <p className="product-review-product">{review.productName}</p>
                   ) : null}
                 </div>
               </div>

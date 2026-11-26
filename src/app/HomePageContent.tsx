@@ -5,6 +5,7 @@ import { WhyChooseSection } from "@/components/sections/WhyChooseSection";
 import { CategorySection } from "@/components/sections/CategorySection";
 import { RecentlyViewedSection } from "@/components/sections/RecentlyViewedSection";
 import { ProductSection } from "@/components/sections/ProductSection";
+import { ProductReviewsShowcase } from "@/components/sections/ProductReviewsShowcase";
 import { BlogSection } from "@/components/sections/BlogSection";
 import type { SectionHeadingProps } from "@/components/shared/SectionHeading";
 import type { StoreListProduct } from "@/types/storeProduct";
@@ -64,6 +65,11 @@ const HOME_SECTION_HEADINGS: Record<string, SectionHeadingProps> = {
     description:
       "Discover limited-time offers and special prices on groceries, spices, snacks, wellness products and other customer favorites.",
   },
+  reviews: {
+    eyebrow: "✦ CUSTOMER REVIEWS ✦",
+    title: "Loved by Our Customers",
+    description: "What customers are saying about products they love.",
+  },
   blogs: {
     eyebrow: "✦ OUR BLOG ✦",
     title: "Latest Articles &",
@@ -111,6 +117,15 @@ type BlogPost = {
   href: string;
 };
 
+type HomepageReviewRow = {
+  id: number;
+  rating: number | string;
+  comment: string;
+  userName: string;
+  productName: string;
+  createdAt: string;
+};
+
 export default async function HomePageContent() {
   const [
     bannersResult,
@@ -120,6 +135,7 @@ export default async function HomePageContent() {
     bestSellersResult,
     bestDealsResult,
     blogsResult,
+    reviewsResult,
   ] = await Promise.allSettled([
     getData(
       API_ENDPOINTS.CUSTOMER.HOMEPAGE_BANNERS,
@@ -133,29 +149,30 @@ export default async function HomePageContent() {
     ),
     getData(
       API_ENDPOINTS.CUSTOMER.STORE_PRODUCTS,
-      { pageNumber: 1, pageSize: 8, sortBy: "newest", featured: true },
+      { pageNumber: 1, pageSize: 10, sortBy: "newest", featured: true },
       { auth: false }
     ),
     getData(
       API_ENDPOINTS.CUSTOMER.STORE_PRODUCTS,
-      { pageNumber: 1, pageSize: 8, sortBy: "newest", newArrivals: true },
+      { pageNumber: 1, pageSize: 10, sortBy: "newest", newArrivals: true },
       { auth: false }
     ),
     getData(
       API_ENDPOINTS.CUSTOMER.STORE_PRODUCTS,
-      { pageNumber: 1, pageSize: 8, sortBy: "newest", bestSeller: true },
+      { pageNumber: 1, pageSize: 10, sortBy: "newest", bestSeller: true },
       { auth: false }
     ),
     getData(
       API_ENDPOINTS.CUSTOMER.STORE_PRODUCTS,
-      { pageNumber: 1, pageSize: 8, sortBy: "newest", bestDeals: true },
+      { pageNumber: 1, pageSize: 10, sortBy: "newest", bestDeals: true },
       { auth: false }
     ),
     getData(
       API_ENDPOINTS.CUSTOMER.BLOGS,
-      { pageNumber: 1, pageSize: 8 },
+      { pageNumber: 1, pageSize: 3 },
       { auth: false }
     ),
+    getData(API_ENDPOINTS.CUSTOMER.REVIEWS, undefined, { auth: false }),
   ]);
 
   const banners =
@@ -187,6 +204,13 @@ export default async function HomePageContent() {
     blogsResult,
     "homepage blog posts"
   ).map(mapBlogPost);
+  const reviews = getPromiseRows<HomepageReviewRow>(
+    reviewsResult,
+    "homepage reviews"
+  ).map(mapHomepageReview)
+
+
+  console.log("banners", reviews);
 
   return (
     <>
@@ -218,6 +242,10 @@ export default async function HomePageContent() {
         title="View All Special Offers"
         heading={HOME_SECTION_HEADINGS.bestDeals}
         products={bestDealProducts}
+      />
+      <ProductReviewsShowcase
+        heading={HOME_SECTION_HEADINGS.reviews}
+        reviews={reviews}
       />
       {blogs.length > 0 && (
         <BlogSection
@@ -288,6 +316,20 @@ function mapBlogPost(row: BlogApiRow): BlogPost {
     category: String(row.category || "Blog"),
     date: String(row.date || ""),
     href: String(row.href || (slug ? `/blog/${slug}` : "/blogs")),
+  };
+}
+
+function mapHomepageReview(row: HomepageReviewRow) {
+  const rating = Number(row.rating);
+  return {
+    id: Number(row.id) || 0,
+    comment: String(row.comment || ""),
+    productName: String(row.productName || ""),
+    userName: String(row.userName || "Customer"),
+    rating: Number.isFinite(rating)
+      ? Math.min(5, Math.max(0, Math.round(rating)))
+      : 0,
+    createdAt: String(row.createdAt || ""),
   };
 }
 

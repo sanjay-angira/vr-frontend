@@ -72,7 +72,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  font-size: 0.68rem;
+  font-size: 0.62rem;
   font-weight: 800;
   line-height: 1;
   padding: 0.42rem 0.72rem;
@@ -99,13 +99,13 @@
 }
 
 .product-card .badge__value {
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   font-weight: 900;
   letter-spacing: 0.02em;
 }
 
 .product-card .badge__label {
-  font-size: 0.62rem;
+  font-size: 0.58rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   opacity: 0.95;
@@ -119,14 +119,15 @@
 
 .product-card .badge--sale,
 .product-card .badge.sale {
-  gap: 0.28rem;
-  padding: 0.4rem 0.7rem 0.4rem 0.62rem;
-  background: linear-gradient(135deg, #d4652b 0%, #b84a1a 52%, #9a3c14 100%);
-  color: #fff8f2;
-  box-shadow:
-    0 8px 20px rgba(184, 74, 26, 0.38),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
-  border-color: rgba(255, 255, 255, 0.32);
+  gap: 0.25rem;
+  padding: 0.35rem 0.55rem;
+  background: #3b8300;
+  color: #fff;
+  border: 0;
+  border-radius: 4px;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 .product-card .quick-actions {
@@ -191,20 +192,27 @@
 
 .product-card .add-to-cart-btn {
   width: 100%;
-  height: var(--control-height);
+  height: 36px;
+  min-height: 36px;
   border: none;
   border-radius: 0;
-  padding: 0 14px;
-  font-size: 14px;
+  padding: 0 10px;
+  font-size: 12px;
   font-weight: 600;
   color: #fff;
   background: var(--primary-background);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--gap-s);
+  gap: 0.4rem;
   cursor: pointer;
   transition: background 0.2s ease, opacity 0.2s ease;
+}
+
+.product-card .add-to-cart-btn svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
 }
 
 .product-card .add-to-cart-btn__label--short {
@@ -223,13 +231,13 @@
 .product-card .content {
   display: flex;
   flex-direction: column;
-  gap: var(--gap-s);
+  gap: var(--gap-xxs);
   padding: 14px 14px 16px;
 }
 
 .product-card .category {
-  font-size: 12px;
-  font-weight: 700;
+  font-size: 11px;
+  font-weight: 600;
   color: var(--vr-gold);
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -238,11 +246,11 @@
 .product-card .product-name {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 16px;
-  font-weight: 700;
+  font-size: 15px;
+  font-weight: 600;
   color: var(--vr-text);
-  line-height: 1.4;
-  min-height: 44px;
+  line-height: 1.3;
+  /* min-height: 44px; */
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -280,7 +288,7 @@
 }
 
 .product-card .review-count {
-  font-size: 13px;
+  font-size: 12px;
   color: #7b746e;
   margin-left: 4px;
 }
@@ -300,19 +308,20 @@
 }
 
 .product-card .current-price {
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 800;
   color: var(--vr-text);
 }
 
 .product-card .original-price {
-  font-size: 13px;
+  font-size: 15px;
   color: #8a8077;
   text-decoration: line-through;
+  text-decoration-color: #dc2626;
 }
 
 .product-card .stock-status {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   white-space: nowrap;
 }
@@ -410,9 +419,9 @@
   }
 
   .product-card .add-to-cart-btn {
-    width: 34px;
-    height: 34px;
-    min-height: 34px;
+    width: 32px;
+    height: 32px;
+    min-height: 32px;
     padding: 0;
     font-size: 0;
     font-weight: 700;
@@ -438,7 +447,7 @@
   }
 
   .product-card .category {
-    font-size: 10px;
+    font-size: 9px;
     letter-spacing: 0.06em;
     white-space: nowrap;
     overflow: hidden;
@@ -446,7 +455,7 @@
   }
 
   .product-card .product-name {
-    font-size: 13px;
+    font-size: 12px;
     line-height: 1.35;
     min-height: 0;
     font-weight: 600;
@@ -463,7 +472,7 @@
   }
 
   .product-card .review-count {
-    font-size: 11px;
+    font-size: 10px;
     margin-left: 2px;
   }
 
@@ -472,7 +481,6 @@
     align-items: center;
     justify-content: space-between;
     gap: 6px;
-    margin-top: 4px;
   }
 
   .product-card .prices {
@@ -483,14 +491,14 @@
   }
 
   .product-card .current-price {
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 800;
     letter-spacing: -0.01em;
     line-height: 1.2;
   }
 
   .product-card .original-price {
-    font-size: 11px;
+    font-size: 13px;
     line-height: 1.2;
   }
 

@@ -335,7 +335,9 @@ export default function ReviewSection({
                     {review.comment.includes("<") ? (
                       <div
                         className="pdp-reviews__body rich-html"
-                        dangerouslySetInnerHTML={{ __html: review.comment }}
+                        dangerouslySetInnerHTML={{
+                          __html: review.comment || "",
+                        }}
                       />
                     ) : (
                       <p className="pdp-reviews__body">{plain}</p>

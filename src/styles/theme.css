@@ -65,6 +65,7 @@
   --container-padding-x: 1.5rem;
 
   /* Spacing scale */
+  --gap-xxs: 0.25rem;
   --gap-xs: 0.5rem;
   --gap-s: 0.75rem;
   --gap-m: 1rem;
