@@ -181,7 +181,11 @@ function BotanicalDecor() {
   );
 }
 
-export function WhyChooseSection({ heading }: { heading: SectionHeadingProps }) {
+export function WhyChooseSection({
+  heading,
+}: {
+  heading: SectionHeadingProps;
+}) {
   return (
     <section
       className="why-choose-section"

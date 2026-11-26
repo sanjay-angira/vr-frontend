@@ -1,12 +1,7 @@
 import { unstable_cache } from "next/cache";
 import { getData } from "@/services/api/apiService";
 import { API_ENDPOINTS } from "@/services/api/API_ENDPOINT";
-import type {
-  HomepageBanner,
-  HomepageProductSection,
-  HomepageSectionCopy,
-} from "@/types/homepage";
-import type { StoreProductSectionOption } from "@/components/shop/StoreFiltersSidebar";
+import type { HomepageBanner } from "@/types/homepage";
 import type { StoreListProduct } from "@/types/storeProduct";
 
 type HomepageBannersApiResponse = {
@@ -14,100 +9,65 @@ type HomepageBannersApiResponse = {
   data?: HomepageBanner[];
 };
 
-type StoreFiltersResponse = {
-  success: boolean;
-  message?: string;
-  data?: {
-    productSections?: StoreProductSectionOption[];
-    homepageSectionCopy?: HomepageSectionCopy[];
-  };
-};
-
 type StoreProductsResponse = {
   success: boolean;
+  message?: string;
   data?: {
     rows?: StoreListProduct[];
   };
 };
 
-type HomepageContent = {
-  productSections: HomepageProductSection[];
-  sectionCopy: HomepageSectionCopy[];
-};
+type HomepageProductFilter =
+  | "featured"
+  | "newArrivals"
+  | "bestSeller"
+  | "bestDeals";
 
-async function loadHomepageContent(): Promise<HomepageContent> {
-  const filters = (await getData(
-    API_ENDPOINTS.CUSTOMER.STORE_FILTERS,
-    undefined,
+async function loadHomepageProducts(
+  filter: HomepageProductFilter
+): Promise<StoreListProduct[]> {
+  const response = (await getData(
+    API_ENDPOINTS.CUSTOMER.STORE_PRODUCTS,
+    {
+      pageNumber: 1,
+      pageSize: 8,
+      sortBy: "newest",
+      [filter]: true,
+    },
     { auth: false }
-  )) as StoreFiltersResponse;
+  )) as StoreProductsResponse;
 
-  if (!filters?.success) {
-    throw new Error(filters?.message || "Failed to load homepage sections.");
+  if (!response?.success) {
+    throw new Error(response?.message || `Failed to load ${filter} products.`);
   }
-  if (!Array.isArray(filters.data?.productSections)) {
-    throw new Error("Homepage section response is invalid.");
-  }
-  if (!Array.isArray(filters.data.homepageSectionCopy)) {
-    throw new Error("Homepage copy response is invalid.");
+  if (!Array.isArray(response.data?.rows)) {
+    throw new Error(`The ${filter} products response is invalid.`);
   }
 
-  const sectionCopy = filters.data.homepageSectionCopy;
-  const sectionCopyBySlug = new Map(
-    sectionCopy.map((section) => [section.slug, section])
-  );
-  const sections = filters.data.productSections.filter(
-    (section) =>
-      section.type === "product_slider" &&
-      section.slug?.trim() &&
-      section.title?.trim()
-  );
-  const results = await Promise.allSettled(
-    sections.map(async (section) => {
-      const copy = sectionCopyBySlug.get(section.slug);
-      const response = (await getData(
-        API_ENDPOINTS.CUSTOMER.STORE_PRODUCTS,
-        {
-          pageNumber: 1,
-          pageSize: copy?.maxProducts || 8,
-          sectionSlugs: section.slug,
-        },
-        { auth: false }
-      )) as StoreProductsResponse;
-
-      if (!response?.success) {
-        throw new Error("Product API returned an unsuccessful response.");
-      }
-      if (!Array.isArray(response.data?.rows)) {
-        throw new Error("Product API returned an invalid product list.");
-      }
-
-      return {
-        slug: section.slug,
-        title: section.title,
-        products: response.data.rows,
-      };
-    })
-  );
-
-  const productSections = results.flatMap((result, index) => {
-    if (result.status === "rejected") {
-      console.error(
-        `Failed to load homepage products for section "${sections[index].slug}":`,
-        result.reason
-      );
-      return [];
-    }
-
-    return result.value.products.length > 0 ? [result.value] : [];
-  });
-
-  return { productSections, sectionCopy };
+  return response.data.rows;
 }
 
-export const fetchHomepageContent = unstable_cache(
-  loadHomepageContent,
-  ["storefront-homepage-content"],
+export const fetchFeaturedProducts = unstable_cache(
+  () => loadHomepageProducts("featured"),
+  ["storefront-homepage-featured-products"],
+  { revalidate: 300 }
+);
+
+export const fetchNewArrivalProducts = unstable_cache(
+  () => loadHomepageProducts("newArrivals"),
+  ["storefront-homepage-new-arrival-products"],
+  { revalidate: 300 }
+);
+
+export const fetchBestSellerProducts = unstable_cache(
+  () => loadHomepageProducts("bestSeller"),
+  ["storefront-homepage-best-seller-products"],
+  { revalidate: 300 }
+);
+
+export const fetchBestDealProducts = unstable_cache(
+  () => loadHomepageProducts("bestDeals"),
+  ["storefront-homepage-best-deal-products"],
   { revalidate: 300 }
 );
 
