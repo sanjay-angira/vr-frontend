@@ -14,7 +14,7 @@ export function HeaderLogo() {
         priority
       />
       <Image
-        src="/logo/log5.png"
+        src="/logo/logo5.svg"
         alt="Vrindavan Rasa"
         width={650}
         height={106}
