@@ -2,8 +2,7 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import { HomePageSkeleton } from "@/components/shared/HomePageSkeleton";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { fetchAllCategories } from "@/components/categories/categoriesApi";
-import { fetchBlogs } from "@/components/blog/blogApi";
+import type { Category } from "@/components/cards/CategoryCard";
 import { HeroBannerSection } from "@/components/sections/HeroBannerSection";
 import { WhyChooseSection } from "@/components/sections/WhyChooseSection";
 import { CategorySection } from "@/components/sections/CategorySection";
@@ -12,14 +11,10 @@ import { ProductSection } from "@/components/sections/ProductSection";
 import { BlogSection } from "@/components/sections/BlogSection";
 import type { SectionHeadingProps } from "@/components/shared/SectionHeading";
 import type { StoreListProduct } from "@/types/storeProduct";
+import type { HomepageBanner } from "@/types/homepage";
 import { mapStoreListProduct } from "@/services/shopProductMapper";
-import {
-  fetchBestDealProducts,
-  fetchBestSellerProducts,
-  fetchFeaturedProducts,
-  fetchHomepageBanners,
-  fetchNewArrivalProducts,
-} from "@/services/homepageService";
+import { getData } from "@/services/api/apiService";
+import { API_ENDPOINTS } from "@/services/api/API_ENDPOINT";
 import { getWebSiteSchema } from "@/lib/schema";
 import { getStaticPageMetadata } from "@/lib/seo";
 
@@ -84,6 +79,44 @@ const HOME_SECTION_HEADINGS: Record<string, SectionHeadingProps> = {
   },
 };
 
+type ApiResponse<T> = {
+  success: boolean;
+  message?: string;
+  data?: T;
+};
+
+type CategoryApiRow = {
+  id: number;
+  name: string;
+  slug: string | null;
+  description?: string;
+  shortDescription?: string;
+  image?: string | null;
+  mobileImage?: string | null;
+  productCount?: number;
+};
+
+type BlogApiRow = {
+  id?: number | string;
+  title?: string;
+  slug?: string;
+  excerpt?: string;
+  image?: string;
+  category?: string;
+  date?: string;
+  href?: string;
+};
+
+type BlogPost = {
+  id: number;
+  category: string;
+  date: string;
+  title: string;
+  excerpt: string;
+  image: string;
+  href: string;
+};
+
 export default function Page() {
   return (
     <Suspense fallback={<HomePageSkeleton />}>
@@ -102,13 +135,112 @@ async function HomePageContent() {
     bestDealsResult,
     blogsResult,
   ] = await Promise.allSettled([
-    fetchHomepageBanners(),
-    fetchAllCategories(),
-    fetchFeaturedProducts(),
-    fetchNewArrivalProducts(),
-    fetchBestSellerProducts(),
-    fetchBestDealProducts(),
-    fetchBlogs({ pageSize: 8 }),
+    getData(
+      API_ENDPOINTS.CUSTOMER.HOMEPAGE_BANNERS,
+      undefined,
+      { auth: false }
+    ).then((response: ApiResponse<HomepageBanner[]>) => {
+      if (!response?.success || !Array.isArray(response.data)) {
+        throw new Error(response?.message || "Invalid homepage banners response.");
+      }
+      return response.data;
+    }),
+    getData(
+      API_ENDPOINTS.CUSTOMER.CATEGORIES,
+      undefined,
+      { auth: false }
+    ).then(
+      (
+        response: ApiResponse<{
+          rows?: CategoryApiRow[];
+        }>
+      ): Category[] => {
+        if (!response?.success || !Array.isArray(response.data?.rows)) {
+          throw new Error(response?.message || "Invalid categories response.");
+        }
+
+        return response.data.rows.map((row) => ({
+          id: row.id,
+          name: row.name,
+          slug: row.slug || undefined,
+          description: row.shortDescription || row.description || "",
+          image: row.image || "",
+          mobileImage: row.mobileImage || "",
+          productCount: Number(row.productCount) || 0,
+          href: row.slug
+            ? `/category/${encodeURIComponent(row.slug)}`
+            : "/products",
+        }));
+      }
+    ),
+    getData(
+      API_ENDPOINTS.CUSTOMER.STORE_PRODUCTS,
+      { pageNumber: 1, pageSize: 8, sortBy: "newest", featured: true },
+      { auth: false }
+    ).then((response: ApiResponse<{ rows?: StoreListProduct[] }>) => {
+      if (!response?.success || !Array.isArray(response.data?.rows)) {
+        throw new Error(response?.message || "Invalid featured products response.");
+      }
+      return response.data.rows;
+    }),
+    getData(
+      API_ENDPOINTS.CUSTOMER.STORE_PRODUCTS,
+      { pageNumber: 1, pageSize: 8, sortBy: "newest", newArrivals: true },
+      { auth: false }
+    ).then((response: ApiResponse<{ rows?: StoreListProduct[] }>) => {
+      if (!response?.success || !Array.isArray(response.data?.rows)) {
+        throw new Error(response?.message || "Invalid new-arrival products response.");
+      }
+      return response.data.rows;
+    }),
+    getData(
+      API_ENDPOINTS.CUSTOMER.STORE_PRODUCTS,
+      { pageNumber: 1, pageSize: 8, sortBy: "newest", bestSeller: true },
+      { auth: false }
+    ).then((response: ApiResponse<{ rows?: StoreListProduct[] }>) => {
+      if (!response?.success || !Array.isArray(response.data?.rows)) {
+        throw new Error(response?.message || "Invalid best-seller products response.");
+      }
+      return response.data.rows;
+    }),
+    getData(
+      API_ENDPOINTS.CUSTOMER.STORE_PRODUCTS,
+      { pageNumber: 1, pageSize: 8, sortBy: "newest", bestDeals: true },
+      { auth: false }
+    ).then((response: ApiResponse<{ rows?: StoreListProduct[] }>) => {
+      if (!response?.success || !Array.isArray(response.data?.rows)) {
+        throw new Error(response?.message || "Invalid special-offer products response.");
+      }
+      return response.data.rows;
+    }),
+    getData(
+      API_ENDPOINTS.CUSTOMER.BLOGS,
+      { pageNumber: 1, pageSize: 8 },
+      { auth: false }
+    ).then(
+      (
+        response: ApiResponse<{
+          rows?: BlogApiRow[];
+        }>
+      ): BlogPost[] => {
+        if (!response?.success || !Array.isArray(response.data?.rows)) {
+          throw new Error(response?.message || "Invalid blog posts response.");
+        }
+
+        return response.data.rows.map((row) => {
+          const slug = String(row.slug || "");
+          return {
+            id: Number(row.id) || 0,
+            title: String(row.title || ""),
+            excerpt: String(row.excerpt || ""),
+            image: String(row.image || ""),
+            category: String(row.category || "Blog"),
+            date: String(row.date || ""),
+            href: String(row.href || (slug ? `/blog/${slug}` : "/blogs")),
+          };
+        });
+      }
+    ),
   ]);
   const banners = getResultValue(bannersResult, "homepage banners", []);
   const categories = getResultValue(
@@ -136,12 +268,7 @@ async function HomePageContent() {
     "special-offer products",
     []
   );
-  const blogs = getResultValue(blogsResult, "homepage blog posts", {
-    rows: [],
-    count: 0,
-    pageNumber: 1,
-    pageSize: 8,
-  }).rows;
+  const blogs = getResultValue(blogsResult, "homepage blog posts", []);
 
   const websiteLd = getWebSiteSchema();
 
