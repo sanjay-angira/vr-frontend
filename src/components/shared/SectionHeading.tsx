@@ -1,14 +1,8 @@
 export type SectionHeadingProps = {
-  /** Top label, e.g. "EXPLORE OUR RANGE" */
   eyebrow?: string;
-  /** Main heading text (full title, or the part before the accent) */
   title: string;
-  /** Accent-colored portion, e.g. "Categories" */
   accent?: string;
-  /** Supporting line under the title */
   description?: string;
-  className?: string;
-  align?: "center" | "left";
   showDivider?: boolean;
 };
 
@@ -60,9 +54,6 @@ export function SectionHeading({
   title,
   accent,
   description,
-  className,
-  align = "center",
-  showDivider = true,
 }: SectionHeadingProps) {
   const parts = splitTitle(title, accent);
   const showEyebrow = Boolean(eyebrow?.trim());
@@ -70,7 +61,7 @@ export function SectionHeading({
 
   return (
     <header
-      className={`section-header section-header--${align}${className ? ` ${className}` : ""}`}
+      className={`section-header section-header--center`}
     >
       {showEyebrow ? (
         <div className="section-eyebrow">
@@ -98,15 +89,13 @@ export function SectionHeading({
         <p className="section-description">{(description ?? "").trim()}</p>
       ) : null}
 
-      {showDivider ? (
-        <div className="section-divider" aria-hidden>
-          <span className="section-divider__line" />
-          <span className="section-divider__dot" />
-          <LeafMark className="section-divider__icon" />
-          <span className="section-divider__dot" />
-          <span className="section-divider__line" />
-        </div>
-      ) : null}
+      <div className="section-divider" aria-hidden>
+        <span className="section-divider__line" />
+        <span className="section-divider__dot" />
+        <LeafMark className="section-divider__icon" />
+        <span className="section-divider__dot" />
+        <span className="section-divider__line" />
+      </div>
     </header>
   );
 }

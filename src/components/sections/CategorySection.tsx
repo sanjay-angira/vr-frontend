@@ -13,26 +13,6 @@ interface CategorySectionProps {
   viewAllLabel?: string;
 }
 
-const highlights = [
-  {
-    id: "quality",
-    icon: Leaf,
-    label: "Premium Quality",
-    detail: "Handpicked Products",
-  },
-  {
-    id: "variety",
-    icon: Flower2,
-    label: "Wide Variety",
-    detail: "Everything You Need",
-  },
-  {
-    id: "fast",
-    icon: Truck,
-    label: "Fast & Reliable",
-    detail: "Quick Delivery",
-  },
-] as const;
 
 export function CategorySection({
   heading,
@@ -45,26 +25,6 @@ export function CategorySection({
     <section className="section home-section category-section">
       <div className="container category-section__inner">
         <SectionHeading {...heading} showDivider={false} />
-        <ul className="category-section__highlights">
-          {highlights.map((item) => {
-            const Icon = item.icon;
-            return (
-              <li key={item.id} className="category-section__highlight">
-                <span className="category-section__highlight-icon" aria-hidden>
-                  <Icon size={18} strokeWidth={1.55} />
-                </span>
-                <span className="category-section__highlight-copy">
-                  <span className="category-section__highlight-label">
-                    {item.label}
-                  </span>
-                  <span className="category-section__highlight-detail">
-                    {item.detail}
-                  </span>
-                </span>
-              </li>
-            );
-          })}
-        </ul>
         <div className="category-grid">
           {categories.map((category) => (
             <CategoryCard key={category.id} category={category} />

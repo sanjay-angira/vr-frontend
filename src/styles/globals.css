@@ -634,10 +634,6 @@ body {
   z-index: 1;
 }
 
-.category-section .section-header {
-  margin-bottom: 1.35rem;
-}
-
 .category-section .section-title {
   font-family: var(--font-heading);
   font-weight: 700;

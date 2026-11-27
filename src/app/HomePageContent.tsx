@@ -67,7 +67,8 @@ const HOME_SECTION_HEADINGS: Record<string, SectionHeadingProps> = {
   },
   reviews: {
     eyebrow: "✦ CUSTOMER REVIEWS ✦",
-    title: "Loved by Our Customers",
+    title: "Loved by",
+    accent: "Our Customers",
     description: "What customers are saying about products they love.",
   },
   blogs: {
@@ -215,14 +216,12 @@ export default async function HomePageContent() {
   return (
     <>
       <JsonLd data={getWebSiteSchema()} />
-      {banners.length > 0 && <HeroBannerSection banners={banners} />}
+      <HeroBannerSection banners={banners} />
       <WhyChooseSection heading={HOME_SECTION_HEADINGS.whyChoose} />
-      {categories.length > 0 && (
-        <CategorySection
-          heading={HOME_SECTION_HEADINGS.categories}
-          categories={categories.slice(0, 8)}
-        />
-      )}
+      <CategorySection
+        heading={HOME_SECTION_HEADINGS.categories}
+        categories={categories.slice(0, 8)}
+      />
       <HomeProductSection
         title="View All Featured Products"
         heading={HOME_SECTION_HEADINGS.featured}
@@ -247,13 +246,11 @@ export default async function HomePageContent() {
         heading={HOME_SECTION_HEADINGS.reviews}
         reviews={reviews}
       />
-      {blogs.length > 0 && (
-        <BlogSection
-          heading={HOME_SECTION_HEADINGS.blogs}
-          posts={blogs}
-          viewAllLabel="View All Blogs"
-        />
-      )}
+      <BlogSection
+        heading={HOME_SECTION_HEADINGS.blogs}
+        posts={blogs}
+        viewAllLabel="View All Blogs"
+      />
       <RecentlyViewedSection heading={HOME_SECTION_HEADINGS.recentlyViewed} />
     </>
   );

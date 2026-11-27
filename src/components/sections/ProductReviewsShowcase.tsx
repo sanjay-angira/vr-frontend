@@ -13,12 +13,6 @@ type ReviewItem = {
   createdAt: string;
 };
 
-function authorInitials(name: string) {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  if (!parts.length) return "VR";
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-  return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
-}
 
 export function ProductReviewsShowcase({
   heading,
@@ -58,9 +52,6 @@ export function ProductReviewsShowcase({
                 dangerouslySetInnerHTML={{ __html: review.comment || "" }}
               />
               <div className="product-review-author">
-                <span className="product-review-avatar" aria-hidden>
-                  {authorInitials(review.userName || "")}
-                </span>
                 <div className="product-review-author-copy">
                   <p className="product-review-name">{review.userName}</p>
                   {review.productName ? (
