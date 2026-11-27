@@ -181,7 +181,10 @@ export default function ReviewSection({
   return (
     <section className="pdp-reviews" aria-labelledby="pdp-reviews-title">
       <header className="pdp-reviews__top">
-        <h2 id="pdp-reviews-title" className="pdp-reviews__title">
+        <h2
+          id="pdp-reviews-title"
+          className="product-section-heading pdp-reviews__title"
+        >
           Customer Reviews
         </h2>
         <p className="pdp-reviews__subtitle">
@@ -310,27 +313,42 @@ export default function ReviewSection({
             <ul className="pdp-reviews__list">
               {visibleReviews.map((review) => {
                 const plain = stripHtml(review.comment);
+                const rating = Math.min(
+                  5,
+                  Math.max(0, Number(review.rating) || 0)
+                );
                 return (
                   <li key={review.id} className="pdp-reviews__item">
                     <div className="pdp-reviews__item-head">
-                      <div>
-                        <StarRow value={Number(review.rating) || 0} size={15} />
-                        <div className="pdp-reviews__author">
-                          <strong>{review.userName}</strong>
-                          {review.verified ? (
-                            <span className="pdp-reviews__badge">
-                              <CheckCircle2 size={14} />
-                              Verified Purchase
-                            </span>
-                          ) : (
-                            <span className="pdp-reviews__badge is-muted">
-                              <BadgeCheck size={14} />
-                              Customer
-                            </span>
-                          )}
-                        </div>
+                      <div
+                        className="pdp-reviews__rating"
+                        role="img"
+                        aria-label={`Rated ${rating.toFixed(1)} out of 5`}
+                      >
+                        <StarRow value={rating} size={15} />
+                        <span className="pdp-reviews__rating-score">
+                          {rating.toFixed(1)}
+                        </span>
                       </div>
-                      <time className="pdp-reviews__date">{review.date}</time>
+                      {review.date ? (
+                        <time className="pdp-reviews__date">
+                          {review.date}
+                        </time>
+                      ) : null}
+                    </div>
+                    <div className="pdp-reviews__author">
+                      <strong>{review.userName}</strong>
+                      {review.verified ? (
+                        <span className="pdp-reviews__badge">
+                          <CheckCircle2 size={14} />
+                          Verified Purchase
+                        </span>
+                      ) : (
+                        <span className="pdp-reviews__badge is-muted">
+                          <BadgeCheck size={14} />
+                          Customer
+                        </span>
+                      )}
                     </div>
                     {review.comment.includes("<") ? (
                       <div

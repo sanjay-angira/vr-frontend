@@ -38,10 +38,10 @@ export function ProductReviewsShowcase({
                 <Quote size={22} />
               </div>
               <div
-                className="product-review-quote rich-html"
-                dangerouslySetInnerHTML={{ __html: review.comment || "" }}
-              />
-              <div className="product-review-stars" aria-label={`Rated ${review.rating} out of 5`}>
+                className="product-review-stars"
+                role="img"
+                aria-label={`Rated ${review.rating} out of 5`}
+              >
                 {[...Array(5)].map((_, index) => (
                   <Star
                     key={index}
@@ -53,6 +53,10 @@ export function ProductReviewsShowcase({
                   />
                 ))}
               </div>
+              <div
+                className="product-review-quote rich-html"
+                dangerouslySetInnerHTML={{ __html: review.comment || "" }}
+              />
               <div className="product-review-author">
                 <span className="product-review-avatar" aria-hidden>
                   {authorInitials(review.userName || "")}

@@ -4091,29 +4091,20 @@ body {
 }
 
 .pdp-reviews__top {
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
 }
 
 .pdp-reviews__title {
   margin: 0;
-  font-family: var(--font-heading);
-  font-size: clamp(1.25rem, 1.8vw, 1.5rem);
-  font-weight: 700;
-  color: var(--vr-forest);
-  line-height: 1.3;
-  letter-spacing: -0.02em;
-  width: fit-content;
-  padding: 0.28rem 0.65rem;
-  border-left: 3px solid var(--vr-gold);
-  background: linear-gradient(90deg, rgba(166, 124, 82, 0.1), rgba(166, 124, 82, 0.025));
-  border-radius: 0 4px 4px 0;
 }
 
 .pdp-reviews__subtitle {
   margin: 0.35rem 0 0;
-  font-family: var(--font-body);
+  max-width: 40rem;
   color: var(--vr-text-muted);
+  font-family: var(--font-body);
   font-size: 0.95rem;
+  line-height: 1.65;
 }
 
 .pdp-reviews__write-btn {
@@ -4148,8 +4139,8 @@ body {
 
 .pdp-reviews__layout {
   display: grid;
-  grid-template-columns: minmax(240px, 300px) minmax(0, 1fr);
-  gap: 1.5rem;
+  grid-template-columns: minmax(250px, 300px) minmax(0, 1fr);
+  gap: 1.25rem;
   align-items: start;
 }
 
@@ -4160,9 +4151,9 @@ body {
 }
 
 .pdp-reviews__card {
-  background: #fff;
-  border: 1px solid rgba(10, 42, 27, 0.1);
-  padding: 1.2rem 1.15rem;
+  background: color-mix(in srgb, var(--vr-forest) 3%, #fff);
+  border: 1px solid rgba(10, 42, 27, 0.09);
+  padding: 1.2rem;
 }
 
 .pdp-reviews__overview {
@@ -4178,7 +4169,7 @@ body {
 }
 
 .pdp-reviews__based {
-  margin: 0.4rem 0 1rem;
+  margin: 0.45rem 0 1rem;
   color: var(--vr-text-muted);
   font-size: 0.88rem;
 }
@@ -4249,10 +4240,15 @@ body {
   display: flex;
   align-items: flex-start;
   gap: 0.7rem;
-  background: color-mix(in srgb, var(--vr-forest) 7%, #fff);
-  border-color: color-mix(in srgb, var(--vr-forest) 18%, transparent);
+  background: color-mix(in srgb, var(--vr-forest) 6%, #fff);
+  border-color: rgba(10, 42, 27, 0.1);
   color: var(--vr-forest);
   text-align: left;
+}
+
+.pdp-reviews__verified svg {
+  flex: 0 0 auto;
+  margin-top: 0.1rem;
 }
 
 .pdp-reviews__verified p {
@@ -4262,6 +4258,9 @@ body {
 }
 
 .pdp-reviews__cta {
+  padding: 1.15rem 1.2rem;
+  border: 1px solid rgba(197, 157, 95, 0.28);
+  background: color-mix(in srgb, var(--vr-gold) 7%, #fff);
   text-align: center;
 }
 
@@ -4281,7 +4280,7 @@ body {
 .pdp-reviews__toolbar {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.75rem;
   flex-wrap: wrap;
   margin-bottom: 1rem;
@@ -4300,6 +4299,13 @@ body {
   color: var(--vr-text);
   font-size: 0.8rem;
   cursor: pointer;
+  transition: background-color 160ms ease, border-color 160ms ease,
+    color 160ms ease;
+}
+
+.pdp-reviews__pill:hover:not(.is-active) {
+  background: color-mix(in srgb, var(--vr-forest) 5%, #fff);
+  border-color: rgba(10, 42, 27, 0.28);
 }
 
 .pdp-reviews__pill.is-active {
@@ -4316,6 +4322,7 @@ body {
 
 .pdp-reviews__sort select {
   appearance: none;
+  min-height: 2.25rem;
   padding: 0.4rem 1.8rem 0.4rem 0.7rem;
   border: 1px solid rgba(10, 42, 27, 0.14);
   background: #fff;
@@ -4331,9 +4338,9 @@ body {
 }
 
 .pdp-reviews__form {
-  background: #fff;
+  background: color-mix(in srgb, var(--vr-forest) 3%, #fff);
   border: 1px solid rgba(197, 157, 95, 0.28);
-  padding: 1.15rem;
+  padding: 1.25rem;
   margin-bottom: 1.15rem;
 }
 
@@ -4351,11 +4358,21 @@ body {
 
 .pdp-reviews__form textarea {
   width: 100%;
+  box-sizing: border-box;
   margin-top: 0.75rem;
   padding: 0.75rem;
   border: 1px solid rgba(10, 42, 27, 0.14);
+  background: #fff;
+  color: var(--vr-text);
   font: inherit;
   resize: vertical;
+}
+
+.pdp-reviews__form textarea:focus,
+.pdp-reviews__sort select:focus {
+  outline: 2px solid color-mix(in srgb, var(--vr-forest) 25%, transparent);
+  outline-offset: 1px;
+  border-color: var(--vr-forest);
 }
 
 .pdp-reviews__form-actions {
@@ -4366,28 +4383,62 @@ body {
 }
 
 .pdp-reviews__cancel {
-  border: 0;
-  background: none;
+  min-height: var(--control-height);
+  padding: 0 0.9rem;
+  border: 1px solid rgba(10, 42, 27, 0.14);
+  background: #fff;
   color: var(--vr-text-muted);
   cursor: pointer;
+}
+
+.pdp-reviews__cancel:hover {
+  border-color: rgba(10, 42, 27, 0.3);
+  color: var(--vr-forest);
 }
 
 .pdp-reviews__list {
   list-style: none;
   margin: 0;
   padding: 0;
+  display: grid;
+  gap: 0.75rem;
 }
 
 .pdp-reviews__item {
-  padding: 1.15rem 0;
-  border-bottom: 1px solid rgba(10, 42, 27, 0.08);
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding: 1.15rem 1.25rem;
+  border: 1px solid #ded9cf;
+  border-radius: 6px;
+  background: #fff;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.pdp-reviews__item:hover {
+  border-color: rgba(197, 157, 95, 0.55);
+  box-shadow: 0 5px 16px rgba(10, 42, 27, 0.05);
 }
 
 .pdp-reviews__item-head {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  gap: 1rem;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.pdp-reviews__rating {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.pdp-reviews__rating-score {
+  color: var(--vr-forest);
+  font-size: 0.82rem;
+  font-weight: 700;
 }
 
 .pdp-reviews__author {
@@ -4395,11 +4446,12 @@ body {
   flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem 0.75rem;
-  margin-top: 0.35rem;
+  min-width: 0;
 }
 
 .pdp-reviews__author strong {
   color: var(--vr-text);
+  font-size: 0.95rem;
 }
 
 .pdp-reviews__badge {
@@ -4420,23 +4472,81 @@ body {
   color: var(--vr-text-muted);
   font-size: 0.82rem;
   white-space: nowrap;
+  text-align: right;
 }
 
 .pdp-reviews__body {
-  margin: 0.7rem 0 0;
+  margin: 0;
+  overflow-wrap: anywhere;
   color: var(--vr-text);
   line-height: 1.7;
   font-size: 0.95rem;
 }
 
 .pdp-reviews__empty {
-  margin: 1rem 0 0;
+  margin: 0;
+  padding: 1rem 1.1rem;
+  border: 1px solid rgba(197, 157, 95, 0.2);
+  background: color-mix(in srgb, var(--vr-forest) 3%, #fff);
   color: var(--vr-text-muted);
+}
+
+.pdp-reviews__star-btn:focus-visible,
+.pdp-reviews__pill:focus-visible,
+.pdp-reviews__write-btn:focus-visible,
+.pdp-reviews__cancel:focus-visible {
+  outline: 2px solid var(--vr-forest);
+  outline-offset: 2px;
 }
 
 @media (max-width: 900px) {
   .pdp-reviews__layout {
     grid-template-columns: 1fr;
+  }
+
+  .pdp-reviews__summary {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+  }
+
+  .pdp-reviews__overview {
+    grid-row: span 2;
+  }
+
+  .pdp-reviews__cta {
+    align-self: stretch;
+  }
+}
+
+@media (max-width: 600px) {
+  .pdp-reviews__summary {
+    grid-template-columns: 1fr;
+  }
+
+  .pdp-reviews__overview {
+    grid-row: auto;
+  }
+
+  .pdp-reviews__toolbar {
+    align-items: stretch;
+  }
+
+  .pdp-reviews__sort,
+  .pdp-reviews__sort select {
+    width: 100%;
+  }
+
+  .pdp-reviews__date {
+    white-space: normal;
+  }
+
+  .pdp-reviews__item {
+    padding: 1rem 1.05rem;
+  }
+
+  .pdp-reviews__form-actions > button {
+    flex: 1;
   }
 }
 
@@ -4647,16 +4757,30 @@ body {
   flex-direction: column;
   height: 100%;
   min-height: 230px;
+  overflow: hidden;
   padding: 1.4rem 1.5rem;
-  background: #fff;
-  border: 1px solid #ded9cf;
-  border-radius: 6px;
+  background: var(--vr-white);
+  border: 1px solid rgba(197, 157, 95, 0.2);
+  border-radius: 0;
+  box-shadow: 0 8px 20px rgba(10, 42, 27, 0.08);
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    border-color 0.25s ease;
+}
+
+@media (hover: hover) {
+  .product-review-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(197, 157, 95, 0.35);
+    box-shadow: 0 14px 28px rgba(10, 42, 27, 0.12);
+  }
 }
 
 .product-review-quote {
   flex: 1;
   color: var(--vr-text);
-  margin: 1rem 0 1.25rem;
+  margin: 0.75rem 0 1.25rem;
   font-family: var(--font-body);
   font-size: 0.95rem;
   line-height: 1.6;
@@ -4664,7 +4788,9 @@ body {
 
 .product-review-stars {
   display: flex;
+  align-items: center;
   gap: 0.2rem;
+  margin-top: 0.75rem;
   color: var(--vr-gold);
 }
 
@@ -4738,9 +4864,16 @@ body {
   .product-review-card {
     min-height: 200px;
     padding: 1.15rem;
+    box-shadow: 0 4px 14px rgba(10, 42, 27, 0.07);
+  }
+
+  .product-review-card:hover {
+    transform: none;
+    box-shadow: 0 4px 14px rgba(10, 42, 27, 0.07);
   }
 
   .product-review-quote {
+    margin-top: 0.65rem;
     font-size: 0.88rem;
     line-height: 1.55;
   }
