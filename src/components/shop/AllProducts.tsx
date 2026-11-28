@@ -6,7 +6,9 @@ import {
   useRef,
   useState,
 } from "react";
+import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { ArrowRight, ShoppingBag, Sparkles } from "lucide-react";
 import { API_ENDPOINTS } from "@/services/api/API_ENDPOINT";
 import { getData } from "@/services/api/apiService";
 import {
@@ -416,6 +418,17 @@ export function AllProducts({
   }, [categoryReady, fetchStoreProducts]);
 
   const hasMore = products.length < count;
+  const hasSearch = Boolean(search.trim());
+  const emptyStateHref = hasSearch
+    ? pathname
+    : isCategoryPage
+      ? "/products"
+      : "/";
+  const emptyStateAction = hasSearch
+    ? "Clear search"
+    : isCategoryPage
+      ? "Browse all products"
+      : "Back to home";
 
   const handleLoadMore = () => {
     if (loading || loadingMore || !hasMore) return;
@@ -482,9 +495,41 @@ export function AllProducts({
           )}
 
           {!catalogLoading && !error && products.length === 0 && (
-            <p className="store-page__message">
-              No products found.
-            </p>
+            <section
+              className="store-empty-state"
+              role="status"
+              aria-labelledby="store-empty-state-title"
+            >
+              <div className="store-empty-state__icon" aria-hidden="true">
+                <ShoppingBag size={27} strokeWidth={1.6} />
+                <Sparkles
+                  className="store-empty-state__sparkle"
+                  size={17}
+                  strokeWidth={1.7}
+                />
+              </div>
+              <p className="store-empty-state__eyebrow">
+                {hasSearch
+                  ? "Search results"
+                  : isCategoryPage
+                    ? "Category collection"
+                    : "Product collection"}
+              </p>
+              <h2 id="store-empty-state-title">
+                {hasSearch ? "No matching products" : "No products found"}
+              </h2>
+              <p className="store-empty-state__description">
+                {hasSearch
+                  ? "We couldn't find products for that search. Try another term or clear your search to see the full collection."
+                  : isCategoryPage
+                    ? "This collection is empty right now. Browse all products to discover something new."
+                    : "There are no products to show right now. Visit the home page to explore our featured collections."}
+              </p>
+              <Link className="store-empty-state__action" href={emptyStateHref}>
+                {emptyStateAction}
+                <ArrowRight size={16} aria-hidden="true" />
+              </Link>
+            </section>
           )}
 
           {products.length > 0 && (
