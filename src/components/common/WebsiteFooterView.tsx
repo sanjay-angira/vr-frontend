@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Mail, MapPin, Phone } from "lucide-react";
 import type { FooterLinkItem, FooterSection } from "@/types/footer";
 import { STATIC_FOOTER_SOCIAL } from "@/types/footer";
+import { NewsletterSignupForm } from "@/components/footer/NewsletterSignupForm";
 import razorpayLogo from "../../../public/social-icons/Razorpay.svg";
 import facebookIcon from "../../../public/social-icons/facebook.svg";
 import instagramIcon from "../../../public/social-icons/instagram.svg";
@@ -95,6 +96,19 @@ export function WebsiteFooterView({ sections }: WebsiteFooterViewProps) {
   return (
     <footer className="footer">
       <div className="container">
+        <section className="footer-newsletter" aria-labelledby="footer-newsletter-title">
+          <div className="footer-newsletter__copy">
+            <p className="footer-newsletter__eyebrow">Stay connected</p>
+            <h2 id="footer-newsletter-title" className="footer-newsletter__title">
+              A little goodness in your inbox
+            </h2>
+            <p className="footer-newsletter__description">
+              Get updates on new products, special offers, and seasonal picks.
+            </p>
+          </div>
+          <NewsletterSignupForm />
+        </section>
+
         <div className="footer-grid">
           <div className="footer-section">
             <h3 className="footer-section-title">Contact Us</h3>

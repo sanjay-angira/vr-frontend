@@ -15,6 +15,10 @@ export const API_ENDPOINTS = {
     VERIFY_OTP: "customer/contact-us/verify-otp",
   },
 
+  NEWSLETTER: {
+    SUBSCRIBE: "newsletter/subscribe",
+  },
+
   CUSTOMER_AUTH: {
     SEND_WHATSAPP_OTP: "customer/auth/send-whatsapp-otp",
     VERIFY_WHATSAPP_OTP: "customer/auth/verify-whatsapp-otp",
