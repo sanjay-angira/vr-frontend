@@ -386,9 +386,7 @@ body {
 
 @media (max-width: 899px) {
 
-  .cms-hero-banner__skeleton,
-  .cms-hero-banner__fallback,
-  .home-skeleton__hero {
+  .cms-hero-banner__fallback {
     aspect-ratio: 4 / 5;
   }
 
@@ -406,8 +404,14 @@ body {
   }
 }
 
+@media (min-width: 768px) and (max-width: 1199px) {
+  .cms-hero-banner__skeleton {
+    aspect-ratio: 2 / 1;
+  }
+}
+
 @media (max-width: 767px) {
-  .home-skeleton__hero {
+  .cms-hero-banner__skeleton {
     aspect-ratio: 3 / 2;
   }
 }
@@ -6864,6 +6868,18 @@ body {
   width: 100%;
   min-height: 0;
   aspect-ratio: 3 / 1;
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
+  .home-skeleton__hero {
+    aspect-ratio: 2 / 1;
+  }
+}
+
+@media (max-width: 767px) {
+  .home-skeleton__hero {
+    aspect-ratio: 3 / 2;
+  }
 }
 
 .home-skeleton__heading {
