@@ -38,13 +38,6 @@ const HOME_SECTION_HEADINGS: Record<string, SectionHeadingProps> = {
     description:
       "Pick up where you left off and continue exploring your favorite products.",
   },
-  featured: {
-    eyebrow: "RECOMMENDED FOR YOU",
-    title: "Popular Products",
-    accent: "Customers Love",
-    description:
-      "Find premium products carefully selected to match your everyday needs and lifestyle.",
-  },
   newArrivals: {
     eyebrow: "✦ NEW ARRIVALS ✦",
     title: "Discover New Products &",
@@ -132,7 +125,6 @@ export default async function HomePageContent() {
   const [
     bannersResult,
     categoriesResult,
-    featuredResult,
     newArrivalsResult,
     bestSellersResult,
     bestDealsResult,
@@ -151,11 +143,6 @@ export default async function HomePageContent() {
     ),
     getData(
       API_ENDPOINTS.CUSTOMER.STORE_PRODUCTS,
-      { pageNumber: 1, pageSize: 10, sortBy: "newest", featured: true },
-      { auth: false }
-    ),
-    getData(
-      API_ENDPOINTS.CUSTOMER.STORE_PRODUCTS,
       { pageNumber: 1, pageSize: 10, sortBy: "newest", newArrivals: true },
       { auth: false }
     ),
@@ -166,7 +153,12 @@ export default async function HomePageContent() {
     ),
     getData(
       API_ENDPOINTS.CUSTOMER.STORE_PRODUCTS,
-      { pageNumber: 1, pageSize: 10, sortBy: "newest", bestDeals: true },
+      {
+        pageNumber: 1,
+        pageSize: 10,
+        sortBy: "discount_desc",
+        bestDeals: true,
+      },
       { auth: false }
     ),
     getData(
@@ -186,10 +178,6 @@ export default async function HomePageContent() {
     categoriesResult,
     "homepage categories"
   ).map(mapCategory);
-  const featuredProducts = getPromiseRows<StoreListProduct>(
-    featuredResult,
-    "featured products"
-  );
   const newArrivalProducts = getPromiseRows<StoreListProduct>(
     newArrivalsResult,
     "new-arrival products"
@@ -224,19 +212,14 @@ export default async function HomePageContent() {
         categories={categories.slice(0, 8)}
       />
       <HomeProductSection
-        title="View All Featured Products"
-        heading={HOME_SECTION_HEADINGS.featured}
-        products={featuredProducts}
+        title="View All Best Sellers"
+        heading={HOME_SECTION_HEADINGS.bestSellers}
+        products={bestSellerProducts}
       />
       <HomeProductSection
         title="View All New Arrivals"
         heading={HOME_SECTION_HEADINGS.newArrivals}
         products={newArrivalProducts}
-      />
-      <HomeProductSection
-        title="View All Best Sellers"
-        heading={HOME_SECTION_HEADINGS.bestSellers}
-        products={bestSellerProducts}
       />
       <HomeProductSection
         title="View All Special Offers"
