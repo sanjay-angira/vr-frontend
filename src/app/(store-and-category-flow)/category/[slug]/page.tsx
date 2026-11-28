@@ -1,104 +1,84 @@
-import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { CategoryShopDescription } from "@/components/shop/CategoryShopDescription";
-import { CategoryShopHeader } from "@/components/shop/CategoryShopHeader";
-import { ShopPageContent } from "@/components/shop/ShopPageContent";
+import { AllProducts } from "@/components/shop/AllProducts";
 import { JsonLd } from "@/components/seo/JsonLd";
 import {
   getBreadcrumbSchema,
   getCollectionPageSchema,
 } from "@/lib/schema";
-import { getCategoryPageMetadata } from "@/lib/seo";
-import { fetchCategoryShopPage } from "@/services/shopCatalogApi";
+import { HeroBannerSection } from "@/components/sections/HeroBannerSection";
+import API_ENDPOINTS from "@/services/api/API_ENDPOINT";
+import { getData } from "@/services/api/apiService";
+import Link from "next/link";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
-
-export async function generateMetadata({
-  params,
-}: PageProps): Promise<Metadata> {
-  const { slug } = await params;
-  const data = await fetchCategoryShopPage(slug);
-
-  if (!data?.category) {
-    const label = slug
-      .split("-")
-      .filter(Boolean)
-      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-      .join(" ");
-    return getCategoryPageMetadata(label || "Category", { slug });
-  }
-
-  const plainDescription =
-    data.category.description
-      .replace(/<[^>]*>/g, " ")
-      .replace(/\s+/g, " ")
-      .trim() || undefined;
-
-  return getCategoryPageMetadata(data.category.name, {
-    slug: data.category.slug,
-    description: plainDescription,
-    image: data.category.bannerImage || data.category.image,
-  });
-}
 
 export default async function CategoryShopPage({
   params,
-  searchParams,
 }: PageProps) {
   const { slug } = await params;
-  const query = await searchParams;
-  const data = await fetchCategoryShopPage(slug, query);
-
-  if (!data) {
+  const categoryRes = await getData(API_ENDPOINTS.CUSTOMER.CATEGORY_BY_SLUG(slug));
+  if (!categoryRes?.success || !categoryRes.data) {
     notFound();
   }
-
-  const plainDescription =
-    data.category.description
-      .replace(/<[^>]*>/g, " ")
-      .replace(/\s+/g, " ")
-      .trim() || undefined;
-
-  const categoryPath = `/category/${data.category.slug}`;
+  const categoryName =
+    categoryRes.data.name || categoryRes.data.categoryName || "";
+  const categorySlug =
+    categoryRes.data.slug || categoryRes.data.categorySlug || slug;
+  const category = {
+    id: categoryRes.data.id,
+    name: categoryName,
+    slug: categorySlug,
+    description:
+      categoryRes.data.description || categoryRes.data.shortDescription || "",
+    image: categoryRes.data.image || categoryRes.data.desktopImage || null,
+    bannerImage: categoryRes.data.bannerImage || null,
+  };
+  const plainDescription = category.description
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  const categoryPath = `/category/${category.slug}`;
   const schemas = [
     getCollectionPageSchema({
-      name: data.category.name,
+      name: category.name,
       path: categoryPath,
-      description: plainDescription,
+      description: plainDescription || undefined,
     }),
     getBreadcrumbSchema([
       { name: "Home", path: "/" },
-      { name: data.category.name, path: categoryPath },
+      { name: "Shop", path: "/products" },
+      { name: category.name, path: categoryPath },
     ]),
   ];
 
   return (
-    <section className="store-catalog">
+    <>
       <JsonLd data={schemas} />
-      <div className="container store-catalog__inner">
-        <CategoryShopHeader category={data.category} />
-
-        <Suspense
-          fallback={<div className="store-catalog__layout" aria-busy="true" />}
-        >
-          <ShopPageContent
-            key={data.category.slug}
-            categorySlug={data.category.slug}
-            initialData={data}
-            hideCategoryChrome
-            embedded
+      <HeroBannerSection banners={[categoryRes.data]} />
+      <section className="store-catalog">
+        <div className="container store-catalog__inner">
+          <div className="store-catalog__category-head">
+            <nav className="store-catalog__breadcrumbs" aria-label="Breadcrumb">
+              <Link href="/">Home</Link>
+              <span aria-hidden>›</span>
+              <Link href="/products">Shop</Link>
+              <span aria-hidden>›</span>
+              <h1 className="is-current">{category.name}</h1>
+            </nav>
+          </div>
+          <Suspense fallback={<div className="store-catalog__layout" aria-busy="true" />}>
+            <AllProducts slug={slug} />
+          </Suspense>
+          <CategoryShopDescription
+            name={categoryName}
+            description={category.description}
           />
-        </Suspense>
-
-        <CategoryShopDescription
-          name={data.category.name}
-          description={data.category.description}
-        />
-      </div>
-    </section>
+        </div>
+      </section>
+    </>
   );
 }

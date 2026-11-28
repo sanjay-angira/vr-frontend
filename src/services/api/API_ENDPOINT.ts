@@ -42,6 +42,7 @@ export const API_ENDPOINTS = {
     STORE_FILTERS: "customer/store-filters",
     SEARCH: "customer/search",
     CATEGORIES: "customer/categories",
+    CATEGORY_BY_SLUG: (slug: string) =>`customer/category/${encodeURIComponent(slug)}`,
     BLOGS: "customer/blogs",
     BLOG_FILTERS: "customer/blog-filters",
     BLOG_DETAILS: (slug: string) => `customer/blog/${slug}`,

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { ShopPageContent } from "@/components/shop/ShopPageContent";
+import { AllProducts } from "@/components/shop/AllProducts";
 import { JsonLd } from "@/components/seo/JsonLd";
 import {
   getBreadcrumbSchema,
@@ -12,6 +12,10 @@ import {
   buildPageMetadata,
   getStaticPageMetadata,
 } from "@/lib/seo";
+import { getData } from "@/services/api/apiService";
+import API_ENDPOINTS from "@/services/api/API_ENDPOINT";
+import { HeroBannerSection } from "@/components/sections/HeroBannerSection";
+import Link from "next/link";
 
 type PageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -39,8 +43,9 @@ export async function generateMetadata({
   return getStaticPageMetadata("shop");
 }
 
-export default function ShopPage() {
+export default async function ShopPage() {
   const shop = SEO_PAGES.shop;
+  const banners = await getData(API_ENDPOINTS.CUSTOMER.HOMEPAGE_BANNERS);
 
   return (
     <>
@@ -57,9 +62,21 @@ export default function ShopPage() {
           ]),
         ]}
       />
-      <Suspense fallback={<section className="store-catalog" aria-busy="true" />}>
-        <ShopPageContent />
-      </Suspense>
+      <HeroBannerSection banners={banners.data} />
+      <section className="store-catalog">
+        <div className="container store-catalog__inner">
+          <div className="store-catalog__category-head">
+            <nav className="store-catalog__breadcrumbs" aria-label="Breadcrumb">
+              <Link href="/">Home</Link>
+              <span aria-hidden>›</span>
+              <h1 className="is-current">All Products</h1>
+            </nav>
+          </div>
+        </div>
+        <Suspense fallback={<section className="store-catalog" aria-busy="true" />}>
+          <AllProducts />
+        </Suspense>
+      </section>
     </>
   );
 }

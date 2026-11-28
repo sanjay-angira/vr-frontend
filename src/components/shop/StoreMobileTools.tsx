@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ArrowUpDown, Check, SlidersHorizontal, X } from "lucide-react";
+import { ArrowUpDown, Check, X } from "lucide-react";
 
 type SortOption = {
   value: string;
@@ -12,7 +12,6 @@ type StoreMobileToolsProps = {
   sortOptions: SortOption[];
   sortBy: string;
   onSortChange: (sortBy: string) => void;
-  onOpenFilters: () => void;
 };
 
 const DISPLAY_LABELS: Record<string, string> = {
@@ -27,7 +26,6 @@ export function StoreMobileTools({
   sortOptions,
   sortBy,
   onSortChange,
-  onOpenFilters,
 }: StoreMobileToolsProps) {
   const [sortOpen, setSortOpen] = useState(false);
   const activeLabel =
@@ -65,14 +63,6 @@ export function StoreMobileTools({
         >
           <ArrowUpDown size={16} aria-hidden />
           <span>Sort</span>
-        </button>
-        <button
-          type="button"
-          className="store-mobile-split__btn"
-          onClick={onOpenFilters}
-        >
-          <SlidersHorizontal size={16} aria-hidden />
-          <span>Filters</span>
         </button>
       </div>
 

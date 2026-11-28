@@ -10,10 +10,8 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { API_ENDPOINTS } from "@/services/api/API_ENDPOINT";
 import { getData } from "@/services/api/apiService";
 import {
-  StoreFiltersSidebar,
   type StoreCategoryOption,
   type StoreFilterState,
-  type StoreProductSectionOption,
 } from "@/components/shop/StoreFiltersSidebar";
 import {
   StoreProductCard,
@@ -27,9 +25,6 @@ import {
   parseShopSearchParams,
 } from "@/utils/shopFilterUrl";
 import { categorySlugsToExpandedIds } from "@/utils/categoryFilterHelpers";
-import { notFound } from "next/navigation";
-import Link from "next/link";
-import type { CategoryShopInitialData } from "@/services/shopCatalogApi";
 
 const STORE_GRID_STYLES = `
 .store-catalog__grid {
@@ -73,14 +68,22 @@ type StoreProductsApiResponse = {
   };
 };
 
-type StoreFiltersApiResponse = {
-  success: boolean;
-  message: string;
+type CategoryApiResponse = {
+  success?: boolean;
+  message?: string;
   data?: {
-    categories: StoreCategoryOption[];
-    priceRange: { min: number; max: number };
-    sortOptions: Array<{ value: string; label: string }>;
-    productSections?: StoreProductSectionOption[];
+    id: number;
+    name?: string | null;
+    categoryName?: string | null;
+    slug?: string | null;
+    categorySlug?: string | null;
+    description?: string | null;
+    shortDescription?: string | null;
+    image?: string | null;
+    desktopImage?: string | null;
+    bannerImage?: string | null;
+    parentId?: number | null;
+    parent?: { id?: number | null } | null;
   };
 };
 
@@ -91,6 +94,8 @@ const DEFAULT_SORT_OPTIONS = [
   { value: "name_asc", label: "Name: A to Z" },
   { value: "discount_desc", label: "Best Discount" },
 ];
+
+const DEFAULT_PRICE_BOUNDS = { min: 0, max: 100000 };
 
 function buildDefaultFilters(
   bounds: { min: number; max: number },
@@ -109,86 +114,49 @@ function buildDefaultFilters(
 }
 
 type ShopPageContentProps = {
-  /** When set, this is a `/category/[slug]` page — same layout as store */
-  categorySlug?: string;
-  /** Server-fetched catalog payload (category pages) */
-  initialData?: CategoryShopInitialData;
-  /** Header/description rendered by the RSC category page */
-  hideCategoryChrome?: boolean;
-  /** Skip outer section/container when wrapped by a server page shell */
-  embedded?: boolean;
+  slug?: string;
 };
 
-export function ShopPageContent({
-  categorySlug,
-  initialData,
-  hideCategoryChrome = false,
-  embedded = false,
+export function AllProducts({
+  slug,
 }: ShopPageContentProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const skipUrlWriteRef = useRef(true);
-  const isCategoryPage = Boolean(categorySlug?.trim());
-  const pathCategorySlug = categorySlug?.trim().toLowerCase() || "";
-
-  const [products, setProducts] = useState<StoreListProduct[]>(
-    () => initialData?.products || []
+  const searchParamsKey = searchParams.toString();
+  const initialUrlState = parseShopSearchParams(
+    new URLSearchParams(searchParamsKey)
   );
-  const [loading, setLoading] = useState(() => !initialData);
+  const skipUrlWriteRef = useRef(true);
+  const isCategoryPage = Boolean(slug?.trim());
+  const pathCategorySlug = slug?.trim().toLowerCase() || "";
+
+  const [products, setProducts] = useState<StoreListProduct[]>([]);
+  const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [filtersLoading, setFiltersLoading] = useState(() => !initialData);
   const [error, setError] = useState("");
-  const [categoryMissing, setCategoryMissing] = useState(false);
-  const [search, setSearch] = useState(() => initialData?.search || "");
+  const [search, setSearch] = useState(initialUrlState.search);
   const [pageNumber, setPageNumber] = useState(1);
   const pageSize = 48;
-  const [count, setCount] = useState(() => initialData?.count || 0);
-  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [count, setCount] = useState(0);
 
   const [categories, setCategories] = useState<StoreCategoryOption[]>(
-    () => initialData?.categories || []
+    []
   );
-  const [productSections, setProductSections] = useState<
-    StoreProductSectionOption[]
-  >(() => initialData?.productSections || []);
-  const [sortOptions, setSortOptions] = useState(
-    () => initialData?.sortOptions || DEFAULT_SORT_OPTIONS
-  );
-  const [priceBounds, setPriceBounds] = useState(
-    () => initialData?.priceBounds || { min: 0, max: 100000 }
-  );
+  const sortOptions = DEFAULT_SORT_OPTIONS;
+  const priceBounds = DEFAULT_PRICE_BOUNDS;
   const [filters, setFilters] = useState<StoreFilterState>(() =>
-    initialData
-      ? initialData.filters
-      : buildDefaultFilters({ min: 0, max: 100000 })
+    buildDefaultFilters(priceBounds, {
+      ...initialUrlState.filters,
+      minPrice: initialUrlState.minPrice ?? priceBounds.min,
+      maxPrice: initialUrlState.maxPrice ?? priceBounds.max,
+    })
   );
-  const [categoryDescription, setCategoryDescription] = useState(
-    () => initialData?.category.description || ""
-  );
+  const [loadedCategorySlug, setLoadedCategorySlug] = useState("");
 
-  const searchParamsKey = searchParams.toString();
-
-  const activeCategory = categories.find(
-    (category) => category.slug?.trim().toLowerCase() === pathCategorySlug
-  );
-
-  const resolvedCategoryDescription = (
-    categoryDescription ||
-    activeCategory?.description ||
-    ""
-  ).trim();
-
-  const categoryDisplay =
-    activeCategory ||
-    (initialData?.category
-      ? {
-          id: initialData.category.id,
-          name: initialData.category.name,
-          slug: initialData.category.slug,
-          description: initialData.category.description,
-        }
-      : undefined);
+  const categoryReady =
+    !isCategoryPage || loadedCategorySlug === pathCategorySlug;
+  const catalogLoading = loading || (!categoryReady && !error);
 
   const applyUrlToState = useCallback(
     (
@@ -227,79 +195,68 @@ export function ShopPageContent({
   );
 
   useEffect(() => {
-    if (initialData) {
-      setFiltersLoading(false);
-      return;
-    }
-
+    if (!pathCategorySlug) return;
     let cancelled = false;
 
-    async function loadFilters() {
+    async function loadCategory() {
       try {
-        setFiltersLoading(true);
         const response = (await getData(
-          API_ENDPOINTS.CUSTOMER.STORE_FILTERS,
+          API_ENDPOINTS.CUSTOMER.CATEGORY_BY_SLUG(pathCategorySlug),
           undefined,
           { auth: false }
-        )) as StoreFiltersApiResponse;
+        )) as CategoryApiResponse;
 
-        if (cancelled || !response?.success || !response.data) return;
-
-        const bounds = {
-          min: Number(response.data.priceRange?.min) || 0,
-          max: Math.max(
-            Number(response.data.priceRange?.min) || 0,
-            Number(response.data.priceRange?.max) || 100000
-          ),
-        };
-
-        const nextCategories = response.data.categories || [];
-
-        if (isCategoryPage && pathCategorySlug) {
-          const exists = nextCategories.some(
-            (category) =>
-              category.slug?.trim().toLowerCase() === pathCategorySlug
+        if (cancelled) return;
+        const category = response?.data;
+        const categorySlug = category?.slug || category?.categorySlug;
+        if (!response?.success || !category?.id || !categorySlug) {
+          setError(
+            response?.message ||
+              "The category response did not include a valid slug."
           );
-          if (!exists) {
-            setCategoryMissing(true);
-            setCategories(nextCategories);
-            setPriceBounds(bounds);
-            return;
-          }
+          setLoading(false);
+          return;
         }
 
-        setCategoryMissing(false);
-        setCategories(nextCategories);
-        setProductSections(response.data.productSections || []);
-        setSortOptions(
-          response.data.sortOptions?.length
-            ? response.data.sortOptions
-            : DEFAULT_SORT_OPTIONS
-        );
-        setPriceBounds(bounds);
-        applyUrlToState(
-          new URLSearchParams(searchParamsKey),
-          nextCategories,
-          bounds
-        );
-      } catch {
-        // Keep defaults if filters fail
+        const option: StoreCategoryOption = {
+          id: category.id,
+          name: category.name || category.categoryName || "",
+          slug: categorySlug,
+          parentId: category.parentId ?? category.parent?.id ?? null,
+          description:
+            category.description || category.shortDescription || "",
+          image: category.image || category.desktopImage || null,
+        };
+        setCategories([option]);
+        setFilters((current) => ({
+          ...current,
+          categoryIds: [category.id],
+        }));
+        setLoadedCategorySlug(pathCategorySlug);
+        setError("");
+      } catch (err: unknown) {
+        if (cancelled) return;
+        const message =
+          err && typeof err === "object" && "message" in err
+            ? String((err as { message: string }).message)
+            : "Unable to load this category.";
+        setError(message);
+        setLoading(false);
       } finally {
-        if (!cancelled) setFiltersLoading(false);
+        if (!cancelled) setPageNumber(1);
       }
     }
 
-    loadFilters();
+    void loadCategory();
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- searchParams applied in separate effect
-  }, [applyUrlToState, isCategoryPage, pathCategorySlug, initialData]);
+  }, [pathCategorySlug]);
 
   // Browser back/forward (and external URL changes)
-  const skipFirstUrlSyncRef = useRef(Boolean(initialData));
+  const skipFirstUrlSyncRef = useRef(true);
   useEffect(() => {
-    if (filtersLoading) return;
+    if (!categoryReady) return;
     if (skipFirstUrlSyncRef.current) {
       skipFirstUrlSyncRef.current = false;
       return;
@@ -311,7 +268,7 @@ export function ShopPageContent({
     );
   }, [
     searchParamsKey,
-    filtersLoading,
+    categoryReady,
     categories,
     priceBounds,
     applyUrlToState,
@@ -319,7 +276,7 @@ export function ShopPageContent({
 
   // Sync state → URL
   useEffect(() => {
-    if (filtersLoading) return;
+    if (!categoryReady) return;
     if (skipUrlWriteRef.current) {
       skipUrlWriteRef.current = false;
       return;
@@ -345,61 +302,12 @@ export function ShopPageContent({
     search,
     priceBounds,
     categories,
-    filtersLoading,
+    categoryReady,
     pathname,
     router,
     searchParamsKey,
     isCategoryPage,
   ]);
-
-  useEffect(() => {
-    if (!filtersLoading && categoryMissing) {
-      notFound();
-    }
-  }, [filtersLoading, categoryMissing]);
-
-  // Category description — skip client fetch when SSR already provided it
-  useEffect(() => {
-    if (!isCategoryPage || !pathCategorySlug) {
-      setCategoryDescription("");
-      return;
-    }
-    if (initialData?.category.description) {
-      setCategoryDescription(initialData.category.description);
-      return;
-    }
-
-    let cancelled = false;
-
-    async function loadCategoryDescription() {
-      try {
-        const response = (await getData(
-          API_ENDPOINTS.CUSTOMER.CATEGORIES,
-          undefined,
-          { auth: false }
-        )) as {
-          success?: boolean;
-          data?: {
-            rows?: Array<{ slug?: string | null; description?: string | null }>;
-          };
-        };
-
-        if (cancelled || !response?.success) return;
-
-        const match = (response.data?.rows || []).find(
-          (row) => row.slug?.trim().toLowerCase() === pathCategorySlug
-        );
-        setCategoryDescription(String(match?.description || "").trim());
-      } catch {
-        if (!cancelled) setCategoryDescription("");
-      }
-    }
-
-    loadCategoryDescription();
-    return () => {
-      cancelled = true;
-    };
-  }, [isCategoryPage, pathCategorySlug, initialData?.category.description]);
 
   const fetchStoreProducts = useCallback(
     async (page: number, append: boolean) => {
@@ -426,8 +334,16 @@ export function ShopPageContent({
         }
 
         if (search.trim()) query.set("search", search.trim());
-        if (filters.categoryIds.length) {
-          query.set("categoryIds", filters.categoryIds.join(","));
+        const categoryIds = isCategoryPage
+          ? categoryReady
+            ? filters.categoryIds
+            : []
+          : parseShopSearchParams(
+              new URLSearchParams(searchParamsKey),
+              categories
+            ).filters.categoryIds;
+        if (categoryIds.length) {
+          query.set("categoryIds", categoryIds.join(","));
         }
         if (filters.sectionSlugs.length) {
           query.set("sectionSlugs", filters.sectionSlugs.join(","));
@@ -472,19 +388,32 @@ export function ShopPageContent({
         setLoadingMore(false);
       }
     },
-    [pageSize, search, filters, priceBounds.min, priceBounds.max]
+    [
+      pageSize,
+      search,
+      filters,
+      priceBounds.min,
+      priceBounds.max,
+      isCategoryPage,
+      categoryReady,
+      searchParamsKey,
+      categories,
+    ]
   );
 
-  const skipInitialProductFetchRef = useRef(Boolean(initialData));
   useEffect(() => {
-    if (filtersLoading) return;
-    if (skipInitialProductFetchRef.current) {
-      skipInitialProductFetchRef.current = false;
-      return;
-    }
-    setPageNumber(1);
-    fetchStoreProducts(1, false);
-  }, [fetchStoreProducts, filtersLoading]);
+    if (!categoryReady) return;
+    let cancelled = false;
+    void Promise.resolve().then(() => {
+      if (!cancelled) {
+        void fetchStoreProducts(1, false);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [categoryReady, fetchStoreProducts]);
 
   const hasMore = products.length < count;
 
@@ -510,49 +439,11 @@ export function ShopPageContent({
     setFilters(next);
   };
 
-  const handleClearFilters = () => {
-    setPageNumber(1);
-    setSearch("");
-    const lockedCategoryIds =
-      isCategoryPage && pathCategorySlug
-        ? categorySlugsToExpandedIds([pathCategorySlug], categories)
-        : [];
-    setFilters(
-      buildDefaultFilters(priceBounds, {
-        categoryIds: lockedCategoryIds,
-      })
-    );
-  };
-
   const catalogBody = (
     <>
       <style dangerouslySetInnerHTML={{ __html: STORE_GRID_STYLES }} />
 
-      {!hideCategoryChrome && isCategoryPage && categoryDisplay && (
-        <div className="store-catalog__category-head">
-          <nav className="store-catalog__breadcrumbs" aria-label="Breadcrumb">
-            <Link href="/">Home</Link>
-            <span aria-hidden>›</span>
-            <Link href="/products">Shop</Link>
-            <span aria-hidden>›</span>
-            <h1 className="is-current">{categoryDisplay.name}</h1>
-          </nav>
-        </div>
-      )}
-
       <div className="store-catalog__layout">
-        <StoreFiltersSidebar
-          categories={categories}
-          productSections={productSections}
-          priceBounds={priceBounds}
-          value={filters}
-          onChange={handleFiltersChange}
-          onClear={handleClearFilters}
-          mobileOpen={mobileFiltersOpen}
-          onCloseMobile={() => setMobileFiltersOpen(false)}
-          activeCategorySlug={isCategoryPage ? pathCategorySlug : undefined}
-        />
-
         <div className="store-catalog__main">
           <StoreMobileTools
             sortOptions={sortOptions}
@@ -560,7 +451,6 @@ export function ShopPageContent({
             onSortChange={(sortBy) =>
               handleFiltersChange({ ...filters, sortBy })
             }
-            onOpenFilters={() => setMobileFiltersOpen(true)}
           />
 
           <StoreSortBar
@@ -571,7 +461,7 @@ export function ShopPageContent({
             }
           />
 
-          {loading && products.length === 0 && (
+          {catalogLoading && products.length === 0 && (
             <div className="store-catalog__grid" aria-busy="true">
               {Array.from({ length: 8 }).map((_, index) => (
                 <div className="store-skeleton-card" key={`skeleton-${index}`}>
@@ -585,15 +475,15 @@ export function ShopPageContent({
             </div>
           )}
 
-          {!loading && error && products.length === 0 && (
+          {!catalogLoading && error && products.length === 0 && (
             <p className="store-page__message store-page__message--error">
               {error}
             </p>
           )}
 
-          {!loading && !error && products.length === 0 && (
+          {!catalogLoading && !error && products.length === 0 && (
             <p className="store-page__message">
-              No products match your filters. Try clearing filters.
+              No products found.
             </p>
           )}
 
@@ -614,7 +504,7 @@ export function ShopPageContent({
                 type="button"
                 className="btn btn-outline"
                 onClick={handleLoadMore}
-                disabled={loading || loadingMore}
+                disabled={catalogLoading || loadingMore}
               >
                 {loadingMore ? "Loading…" : "Load More"}
               </button>
@@ -623,31 +513,10 @@ export function ShopPageContent({
         </div>
       </div>
 
-      {!hideCategoryChrome &&
-        isCategoryPage &&
-        resolvedCategoryDescription.replace(/<[^>]*>/g, "").trim() && (
-          <article
-            className="store-catalog__category-description"
-            aria-label={`${categoryDisplay?.name || "Category"} description`}
-          >
-            {/<[a-z][\s\S]*>/i.test(resolvedCategoryDescription) ? (
-              <div
-                className="store-catalog__category-description-body ql-editor rich-html"
-                dangerouslySetInnerHTML={{
-                  __html: resolvedCategoryDescription,
-                }}
-              />
-            ) : (
-              <p className="store-catalog__category-description-copy">
-                {resolvedCategoryDescription}
-              </p>
-            )}
-          </article>
-        )}
     </>
   );
 
-  if (embedded) {
+  if (isCategoryPage) {
     return catalogBody;
   }
 

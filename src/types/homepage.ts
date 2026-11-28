@@ -4,4 +4,5 @@ export type HomepageBanner = {
   tabletImage: string;
   mobileImage: string;
   link: string;
+  alt?: string;
 };
