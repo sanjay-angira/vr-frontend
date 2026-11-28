@@ -21,7 +21,7 @@ src/
 ├── app/                       # Storefront routes, layouts, SEO, and metadata
 │   ├── (account)/             # Customer account routes
 │   ├── (place-order-flow)/    # Cart and checkout routes
-│   ├── (store-and-category-flow)/ # Catalog routes
+│   ├── (products-and-category-flow)/ # Product and category routes
 │   ├── globals.css            # Tailwind and global styles
 │   ├── robots.ts              # Search crawler rules
 │   └── sitemap.ts             # Storefront sitemap
