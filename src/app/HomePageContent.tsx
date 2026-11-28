@@ -6,6 +6,7 @@ import { CategorySection } from "@/components/sections/CategorySection";
 import { RecentlyViewedSection } from "@/components/sections/RecentlyViewedSection";
 import { ProductSection } from "@/components/sections/ProductSection";
 import { ProductReviewsShowcase } from "@/components/sections/ProductReviewsShowcase";
+import { QualityPromiseSection } from "@/components/sections/QualityPromiseSection";
 import { OurStorySection } from "@/components/sections/OurStorySection";
 import { BlogSection } from "@/components/sections/BlogSection";
 import type { SectionHeadingProps } from "@/components/shared/SectionHeading";
@@ -216,6 +217,7 @@ export default async function HomePageContent() {
         heading={HOME_SECTION_HEADINGS.bestSellers}
         products={bestSellerProducts}
       />
+      <QualityPromiseSection />
       <HomeProductSection
         title="View All New Arrivals"
         heading={HOME_SECTION_HEADINGS.newArrivals}
