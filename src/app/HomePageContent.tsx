@@ -6,6 +6,7 @@ import { CategorySection } from "@/components/sections/CategorySection";
 import { RecentlyViewedSection } from "@/components/sections/RecentlyViewedSection";
 import { ProductSection } from "@/components/sections/ProductSection";
 import { ProductReviewsShowcase } from "@/components/sections/ProductReviewsShowcase";
+import { OurStorySection } from "@/components/sections/OurStorySection";
 import { BlogSection } from "@/components/sections/BlogSection";
 import type { SectionHeadingProps } from "@/components/shared/SectionHeading";
 import type { StoreListProduct } from "@/types/storeProduct";
@@ -242,6 +243,7 @@ export default async function HomePageContent() {
         heading={HOME_SECTION_HEADINGS.bestDeals}
         products={bestDealProducts}
       />
+      <OurStorySection/>
       <ProductReviewsShowcase
         heading={HOME_SECTION_HEADINGS.reviews}
         reviews={reviews}
